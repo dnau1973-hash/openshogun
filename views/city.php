@@ -89,8 +89,47 @@ foreach ($queue as $q) {
 }
 
 require_once __DIR__ . '/../core/ImperialSealEngine.php';
+require_once __DIR__ . '/../core/MarketEngine.php';
 $sealEngine = new ImperialSealEngine();
+$marketEngine = new MarketEngine();
 $isSealActive = $sealEngine->isSealActive((int)($user['id'] ?? 0));
+
+$marketLvl = (int)($buildings['market'] ?? 0);
+
+// Données logistiques et convois de marchandises
+$stmtMarketShips = Database::getConnection()->prepare("SELECT ship_code, count FROM planet_ships WHERE planet_id = ?");
+$stmtMarketShips->execute([(int)$planet['id']]);
+$marketShips = $stmtMarketShips->fetchAll(PDO::FETCH_KEY_PAIR);
+$availLight = (int)($marketShips['transporter_light'] ?? 0);
+$availHeavy = (int)($marketShips['transporter_heavy'] ?? 0);
+$totalCargoCapacity = ($availLight * 5000) + ($availHeavy * 25000);
+$merchantsCount = (int)($marketLvl * 2);
+
+$myVillages = $planetEngine->getUserPlanets((int)$user['id']);
+$otherVillages = array_values(array_filter($myVillages, function($v) use ($planet) {
+    return (int)$v['id'] !== (int)$planet['id'];
+}));
+
+// Données Bourse des Sens d'Échange & Troc P2P (Dès Niveau 1)
+$p2pMaxSlots = $marketEngine->getMaxOfferSlots($marketLvl);
+$p2pTradables = MarketEngine::getTradableResources();
+$p2pActiveOffers = ($marketLvl >= 1) ? $marketEngine->getActiveOffers() : [];
+$p2pExchangeDirections = ($marketLvl >= 1) ? $marketEngine->getExchangeDirectionsSummary() : [];
+$p2pMyOffers = ($marketLvl >= 1) ? $marketEngine->getUserOffers((int)$user['id']) : [];
+$p2pMyActiveOffersCount = 0;
+foreach ($p2pMyOffers as $mo) {
+    if ($mo['status'] === 'active' && (int)$mo['planet_id'] === (int)$planet['id']) {
+        $p2pMyActiveOffersCount++;
+    }
+}
+
+// Routes Commerciales & Troc NPC 1:1:1
+$allTradeRoutes = $sealEngine->getTradeRoutes((int)$user['id']);
+$marketRoutes = array_values(array_filter($allTradeRoutes, function($tr) use ($planet) {
+    return (int)$tr['source_planet_id'] === (int)$planet['id'] || (int)$tr['target_planet_id'] === (int)$planet['id'];
+}));
+$goldCoins = (int)($user['gold_coins'] ?? 0);
+$npcPlanetData = $sealEngine->getNpcPlanetResourceData($planet);
 
 $isAdmin = ((class_exists('Auth') && Auth::check() && Auth::isAdmin()) || !empty($user['is_admin']) || (($user['role'] ?? '') === 'admin'));
 $isTerran = (($user['faction'] ?? 'terran') === 'terran');
@@ -766,10 +805,16 @@ ob_start();
                         <i class="fa-solid fa-torii-gate text-purple me-1"></i>Affaires de Clan
                     </button>
                 </li>
-                <!-- Onglet Activité Spécifique (Marché, Muraille, Vigie, etc.) -->
+                <!-- Onglet Activité Spécifique (Muraille, Vigie, etc.) -->
                 <li class="nav-item d-none" id="city-tab-special-li" role="presentation">
                     <button class="nav-link fw-bold text-dark py-2" id="city-tab-special-btn" data-bs-toggle="tab" data-bs-target="#city-pane-special" type="button" role="tab" aria-controls="city-pane-special" aria-selected="false">
                         <i class="fa-solid fa-bolt text-primary me-1" id="city-tab-special-icon"></i><span id="city-tab-special-label">Activité</span>
+                    </button>
+                </li>
+                <!-- Onglet Marché Féodal, Bourse des Sens & Troc (Market) -->
+                <li class="nav-item d-none" id="city-tab-market-li" role="presentation">
+                    <button class="nav-link fw-bold text-dark py-2" id="city-tab-market-btn" data-bs-toggle="tab" data-bs-target="#city-pane-market" type="button" role="tab" aria-controls="city-pane-market" aria-selected="false">
+                        <i class="fa-solid fa-scale-balanced text-success me-1"></i>Marché &amp; Troc Féodal
                     </button>
                 </li>
             </ul>
@@ -790,6 +835,22 @@ ob_start();
                                 <p class="small text-secondary m-0 fst-italic" id="cityModalDesc" style="line-height: 1.5;">
                                     ...
                                 </p>
+                            </div>
+
+                            <!-- Encart d'accès direct Marché si market actif -->
+                            <div id="cityModalMarketQuickBanner" class="alert alert-success d-none mb-3 py-2 px-3 border-success shadow-sm">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-scale-balanced text-success fs-3"></i>
+                                        <div>
+                                            <strong class="text-dark">Place de Marché Opérationnelle (Niveau <span id="cityModalMarketLvlBadge">1</span>)</strong>
+                                            <div class="small text-muted">Bourse des Sens d'Échange, Troc 1:1:1 et Caravanes de Marchandises disponibles.</div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-success fw-bold" onclick="document.getElementById('city-tab-market-btn')?.click()">
+                                        <i class="fa-solid fa-arrow-right-arrow-left me-1"></i>Ouvrir la Bourse &amp; Troc
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Encart comparatif Rendement / Avantage féodal -->
@@ -875,10 +936,66 @@ ob_start();
                             </div>
                         </div>
 
-                        <!-- TAB 8 : ACTIVITÉ SPÉCIFIQUE (MARKET, WALL, RADAR...) -->
+                        <!-- TAB 8 : ACTIVITÉ SPÉCIFIQUE (WALL, RADAR...) -->
                         <div class="tab-pane fade p-4" id="city-pane-special" role="tabpanel">
                             <div id="cityModalSpecialContent">
                                 <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- TAB 9 : MARCHÉ FÉODAL, BOURSE DES SENS & TROC (MARKET) -->
+                        <div class="tab-pane fade p-2 p-md-3" id="city-pane-market" role="tabpanel">
+                            <div class="card border shadow-none mb-0">
+                                <div class="card-header bg-light border-bottom p-2">
+                                    <ul class="nav nav-pills card-header-pills m-0 flex-wrap gap-1" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active fw-bold py-1.5 px-3" data-bs-toggle="pill" data-bs-target="#tab-market-npc" type="button" role="tab">
+                                                <i class="fa-solid fa-scale-balanced text-warning me-1"></i>Troc Équilibré 1:1:1 (Intendant)
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link fw-bold py-1.5 px-3" data-bs-toggle="pill" data-bs-target="#tab-market-p2p" type="button" role="tab">
+                                                <i class="fa-solid fa-arrow-right-arrow-left text-success me-1"></i>Bourse des Sens d'Échange (Troc P2P)
+                                                <span class="badge bg-success-lt ms-1" id="badge-city-mkt-offers-count"><?= count($p2pActiveOffers) ?></span>
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link fw-bold py-1.5 px-3" data-bs-toggle="pill" data-bs-target="#tab-market-dispatch" type="button" role="tab">
+                                                <i class="fa-solid fa-boxes-stacked text-warning me-1"></i>Expédier Caravanes
+                                                <span class="badge bg-secondary-lt ms-1"><?= number_format($totalCargoCapacity) ?> fret</span>
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link fw-bold py-1.5 px-3" data-bs-toggle="pill" data-bs-target="#tab-market-routes" type="button" role="tab">
+                                                <i class="fa-solid fa-route text-primary me-1"></i>Routes Commerciales
+                                                <span class="badge bg-primary-lt ms-1"><?= count($marketRoutes) ?></span>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="card-body p-2 p-md-3">
+                                    <div class="tab-content">
+                                        <!-- SOUS-ONGLET 1 : TROC 1:1:1 INTENDANT -->
+                                        <div class="tab-pane fade show active" id="tab-market-npc" role="tabpanel">
+                                            <?php 
+                                            $isInlineNpcExchange = true;
+                                            require __DIR__ . '/partials/npc_exchange_modal.php'; 
+                                            ?>
+                                        </div>
+
+                                        <!-- SOUS-ONGLET 2 : BOURSE DES SENS D'ÉCHANGE P2P -->
+                                        <?php 
+                                        $lvl = $marketLvl;
+                                        require __DIR__ . '/partials/market_p2p_tab.php'; 
+                                        ?>
+
+                                        <!-- SOUS-ONGLET 3 : EXPÉDIER CARAVANES -->
+                                        <?php require __DIR__ . '/partials/market_dispatch_tab.php'; ?>
+
+                                        <!-- SOUS-ONGLET 4 : ROUTES COMMERCIALES -->
+                                        <?php require __DIR__ . '/partials/market_routes_tab.php'; ?>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -944,6 +1061,11 @@ window.CITY_CONFIG = {
     onigawara_tiles: <?= (int)($planet['onigawara_tiles'] ?? 0) ?>,
     prestige_weapons: <?= (int)($planet['prestige_weapons'] ?? 0) ?>,
     prestige_army: <?= (int)($planet['prestige_army'] ?? 0) ?>,
+    clay: <?= (int)($planet['clay'] ?? 0) ?>,
+    fish: <?= (int)($planet['fish'] ?? 0) ?>,
+    tea: <?= (int)($planet['tea'] ?? 0) ?>,
+    soybean: <?= (int)($planet['soybean'] ?? 0) ?>,
+    storageMax: <?= (int)($planet['storage_max'] ?? 100000) ?>,
     hqLevel: <?= (int)$hqLevel ?>,
     activeFeast: <?= json_encode($activeFeast, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
     availableUnits: <?= json_encode($availableUnits, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
@@ -1019,10 +1141,13 @@ function renderCitySlotModal() {
         cityFeastCountdownInterval = null;
     }
 
-    // Réinitialisation de l'onglet actif sur "Évolution"
-    const evoTabBtn = document.getElementById('city-tab-evolution-btn');
-    if (evoTabBtn && window.bootstrap && window.bootstrap.Tab) {
-        const tabInst = window.bootstrap.Tab.getOrCreateInstance(evoTabBtn);
+    // Réinitialisation de l'onglet actif (Marché & Troc direct si édifice marché actif)
+    const isMarketDirect = (data.code === 'market' && data.level > 0);
+    const targetTabBtn = isMarketDirect 
+        ? document.getElementById('city-tab-market-btn') 
+        : document.getElementById('city-tab-evolution-btn');
+    if (targetTabBtn && window.bootstrap && window.bootstrap.Tab) {
+        const tabInst = window.bootstrap.Tab.getOrCreateInstance(targetTabBtn);
         tabInst.show();
     }
 
@@ -1105,6 +1230,7 @@ function renderCitySlotModal() {
     const researchTabLi = document.getElementById('city-tab-research-li');
     const allianceTabLi = document.getElementById('city-tab-alliance-li');
     const specialTabLi = document.getElementById('city-tab-special-li');
+    const marketTabLi = document.getElementById('city-tab-market-li');
 
     const isCraftBuilding = ['grain_mill', 'sawmill', 'stonemason', 'blacksmith'].includes(data.code) && data.level > 0;
     const isFeastBuilding = (data.code === 'hq' && data.level > 0);
@@ -1112,7 +1238,8 @@ function renderCitySlotModal() {
     const isShipsBuilding = (data.code === 'shipyard' && data.level > 0);
     const isResearchBuilding = (data.code === 'research_lab' && data.level > 0);
     const isAllianceBuilding = (data.code === 'embassy' && data.level > 0);
-    const isSpecialBuilding = ['market', 'radar', 'wall', 'storage', 'tank', 'quantum_vault', 'teahouse', 'tournament_square'].includes(data.code) && data.level > 0;
+    const isMarketBuilding = (data.code === 'market' && data.level > 0);
+    const isSpecialBuilding = ['radar', 'wall', 'storage', 'tank', 'quantum_vault', 'teahouse', 'tournament_square'].includes(data.code) && data.level > 0;
 
     if (craftTabLi) craftTabLi.classList.toggle('d-none', !isCraftBuilding);
     if (feastTabLi) feastTabLi.classList.toggle('d-none', !isFeastBuilding);
@@ -1121,6 +1248,7 @@ function renderCitySlotModal() {
     if (researchTabLi) researchTabLi.classList.toggle('d-none', !isResearchBuilding);
     if (allianceTabLi) allianceTabLi.classList.toggle('d-none', !isAllianceBuilding);
     if (specialTabLi) specialTabLi.classList.toggle('d-none', !isSpecialBuilding);
+    if (marketTabLi) marketTabLi.classList.toggle('d-none', !isMarketBuilding);
 
     // Ajuster le libellé et l'icône de l'onglet spécial
     if (isSpecialBuilding) {
@@ -1139,6 +1267,7 @@ function renderCitySlotModal() {
     if (isResearchBuilding) renderCityResearchPane(data);
     if (isAllianceBuilding) renderCityAlliancePane(data);
     if (isSpecialBuilding) renderCitySpecialPane(data);
+    if (isMarketBuilding) renderCityMarketPane(data);
 
     // ==========================================
     // 1. RENDU DE L'ONGLET ÉVOLUTION (DE BASE)
@@ -1244,6 +1373,17 @@ function renderCitySlotModal() {
             durEl.textContent = data.is_max ? 'Apogée' : formatCityDuration(data.duration || 60);
         }
 
+        // Bannière d'accès direct au marché
+        const mktBanner = document.getElementById('cityModalMarketQuickBanner');
+        if (mktBanner) {
+            const isMkt = (data.code === 'market' && data.level > 0);
+            mktBanner.classList.toggle('d-none', !isMkt);
+            if (isMkt) {
+                const mktLvlEl = document.getElementById('cityModalMarketLvlBadge');
+                if (mktLvlEl) mktLvlEl.textContent = data.level;
+            }
+        }
+
         // Boutons d'action dans le footer
         if (actionContainer) {
             if (data.is_max) {
@@ -1265,6 +1405,14 @@ function renderCitySlotModal() {
                         <i class="fa-solid fa-lock me-1"></i> Ressources insuffisantes
                     </button>
                 `;
+            }
+
+            if (data.code === 'market' && data.level > 0) {
+                actionContainer.innerHTML = `
+                    <button type="button" class="btn btn-outline-success fw-bold px-3 shadow-sm d-flex align-items-center gap-1.5" onclick="document.getElementById('city-tab-market-btn')?.click()">
+                        <i class="fa-solid fa-scale-balanced me-1"></i>Accéder au Marché &amp; Troc
+                    </button>
+                ` + actionContainer.innerHTML;
             }
         }
     }
@@ -1298,6 +1446,48 @@ function getSpecialTabMeta(code) {
         default:
             return { label: 'Activité', icon: 'fa-solid fa-bolt text-primary' };
     }
+}
+
+// ==========================================
+// 1bis. RENDU DU MARCHÉ FÉODAL & BOURSE DES SENS D'ÉCHANGE
+// ==========================================
+function renderCityMarketPane(data) {
+    if (typeof openNpcExchangeModal === 'function' && window.CITY_CONFIG) {
+        const pId = (currentPlanetCoords && currentPlanetCoords.planetId) ? currentPlanetCoords.planetId : <?= (int)$planet['id'] ?>;
+        const pName = (currentPlanetCoords && currentPlanetCoords.planetName) ? currentPlanetCoords.planetName : <?= json_encode($planet['name'] ?? 'Fief Principal') ?>;
+        openNpcExchangeModal(
+            pId,
+            pName,
+            {
+                wood: window.CITY_CONFIG.metal || 0,
+                stone: window.CITY_CONFIG.crystal || 0,
+                rice: window.CITY_CONFIG.deuterium || 0,
+                fish: window.CITY_CONFIG.fish || 0,
+                tea: window.CITY_CONFIG.tea || 0,
+                soybean: window.CITY_CONFIG.soybean || 0,
+                rice_flour: window.CITY_CONFIG.rice_flour || 0,
+                sake: window.CITY_CONFIG.sake || 0,
+                clay: window.CITY_CONFIG.clay || 0,
+                wooden_beams: window.CITY_CONFIG.wooden_beams || 0,
+                charcoal: window.CITY_CONFIG.charcoal || 0
+            },
+            {
+                wood: window.CITY_CONFIG.storageMax || 100000,
+                stone: window.CITY_CONFIG.storageMax || 100000,
+                rice: window.CITY_CONFIG.storageMax || 100000,
+                fish: 50000,
+                tea: 50000,
+                soybean: 50000,
+                rice_flour: 50000,
+                sake: 50000,
+                clay: 50000,
+                wooden_beams: 50000,
+                charcoal: 50000
+            }
+        );
+    }
+    if (typeof onP2POfferResChange === 'function') onP2POfferResChange();
+    if (typeof updateMarketCalculations === 'function') updateMarketCalculations();
 }
 
 // ==========================================
@@ -3285,7 +3475,21 @@ function toggleCityViewMode() {
         toggleBtn.innerHTML = '<i class="fa-solid fa-clipboard-list me-1"></i>Fiches Détaillées';
     }
 }
+
+// Initialisation dynamique lors du basculement sur l'onglet Marché & Troc
+document.addEventListener('DOMContentLoaded', () => {
+    const marketTabBtn = document.getElementById('city-tab-market-btn');
+    if (marketTabBtn) {
+        marketTabBtn.addEventListener('shown.bs.tab', () => {
+            const data = window.CITY_SLOTS_DATA ? window.CITY_SLOTS_DATA[currentCitySlotIndex] : null;
+            if (data && data.code === 'market') {
+                renderCityMarketPane(data);
+            }
+        });
+    }
+});
 </script>
+<?php require __DIR__ . '/partials/market_scripts.php'; ?>
 <?php
 $extraHtml = ob_get_clean();
 require __DIR__ . '/partials/game_screen_template.php';

@@ -159,6 +159,9 @@ if ($page === 'galaxy') {
     $page = 'pedagogy';
 } elseif ($page === 'profile') {
     $page = 'poster';
+} elseif ($page === 'market') {
+    header('Location: /?page=city&code=market');
+    exit;
 } elseif ($page === 'newsletter') {
     $page = 'newsletter_compose';
 } elseif ($page === 'view_village') {

@@ -179,3 +179,4 @@ echo "✓ Interface de la Bourse des Sens d'Échange validée avec succès !\n";
 echo "\n=======================================================\n";
 echo ">>> TOUS LES TESTS BOURSE DES SENS & TROC 1:1:1 SONT 100% OK ! <<<\n";
 echo "=======================================================\n";
+
