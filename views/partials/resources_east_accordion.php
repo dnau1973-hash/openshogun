@@ -213,6 +213,7 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
 <div class="accordion resources-east-accordion" id="resourcesEastAccordion">
 
     <!-- ── 1. DIDACTICIEL FÉODAL & QUÊTES DU DAIMYŌ ── -->
+    <?php if ($hasActiveQuest): ?>
     <div class="accordion-item bg-white">
         <h3 class="accordion-header" id="heading-east-quest">
             <button class="accordion-button <?= ($defaultOpen === 'quest') ? '' : 'collapsed' ?>" 
@@ -224,14 +225,10 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
                 <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate pe-2">
                     <i class="fa-solid fa-scroll text-primary"></i>
                     <span class="fw-bold">Didacticiel</span>
-                    <?php if ($hasActiveQuest): ?>
-                        <?php if (!empty($activeQuest['is_claimable'])): ?>
-                            <span class="badge bg-success-lt text-success ms-auto fw-bold" style="font-size:0.68rem;">Objectif atteint !</span>
-                        <?php else: ?>
-                            <span class="badge bg-primary-lt ms-auto font-monospace" style="font-size:0.68rem;">Étape <?= (int)$activeQuest['order'] ?>/<?= (int)($questSummary['total_quests'] ?? 12) ?></span>
-                        <?php endif; ?>
+                    <?php if (!empty($activeQuest['is_claimable'])): ?>
+                        <span class="badge bg-success-lt text-success ms-auto fw-bold" style="font-size:0.68rem;">Objectif atteint !</span>
                     <?php else: ?>
-                        <span class="badge bg-secondary-lt text-secondary ms-auto font-monospace" style="font-size:0.68rem;">Codex (12/12)</span>
+                        <span class="badge bg-primary-lt ms-auto font-monospace" style="font-size:0.68rem;">Étape <?= (int)$activeQuest['order'] ?>/<?= (int)($questSummary['total_quests'] ?? 12) ?></span>
                     <?php endif; ?>
                 </div>
                 <span class="accordion-button-toggle">
@@ -244,21 +241,11 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
              aria-labelledby="heading-east-quest" 
              data-bs-parent="#resourcesEastAccordion">
             <div class="accordion-body">
-                <?php if ($hasActiveQuest): ?>
-                    <?php require __DIR__ . '/quest_banner.php'; ?>
-                <?php else: ?>
-                    <div class="text-center py-4 text-muted">
-                        <i class="fa-solid fa-award text-warning d-block mb-2" style="font-size: 2rem;"></i>
-                        <strong class="text-dark d-block">Didacticiel Accompli !</strong>
-                        <p class="small text-muted mt-1 mb-3">Toutes les épreuves du Shogunat ont été complétées avec succès.</p>
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="openQuestModal()">
-                            <i class="fa-solid fa-book-open me-1"></i> Ouvrir le Codex Féodal
-                        </button>
-                    </div>
-                <?php endif; ?>
+                <?php require __DIR__ . '/quest_banner.php'; ?>
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- ── 1bis. CHRONIQUE FÉODALE DU SENGOKU (ÉVÉNEMENT HEBDOMADAIRE) ── -->
     <?php if ($activeEvent): ?>
