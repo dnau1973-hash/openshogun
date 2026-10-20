@@ -1,8 +1,8 @@
 <?php
 /**
- * Widget Didacticiel & Quêtes du Daimyō (OpenShogun)
- * Affiché dans le menu latéral droit pour accompagner le joueur dans son ascension féodale.
- * Présentation identique aux autres cartes (sans dégradé).
+ * Widget Synthétique du Codex des Quêtes Féodales (OpenShogun)
+ * Présentation moderne avec vignette illustrée de l'étape active,
+ * ouvrant la modale illustrée haute définition au format Craft/Mineur.
  */
 require_once __DIR__ . '/../../core/QuestEngine.php';
 
@@ -13,120 +13,85 @@ if (!isset($user) || !isset($planet)) {
 $questEngine = new QuestEngine();
 $questSummary = $questEngine->getPlayerQuestsStatus((int)$user['id'], (int)$planet['id']);
 
-// Dès que le joueur a terminé l'intégralité du tutoriel/didacticiel féodal, ce bloc de droite disparaît complètement
+// Masqué si toutes les quêtes ont été accomplies
 if (!empty($questSummary['all_completed']) || empty($questSummary['active_quest'])) {
     return;
 }
+
 $activeQuest = $questSummary['active_quest'];
+$isClaimable = !empty($activeQuest['is_claimable']);
+$questImgUrl = !empty($activeQuest['image_url']) ? $activeQuest['image_url'] : '/public/assets/quests/quest_01_wood_field.jpg';
 ?>
 
-<div id="questBannerContainer" class="card">
-    <?php if ($activeQuest): ?>
-        <!-- Bloc Quête Active (Style Washi Sobre sans Dégradé) -->
-        <?php $isClaimable = $activeQuest['is_claimable']; ?>
-        <div class="card-header">
-            <h3 class="card-title" style="font-size: 1rem;">
-                <span><i class="fa-solid fa-scroll text-primary me-1"></i></span> Didacticiel du Daimyō
-            </h3>
+<div id="questBannerContainer" class="card border shadow-sm mb-0" style="border-radius: 8px; overflow: hidden; background: #ffffff;">
+    <div class="card-body p-3">
+        <!-- En-tête compacte : étape et catégorie -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-uppercase fw-bold text-danger" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                ⛩️ Étape <?= (int)$activeQuest['order'] ?> / <?= (int)($questSummary['total_quests'] ?? 12) ?> &bull; <?= htmlspecialchars($activeQuest['category'] ?? 'Terroir') ?>
+            </span>
             <?php if ($isClaimable): ?>
-                <span class="badge " style="background: #15803d; color: #ffffff; font-size: 0.7rem; padding: 0.15rem 0.45rem; font-weight: 800; border-radius: 4px;">
-                    <i class="fa-solid fa-sparkles text-warning me-1"></i>Objectif atteint !
+                <span class="badge bg-success text-white font-monospace" style="font-size: 0.65rem;">
+                    <i class="fa-solid fa-sparkles me-1"></i>Prête !
                 </span>
             <?php else: ?>
-                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">
-                    Étape <?= $activeQuest['order'] ?> / <?= $questSummary['total_quests'] ?>
+                <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.65rem;">
+                    <i class="fa-solid fa-hourglass-half me-1"></i>En cours
                 </span>
             <?php endif; ?>
         </div>
 
-        <div class="card-body" style="padding: 1rem;">
-            <!-- Mentor & Titre de la quête -->
-            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.65rem;">
-                <div style="font-size: 1.6rem; line-height: 1;"><?= $activeQuest['icon'] ?></div>
-                <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 0.88rem; font-weight: 800; color: var(--text-main); line-height: 1.3;">
-                        <?= htmlspecialchars($activeQuest['title']) ?>
+        <!-- Corps compact avec vignette illustrée -->
+        <div class="d-flex align-items-center gap-3 cursor-pointer" onclick="openCodexQuestModal('<?= htmlspecialchars($activeQuest['key']) ?>')" style="cursor: pointer;">
+            <div style="width: 72px; height: 72px; min-width: 72px; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid #e2e8f0; background: #0f172a;" class="shadow-sm">
+                <img src="<?= htmlspecialchars($questImgUrl) ?>" alt="<?= htmlspecialchars($activeQuest['title']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                <?php if ($isClaimable): ?>
+                    <div style="position: absolute; inset: 0; background: rgba(22, 163, 74, 0.25); display: flex; align-items: center; justify-content: center;">
+                        <span class="badge bg-success p-1 rounded-circle"><i class="fa-solid fa-check text-white"></i></span>
                     </div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted);">
-                        Conseiller : <strong style="color: var(--text-secondary);"><?= htmlspecialchars($activeQuest['mentor_name']) ?></strong>
-                    </div>
-                </div>
+                <?php endif; ?>
             </div>
 
-            <!-- Objectif -->
-            <div style="background: rgba(0, 0, 0, 0.03); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.55rem 0.7rem; margin-bottom: 0.65rem;">
-                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 0.15rem;">
-                    Objectif :
-                </div>
-                <div style="font-size: 0.85rem; font-weight: 700; color: <?= $isClaimable ? '#15803d' : 'var(--text-main)' ?>; line-height: 1.35;">
+            <div class="flex-grow-1 min-w-0">
+                <h4 class="m-0 text-dark fw-bold text-truncate" style="font-size: 0.92rem;" title="<?= htmlspecialchars($activeQuest['title']) ?>">
+                    <?= $activeQuest['icon'] ?> <?= htmlspecialchars($activeQuest['title']) ?>
+                </h4>
+                <div class="text-secondary small text-truncate mt-1" style="font-size: 0.75rem; line-height: 1.3;" title="<?= htmlspecialchars($activeQuest['objective']) ?>">
                     <?= htmlspecialchars($activeQuest['objective']) ?>
                 </div>
             </div>
+        </div>
 
-            <!-- Lore / Conseil du mentor -->
-            <div style="font-size: 0.76rem; color: var(--text-muted); font-style: italic; margin-bottom: 0.65rem; line-height: 1.35;">
-                &laquo; <?= htmlspecialchars($activeQuest['lore']) ?> &raquo;
-            </div>
-
-            <!-- Aperçu des récompenses -->
-            <div style="background: var(--bg-surface); border: 1px dashed var(--border-color); border-radius: 6px; padding: 0.45rem 0.6rem; margin-bottom: 0.75rem; font-size: 0.76rem;">
-                <div style="color: var(--text-muted); font-weight: 700; margin-bottom: 0.2rem;">Récompense :</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.35rem 0.6rem;">
-                    <?php if (!empty($activeQuest['rewards']['metal'])): ?>
-                        <span style="color: var(--res-metal); font-weight: 600;"><i class="fa-solid fa-tree text-success me-1"></i>+<?= number_format($activeQuest['rewards']['metal']) ?> Bois</span>
-                    <?php endif; ?>
-                    <?php if (!empty($activeQuest['rewards']['crystal'])): ?>
-                        <span style="color: var(--res-crystal); font-weight: 600;"><i class="fa-solid fa-mountain text-secondary me-1"></i>+<?= number_format($activeQuest['rewards']['crystal']) ?> Pierre</span>
-                    <?php endif; ?>
-                    <?php if (!empty($activeQuest['rewards']['deuterium'])): ?>
-                        <span style="color: var(--res-deut); font-weight: 600;"><i class="fa-solid fa-wheat-awn text-warning me-1"></i>+<?= number_format($activeQuest['rewards']['deuterium']) ?> Riz</span>
-                    <?php endif; ?>
-                    <?php if (!empty($activeQuest['rewards']['points'])): ?>
-                        <span style="color: #b45309; font-weight: 600;"><i class="fa-solid fa-torii-gate text-danger me-1"></i>+<?= $activeQuest['rewards']['points'] ?> Honneur</span>
-                    <?php endif; ?>
-                    <?php if (!empty($activeQuest['rewards']['bonus_units'])): ?>
-                        <span style="color: var(--red-primary, #c2252b); font-weight: 700;"><i class="fa-solid fa-khanda text-danger me-1"></i>+<?= $activeQuest['rewards']['bonus_units'] ?> Recrues</span>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <!-- Bouton d'action ou de Réclamation (sans dégradé) -->
+        <!-- Bouton d'action pour réclamer ou consulter -->
+        <div class="mt-2 pt-1">
             <?php if ($isClaimable): ?>
                 <button type="button" 
-                        onclick="claimQuestReward('<?= $activeQuest['key'] ?>')" 
-                        class="btn btn-primary" 
-                        style="width: 100%; background: #15803d; border-color: #166534; color: #ffffff; font-weight: 800; font-size: 0.85rem; padding: 0.55rem; border-radius: 6px; cursor: pointer; text-align: center; margin-bottom: 0.6rem;">
-                    <i class="fa-solid fa-sparkles text-warning me-1"></i>Réclamer ma Récompense
+                        onclick="openCodexQuestModal('<?= htmlspecialchars($activeQuest['key']) ?>')" 
+                        class="btn btn-sm btn-success w-100 fw-bold shadow-sm pulse-btn d-flex align-items-center justify-content-center gap-2 py-2">
+                    <i class="fa-solid fa-gift"></i>
+                    <span>Objectif Atteint &bull; Réclamer</span>
                 </button>
             <?php else: ?>
-                <?php if (str_starts_with($activeQuest['action_url'], 'javascript:')): ?>
-                    <button type="button" 
-                            onclick="<?= htmlspecialchars(substr($activeQuest['action_url'], 11)) ?>" 
-                            class="btn btn-primary" 
-                            style="width: 100%; font-size: 0.85rem; padding: 0.5rem; font-weight: 700; text-align: center; margin-bottom: 0.6rem;">
-                        <?= htmlspecialchars($activeQuest['action_label']) ?> &rarr;
-                    </button>
-                <?php else: ?>
-                    <a href="<?= htmlspecialchars($activeQuest['action_url']) ?>" 
-                       class="btn btn-primary" 
-                       style="display: block; width: 100%; font-size: 0.85rem; padding: 0.5rem; font-weight: 700; text-align: center; text-decoration: none; box-sizing: border-box; margin-bottom: 0.6rem;">
-                        <?= htmlspecialchars($activeQuest['action_label']) ?> &rarr;
-                    </a>
-                <?php endif; ?>
-            <?php endif; ?>
-
-            <!-- Barre de progression sobre (sans dégradé) & Lien vers le Codex -->
-            <div style="padding-top: 0.5rem; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
-                <div style="flex: 1; display: flex; align-items: center; gap: 0.4rem;">
-                    <div style="flex: 1; height: 6px; background: var(--border-rice, #e5d8c5); border-radius: 3px; overflow: hidden;">
-                        <div style="height: 100%; width: <?= $questSummary['overall_percent'] ?>%; background: var(--red-primary, #c2252b);"></div>
-                    </div>
-                    <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; font-family: monospace;"><?= $questSummary['overall_percent'] ?>%</span>
-                </div>
-                <button type="button" onclick="openQuestModal()" style="background: transparent; border: none; color: var(--text-muted); font-size: 0.74rem; cursor: pointer; text-decoration: underline; padding: 0; white-space: nowrap;">
-                    <i class="fa-solid fa-scroll me-1"></i>Codex (<?= $questSummary['claimed_count'] ?>/12)
+                <button type="button" 
+                        onclick="openCodexQuestModal('<?= htmlspecialchars($activeQuest['key']) ?>')" 
+                        class="btn btn-sm btn-outline-secondary w-100 d-flex align-items-center justify-content-between py-1 px-3 text-secondary">
+                    <span class="small"><i class="fa-solid fa-book-open me-1 text-primary"></i>Détails &amp; Décret</span>
+                    <i class="fa-solid fa-chevron-right small text-muted"></i>
                 </button>
-            </div>
+            <?php endif; ?>
         </div>
-    <?php endif; ?>
+
+        <!-- Jauge d'avancement du Codex -->
+        <div class="mt-2 pt-2 border-top d-flex align-items-center justify-content-between gap-2" style="font-size: 0.7rem; color: #64748b;">
+            <div class="d-flex align-items-center gap-1 flex-grow-1">
+                <div class="progress flex-grow-1" style="height: 5px; background: #e2e8f0; border-radius: 3px;">
+                    <div class="progress-bar bg-danger" style="width: <?= (int)$questSummary['overall_percent'] ?>%;"></div>
+                </div>
+                <span class="font-monospace fw-bold text-dark"><?= (int)$questSummary['overall_percent'] ?>%</span>
+            </div>
+            <a href="javascript:void(0)" onclick="openCodexQuestModal()" class="text-secondary text-decoration-none hover-primary fw-semibold">
+                Codex (<?= (int)$questSummary['claimed_count'] ?>/<?= (int)$questSummary['total_quests'] ?>)
+            </a>
+        </div>
+    </div>
 </div>
