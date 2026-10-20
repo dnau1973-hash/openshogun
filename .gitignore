@@ -18,6 +18,5 @@ config/installed.lock
 config/.net_traffic_cache.json
 config/server_hardware_logs.json
 tmp/
-networks:.yaml
 *.bik
 *.sqlite

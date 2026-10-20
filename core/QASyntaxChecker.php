@@ -34,13 +34,14 @@ class QASyntaxChecker {
 
         $passed = 0;
         $errors = [];
+        $phpBinary = (defined('PHP_BINARY') && PHP_BINARY) ? PHP_BINARY : 'php';
 
         foreach ($files as $file) {
             if (!is_file($file)) continue;
 
             $output = [];
             $exitCode = 0;
-            exec('php -l ' . escapeshellarg($file) . ' 2>&1', $output, $exitCode);
+            exec(escapeshellarg($phpBinary) . ' -l ' . escapeshellarg($file) . ' 2>&1', $output, $exitCode);
 
             $relativePath = str_replace($root . '/', '', $file);
 
