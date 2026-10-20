@@ -186,7 +186,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
 </style>
 
 <?php
-$queueTitle = 'Chantiers Ruraux';
+$queueTitle = 'Activités & Chantiers Ruraux';
 ob_start();
 ?>
             <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">

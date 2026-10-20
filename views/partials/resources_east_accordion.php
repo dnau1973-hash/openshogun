@@ -22,6 +22,47 @@ if (!isset($annexedOases) && !empty($planet['id'])) {
     $annexedOases = $oEngine->getAnnexedOasesForPlanet((int)$planet['id']);
 }
 
+require_once __DIR__ . '/../../core/ResearchEngine.php';
+$researchEngine = new ResearchEngine();
+
+if (!isset($planetEngine)) {
+    require_once __DIR__ . '/../../core/PlanetEngine.php';
+    $planetEngine = new PlanetEngine();
+}
+
+$barracksEngine = $barracksEngine ?? new BarracksEngine();
+$shipyardEngine = $shipyardEngine ?? new ShipyardEngine();
+
+if (!isset($barracksQueue) && !empty($planet['id'])) {
+    $barracksQueue = $barracksEngine->getQueue((int)$planet['id']);
+}
+$barracksQueue = $barracksQueue ?? [];
+
+if (!isset($shipyardQueue) && !empty($planet['id'])) {
+    $shipyardQueue = $shipyardEngine->getQueue((int)$planet['id']);
+}
+$shipyardQueue = $shipyardQueue ?? [];
+
+if (!isset($activeResearch) && !empty($user['id'])) {
+    $activeResearch = $researchEngine->getActiveQueue((int)$user['id']);
+}
+
+if (!isset($activeFeast) && !empty($planet['id'])) {
+    $activeFeast = $planetEngine->getActiveFeast((int)$planet['id']);
+}
+
+if (!isset($craftQueue) && !empty($planet['id'])) {
+    $craftQueue = $planetEngine->getCraftQueue((int)$planet['id']);
+}
+$craftQueue = $craftQueue ?? [];
+
+$totalActiveJobs = count($queue ?? []) 
+    + count($barracksQueue) 
+    + count($shipyardQueue) 
+    + (!empty($activeResearch) ? 1 : 0) 
+    + (!empty($activeFeast) ? 1 : 0) 
+    + count($craftQueue);
+
 $queue = $queue ?? [];
 $isTerran = $isTerran ?? (($user['faction'] ?? 'terran') === 'terran');
 $annexedOases = $annexedOases ?? [];
@@ -331,12 +372,12 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
                     aria-expanded="<?= ($defaultOpen === 'queue') ? 'true' : 'false' ?>" 
                     aria-controls="east-item-queue">
                 <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate pe-2">
-                    <i class="fa-solid fa-helmet-safety text-warning"></i>
+                    <i class="fa-solid fa-list-check text-warning"></i>
                     <span class="fw-bold"><?= htmlspecialchars($queueTitle) ?></span>
                     <?php if ($isTerran): ?>
                         <span class="badge bg-danger-lt text-danger ms-auto fw-bold" style="font-size:0.65rem;" title="Privilège Oda : Chantiers simultanés">Oda</span>
                     <?php endif; ?>
-                    <span class="badge bg-warning-lt fw-bold <?= $isTerran ? '' : 'ms-auto' ?>" style="font-size:0.68rem;"><?= count($queue) ?> actif(s)</span>
+                    <span class="badge bg-warning-lt fw-bold <?= $isTerran ? '' : 'ms-auto' ?>" style="font-size:0.68rem;"><?= (int)$totalActiveJobs ?> actif(s)</span>
                 </div>
                 <span class="accordion-button-toggle">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon"><path d="M6 9l6 6l6 -6" /></svg>

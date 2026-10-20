@@ -512,7 +512,7 @@ foreach ($citySlots as $s => $sd) {
 </style>
 <?= SlotPositionEngine::renderCss('city') ?>
 <?php
-$queueTitle = 'Chantiers Urbains';
+$queueTitle = 'Activités & Chantiers Urbains';
 ob_start();
 ?>
         <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
