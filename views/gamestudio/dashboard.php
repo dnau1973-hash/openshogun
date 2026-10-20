@@ -221,13 +221,13 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                 </div>
             </div>
 
-            <!-- ── Synthèse Technique des Services & Pile Logicielle ── -->
-            <div class="row g-3 font-monospace small mb-3">
-                <!-- Base MySQL -->
-                <div class="col-md-3">
-                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-database text-primary me-1"></i>Base de Données SQL</span>
+            <!-- ── Synthèse Technique des Services & Pile Logicielle (4 Blocs sur une seule ligne) ── -->
+            <div class="row g-2 g-md-3 font-monospace small mb-3 flex-nowrap overflow-x-auto">
+                <!-- 1. Base MySQL -->
+                <div class="col-3" style="min-width: 200px;">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 0.85rem 1rem;">
+                        <div class="text-truncate me-2">
+                            <span class="text-muted d-block small text-truncate" style="font-size:0.75rem;"><i class="fa-solid fa-database text-primary me-1"></i>Base de Données SQL</span>
                             <div class="d-flex align-items-center gap-1.5 mt-1">
                                 <strong id="rpi-db-latency" class="text-<?= $serverDiag['database']['latency_class'] ?> fs-6">
                                     <?= $serverDiag['database']['latency_ms'] ?> ms
@@ -235,51 +235,51 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                                 <span class="text-muted small">&bull; <span id="rpi-db-threads"><?= $serverDiag['database']['threads_active'] ?></span> conn.</span>
                             </div>
                         </div>
-                        <span class="badge bg-primary-lt px-2.5 py-1.5" id="rpi-db-size"><?= $serverDiag['database']['db_size_mb'] ?> Mo</span>
+                        <span class="badge bg-primary-lt px-2 py-1 flex-shrink-0" id="rpi-db-size"><?= $serverDiag['database']['db_size_mb'] ?> Mo</span>
                     </div>
                 </div>
 
-                <!-- PHP & OPcache -->
-                <div class="col-md-3">
-                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-brands fa-php text-purple me-1"></i>Moteur PHP &amp; OPcache</span>
-                            <div class="mt-1">
+                <!-- 2. PHP & OPcache -->
+                <div class="col-3" style="min-width: 200px;">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 0.85rem 1rem;">
+                        <div class="text-truncate me-2">
+                            <span class="text-muted d-block small text-truncate" style="font-size:0.75rem;"><i class="fa-brands fa-php text-purple me-1"></i>Moteur PHP &amp; OPcache</span>
+                            <div class="mt-1 text-truncate">
                                 <strong class="text-dark">v<?= $serverDiag['php']['version'] ?></strong>
                                 <span class="text-muted small">(<?= $serverDiag['php']['memory_limit'] ?>)</span>
                             </div>
                         </div>
-                        <span class="badge bg-success-lt px-2.5 py-1.5" id="rpi-opcache-badge" title="Taux de succès du cache d'opcodes">
+                        <span class="badge bg-success-lt px-2 py-1 flex-shrink-0" id="rpi-opcache-badge" title="Taux de succès du cache d'opcodes">
                             <span id="rpi-opcache-hit"><?= $serverDiag['php']['opcache_hit_rate'] ?></span>% Hit
                         </span>
                     </div>
                 </div>
 
-                <!-- Simulation & Game Loop -->
-                <div class="col-md-3">
-                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-gear text-secondary me-1"></i>Simulation IA &amp; Ticks</span>
-                            <div class="mt-1">
+                <!-- 3. Simulation & Game Loop -->
+                <div class="col-3" style="min-width: 200px;">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 0.85rem 1rem;">
+                        <div class="text-truncate me-2">
+                            <span class="text-muted d-block small text-truncate" style="font-size:0.75rem;"><i class="fa-solid fa-gear text-secondary me-1"></i>Simulation IA &amp; Ticks</span>
+                            <div class="mt-1 text-truncate">
                                 <strong class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Active</strong>
                                 <span class="text-muted small">&bull; <?= (int)($totalBots ?? 0) ?> bots</span>
                             </div>
                         </div>
-                        <span class="badge bg-secondary-lt font-monospace px-2.5 py-1.5">Auto</span>
+                        <span class="badge bg-secondary-lt font-monospace px-2 py-1 flex-shrink-0">Auto</span>
                     </div>
                 </div>
 
-                <!-- Déploiement Git -->
-                <div class="col-md-3">
-                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-code-branch text-teal me-1"></i>Version Déployée (Git)</span>
-                            <div class="mt-1">
+                <!-- 4. Déploiement Git -->
+                <div class="col-3" style="min-width: 200px;">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 0.85rem 1rem;">
+                        <div class="text-truncate me-2">
+                            <span class="text-muted d-block small text-truncate" style="font-size:0.75rem;"><i class="fa-solid fa-code-branch text-teal me-1"></i>Version Déployée (Git)</span>
+                            <div class="mt-1 text-truncate">
                                 <strong class="text-teal font-monospace"><?= htmlspecialchars($localGitInfo['branch'] ?? 'main') ?></strong>
                                 <span class="text-muted small">(<?= htmlspecialchars($localGitInfo['short_sha'] ?? 'HEAD') ?>)</span>
                             </div>
                         </div>
-                        <span class="badge bg-teal-lt px-2.5 py-1.5">Synchronisé</span>
+                        <span class="badge bg-teal-lt px-2 py-1 flex-shrink-0">Synchronisé</span>
                     </div>
                 </div>
             </div>
