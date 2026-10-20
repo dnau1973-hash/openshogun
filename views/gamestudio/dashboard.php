@@ -15,6 +15,11 @@ $serverMonitor = new ServerMonitorEngine();
 $serverDiag = $serverMonitor->getSystemDiagnostics();
 ?>
 
+<style>
+    .rpi-sparkline { height: 56px; min-height: 56px; margin-left: -4px; margin-right: -4px; }
+    .rpi-sparkline svg { overflow: visible; }
+</style>
+
 <div class="gamestudio-dashboard">
     <!-- ── SUPERVISION EN TEMPS RÉEL DU SERVEUR RASPBERRY PI & INFRASTRUCTURE ── -->
     <div class="card shadow-sm mb-4" id="rpi-monitor-panel">
@@ -55,6 +60,9 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                     <button type="button" class="btn btn-outline-secondary" onclick="triggerServerResetOpcache(this)" title="Purger le cache d'opcodes PHP sans redémarrer PHP-FPM">
                         <i class="fa-solid fa-broom text-info me-1"></i>Purge OPcache
                     </button>
+                    <a href="/api/server_monitor.php?action=export_csv" class="btn btn-outline-secondary" title="Exporter l'historique de télémétrie (CSV)">
+                        <i class="fa-solid fa-file-csv text-success"></i>
+                    </a>
                     <button type="button" class="btn btn-outline-primary" onclick="refreshRpiMetrics(this)" title="Interroger immédiatement les sondes système">
                         <i class="fa-solid fa-arrows-rotate me-1"></i>Actualiser
                     </button>
@@ -91,6 +99,12 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                                 <span>Refroidissement</span>
                                 <span>Throttling : 80°C</span>
                             </div>
+                            <!-- Mini-graphique historique : Température -->
+                            <div id="rpi-spark-temp" class="rpi-sparkline mt-2"></div>
+                            <div class="d-flex justify-content-between text-muted font-monospace" style="font-size:0.66rem;">
+                                <span>~20 min</span>
+                                <span id="rpi-spark-temp-range">min -- &middot; max --</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -122,6 +136,12 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                             <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
                                 <span>5m : <strong id="rpi-cpu-load-5m"><?= $serverDiag['cpu']['load_5m'] ?></strong></span>
                                 <span>15m : <strong id="rpi-cpu-load-15m"><?= $serverDiag['cpu']['load_15m'] ?></strong></span>
+                            </div>
+                            <!-- Mini-graphique historique : Charge -->
+                            <div id="rpi-spark-load" class="rpi-sparkline mt-2"></div>
+                            <div class="d-flex justify-content-between text-muted font-monospace" style="font-size:0.66rem;">
+                                <span>~20 min</span>
+                                <span id="rpi-spark-load-range">min -- &middot; max --</span>
                             </div>
                         </div>
                     </div>
@@ -155,6 +175,12 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                                     <?= $serverDiag['memory']['swap_warning'] ? '⚠️ Swap Actif' : 'Nominal' ?>
                                 </span>
                             </div>
+                            <!-- Mini-graphique historique : RAM -->
+                            <div id="rpi-spark-ram" class="rpi-sparkline mt-2"></div>
+                            <div class="d-flex justify-content-between text-muted font-monospace" style="font-size:0.66rem;">
+                                <span>~20 min</span>
+                                <span id="rpi-spark-ram-range">min -- &middot; max --</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -184,6 +210,12 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                             <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
                                 <span>Utilisé : <strong id="rpi-disk-used"><?= $serverDiag['disk']['used_gb'] ?> Go</strong></span>
                                 <span>Carte SD / SSD</span>
+                            </div>
+                            <!-- Mini-graphique historique : Stockage -->
+                            <div id="rpi-spark-disk" class="rpi-sparkline mt-2"></div>
+                            <div class="d-flex justify-content-between text-muted font-monospace" style="font-size:0.66rem;">
+                                <span>~20 min</span>
+                                <span id="rpi-spark-disk-range">min -- &middot; max --</span>
                             </div>
                         </div>
                     </div>
@@ -215,6 +247,12 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                             <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
                                 <span>&darr; <strong id="rpi-net-rx"><?= $serverDiag['network']['total_rx_mb'] ?? 0 ?> Mo</strong></span>
                                 <span>&uarr; <strong id="rpi-net-tx"><?= $serverDiag['network']['total_tx_mb'] ?? 0 ?> Mo</strong></span>
+                            </div>
+                            <!-- Mini-graphique historique : Réseau -->
+                            <div id="rpi-spark-net" class="rpi-sparkline mt-2"></div>
+                            <div class="d-flex justify-content-between text-muted font-monospace" style="font-size:0.66rem;">
+                                <span>~20 min</span>
+                                <span id="rpi-spark-net-range">min -- &middot; max --</span>
                             </div>
                         </div>
                     </div>
@@ -284,186 +322,6 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                 </div>
             </div>
 
-            <!-- ── HISTORIQUE DE TÉLÉMÉTRIE & LOGS DU RASPBERRY PI ── -->
-            <div class="mt-3 pt-3 border-top">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                    <div>
-                        <h4 class="text-dark fw-bold m-0 d-flex align-items-center gap-2" style="font-size:0.95rem;">
-                            <i class="fa-solid fa-clock-rotate-left text-danger"></i>
-                            <span>Journal &amp; Historique Télémétrique</span>
-                            <span class="badge bg-secondary-lt font-monospace small"><span id="rpi-logs-count"><?= $serverDiag['hardware_summary']['count'] ?? 1 ?></span> relevés</span>
-                        </h4>
-                        <div class="text-muted small" style="font-size:0.73rem;">
-                            Surveillance continue de la température CPU, de la charge, de la mémoire vive et de la bande passante avec détection de pics.
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <!-- Sélecteur de vue : Graphique vs Tableau -->
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button type="button" class="btn btn-outline-primary active" id="btn-view-hw-chart" onclick="switchHwLogsView('chart')">
-                                <i class="fa-solid fa-chart-area me-1"></i>Graphique Temporel
-                            </button>
-                            <button type="button" class="btn btn-outline-primary" id="btn-view-hw-table" onclick="switchHwLogsView('table')">
-                                <i class="fa-solid fa-table-list me-1"></i>Tableau Détaillé
-                            </button>
-                        </div>
-
-                        <!-- Actions sur les logs -->
-                        <button type="button" class="btn btn-sm btn-outline-success" onclick="triggerRecordHardwareSnapshot(this)" title="Enregistrer manuellement un instantané immédiat">
-                            <i class="fa-solid fa-camera me-1"></i>Prendre Instantané
-                        </button>
-                        <a href="/api/server_monitor.php?action=export_csv" class="btn btn-sm btn-outline-secondary" title="Télécharger l'historique complet au format CSV">
-                            <i class="fa-solid fa-file-csv text-success me-1"></i>Exporter CSV
-                        </a>
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="triggerPurgeHardwareLogs(this)" title="Effacer les anciens relevés pour libérer l'espace carte SD">
-                            <i class="fa-solid fa-trash-can me-1"></i>Purger
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ── 4 Cartes de Records & Pics Historiques ── -->
-                <div class="row g-2 mb-3 font-monospace">
-                    <!-- Pic Température -->
-                    <div class="col-6 col-md-3">
-                        <div class="p-2 rounded border bg-light d-flex align-items-center justify-content-between">
-                            <div>
-                                <span class="text-muted d-block small" style="font-size:0.68rem;">🔥 PIC TEMPÉRATURE</span>
-                                <strong class="text-danger fs-5" id="rpi-summary-peak-temp">
-                                    <?= $serverDiag['hardware_summary']['peak_temp'] !== null ? $serverDiag['hardware_summary']['peak_temp'] . ' °C' : 'N/A' ?>
-                                </strong>
-                            </div>
-                            <span class="badge bg-danger-lt small" id="rpi-summary-peak-temp-time"><?= $serverDiag['hardware_summary']['peak_temp_time'] ?? '--:--' ?></span>
-                        </div>
-                    </div>
-                    <!-- Pic Charge -->
-                    <div class="col-6 col-md-3">
-                        <div class="p-2 rounded border bg-light d-flex align-items-center justify-content-between">
-                            <div>
-                                <span class="text-muted d-block small" style="font-size:0.68rem;">⚡ PIC CHARGE CPU</span>
-                                <strong class="text-primary fs-5" id="rpi-summary-peak-load">
-                                    <?= $serverDiag['hardware_summary']['peak_load'] ?? '0.0' ?>
-                                </strong>
-                            </div>
-                            <span class="badge bg-primary-lt small" id="rpi-summary-peak-load-time"><?= $serverDiag['hardware_summary']['peak_load_time'] ?? '--:--' ?></span>
-                        </div>
-                    </div>
-                    <!-- Pic RAM -->
-                    <div class="col-6 col-md-3">
-                        <div class="p-2 rounded border bg-light d-flex align-items-center justify-content-between">
-                            <div>
-                                <span class="text-muted d-block small" style="font-size:0.68rem;">🧠 PIC MÉMOIRE RAM</span>
-                                <strong class="text-teal fs-5" id="rpi-summary-peak-ram">
-                                    <?= $serverDiag['hardware_summary']['peak_ram'] ?? '0.0' ?> %
-                                </strong>
-                            </div>
-                            <span class="badge bg-teal-lt small" id="rpi-summary-peak-ram-time"><?= $serverDiag['hardware_summary']['peak_ram_time'] ?? '--:--' ?></span>
-                        </div>
-                    </div>
-                    <!-- Anomalies / Santé -->
-                    <div class="col-6 col-md-3">
-                        <div class="p-2 rounded border bg-light d-flex align-items-center justify-content-between">
-                            <div>
-                                <span class="text-muted d-block small" style="font-size:0.68rem;">🛡️ ALERTES SURCHAUFFE</span>
-                                <strong class="<?= ($serverDiag['hardware_summary']['anomalies_count'] ?? 0) > 0 ? 'text-danger' : 'text-success' ?> fs-5" id="rpi-summary-anomalies">
-                                    <?= $serverDiag['hardware_summary']['anomalies_count'] ?? 0 ?> alerte(s)
-                                </strong>
-                            </div>
-                            <span class="badge <?= ($serverDiag['hardware_summary']['anomalies_count'] ?? 0) > 0 ? 'bg-danger text-white' : 'bg-success-lt' ?>" id="rpi-summary-anomalies-badge">
-                                <?= ($serverDiag['hardware_summary']['anomalies_count'] ?? 0) > 0 ? 'Vigilance' : 'RAS' ?>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── VUE 1 : Graphique Temporel Interactif (ApexCharts) ── -->
-                <div id="rpi-hw-chart-container" class="border rounded bg-white p-2 mb-2 shadow-2xs">
-                    <div id="rpi-hardware-apex-chart" style="min-height: 230px;"></div>
-                </div>
-
-                <!-- ── VUE 2 : Tableau des Derniers Relevés Horodatés ── -->
-                <div id="rpi-hw-table-container" class="border rounded bg-white overflow-hidden shadow-2xs d-none">
-                    <div class="table-responsive" style="max-height: 280px;">
-                        <table class="table table-vcenter table-sm card-table table-hover font-monospace" style="font-size:0.75rem;">
-                            <thead class="bg-light sticky-top">
-                                <tr>
-                                    <th>Heure</th>
-                                    <th>Température CPU</th>
-                                    <th>Charge (1m / %)</th>
-                                    <th>Fréquence</th>
-                                    <th>RAM Utilisée</th>
-                                    <th>Swap</th>
-                                    <th>Débit Réseau</th>
-                                    <th>Santé</th>
-                                </tr>
-                            </thead>
-                            <tbody id="rpi-hw-logs-tbody">
-                                <!-- Rempli dynamiquement en JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-                <!-- Base MySQL -->
-                <div class="col-md-3">
-                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-database text-primary me-1"></i>Base de Données SQL</span>
-                            <div class="d-flex align-items-center gap-1.5 mt-1">
-                                <strong id="rpi-db-latency" class="text-<?= $serverDiag['database']['latency_class'] ?> fs-6">
-                                    <?= $serverDiag['database']['latency_ms'] ?> ms
-                                </strong>
-                                <span class="text-muted small">&bull; <span id="rpi-db-threads"><?= $serverDiag['database']['threads_active'] ?></span> conn.</span>
-                            </div>
-                        </div>
-                        <span class="badge bg-primary-lt px-2.5 py-1.5" id="rpi-db-size"><?= $serverDiag['database']['db_size_mb'] ?> Mo</span>
-                    </div>
-                </div>
-
-                <!-- PHP & OPcache -->
-                <div class="col-md-3">
-                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-brands fa-php text-purple me-1"></i>Moteur PHP &amp; OPcache</span>
-                            <div class="mt-1">
-                                <strong class="text-dark">v<?= $serverDiag['php']['version'] ?></strong>
-                                <span class="text-muted small">(<?= $serverDiag['php']['memory_limit'] ?>)</span>
-                            </div>
-                        </div>
-                        <span class="badge bg-success-lt px-2.5 py-1.5" id="rpi-opcache-badge" title="Taux de succès du cache d'opcodes">
-                            <span id="rpi-opcache-hit"><?= $serverDiag['php']['opcache_hit_rate'] ?></span>% Hit
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Simulation & Game Loop -->
-                <div class="col-md-3">
-                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-gear text-secondary me-1"></i>Simulation IA &amp; Ticks</span>
-                            <div class="mt-1">
-                                <strong class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Active</strong>
-                                <span class="text-muted small">&bull; <?= (int)($totalBots ?? 0) ?> bots</span>
-                            </div>
-                        </div>
-                        <span class="badge bg-secondary-lt font-monospace px-2.5 py-1.5">Auto</span>
-                    </div>
-                </div>
-
-                <!-- Déploiement Git -->
-                <div class="col-md-3">
-                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-code-branch text-teal me-1"></i>Version Déployée (Git)</span>
-                            <div class="mt-1">
-                                <strong class="text-teal font-monospace"><?= htmlspecialchars($localGitInfo['branch'] ?? 'main') ?></strong>
-                                <span class="text-muted small">(<?= htmlspecialchars($localGitInfo['short_sha'] ?? 'HEAD') ?>)</span>
-                            </div>
-                        </div>
-                        <span class="badge bg-teal-lt px-2.5 py-1.5">Synchronisé</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1650,10 +1508,8 @@ async function fetchRpiMetrics(isManual = false) {
             }
         }
 
-        // 8. Synthèse Télémétrique & Pics Historiques
-        if (d.hardware_summary) {
-            updateHwSummaryUI(d.hardware_summary);
-        }
+        // 8. Mini-graphiques : ajout du point courant (glissement en temps réel)
+        pushRpiSparkPoint(rpiDiagToPoint(d));
 
         // Animation clignotement subtil du témoin Live
         const dot = document.getElementById('rpi-live-dot');
@@ -1666,277 +1522,147 @@ async function fetchRpiMetrics(isManual = false) {
     }
 }
 
-// Variables & Mécanisme de Graphique / Logs Matériels
-let rpiHwApexChart = null;
-let rpiHwLogsData = [];
-let rpiLastLogsFetch = 0;
+// ==========================================================
+// MINI-GRAPHIQUES (SPARKLINES) PAR INDICATEUR MATÉRIEL
+// ==========================================================
+const RPI_SPARK_MAX_POINTS = 40;
+const rpiSparkBuffer = []; // { t, temp, load, ram, disk, rx, tx }
+const rpiSparkCharts = {};
+const RPI_SPARK_DEFS = {
+    temp: { color: ['#ef4444'], unit: '°C', fields: ['temp'], names: ['Température'], max: null, threshold: 75 },
+    load: { color: ['#3b82f6'], unit: '%',  fields: ['load'], names: ['Charge CPU'],  max: 100 },
+    ram:  { color: ['#0ca678'], unit: '%',  fields: ['ram'],  names: ['RAM'],         max: 100 },
+    disk: { color: ['#6574cd'], unit: '%',  fields: ['disk'], names: ['Stockage'],    max: 100 },
+    net:  { color: ['#4299e1', '#f59f00'], unit: 'Ko/s', fields: ['rx', 'tx'], names: ['↓ Réception', '↑ Émission'], max: null }
+};
 
-function updateHwSummaryUI(s) {
-    if (!s) return;
-    const pTemp = document.getElementById('rpi-summary-peak-temp');
-    const pTempTime = document.getElementById('rpi-summary-peak-temp-time');
-    const pLoad = document.getElementById('rpi-summary-peak-load');
-    const pLoadTime = document.getElementById('rpi-summary-peak-load-time');
-    const pRam = document.getElementById('rpi-summary-peak-ram');
-    const pRamTime = document.getElementById('rpi-summary-peak-ram-time');
-    const anom = document.getElementById('rpi-summary-anomalies');
-    const anomBadge = document.getElementById('rpi-summary-anomalies-badge');
-    const lCount = document.getElementById('rpi-logs-count');
-
-    if (pTemp && s.peak_temp !== null) pTemp.textContent = `${s.peak_temp} °C`;
-    if (pTempTime && s.peak_temp_time) pTempTime.textContent = s.peak_temp_time;
-    if (pLoad) pLoad.textContent = s.peak_load;
-    if (pLoadTime && s.peak_load_time) pLoadTime.textContent = s.peak_load_time;
-    if (pRam) pRam.textContent = `${s.peak_ram} %`;
-    if (pRamTime && s.peak_ram_time) pRamTime.textContent = s.peak_ram_time;
-    if (lCount) lCount.textContent = s.count || 1;
-
-    if (anom) {
-        anom.textContent = `${s.anomalies_count || 0} alerte(s)`;
-        anom.className = (s.anomalies_count > 0 ? 'text-danger' : 'text-success') + ' fs-5';
-    }
-    if (anomBadge) {
-        anomBadge.textContent = (s.anomalies_count > 0 ? 'Vigilance' : 'RAS');
-        anomBadge.className = 'badge ' + (s.anomalies_count > 0 ? 'bg-danger text-white' : 'bg-success-lt');
-    }
+function rpiNum(v) {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : null;
 }
 
-async function loadHardwareLogs(forceRefresh = false) {
-    const now = Date.now();
-    if (!forceRefresh && (now - rpiLastLogsFetch < 12000)) {
-        return; // Éviter le spam réseau, rafraîchir toutes les 12s en live
-    }
-    rpiLastLogsFetch = now;
+function rpiLogToPoint(l) {
+    return {
+        t: l.time_label || (l.datetime ? String(l.datetime).split(' ')[1] : ''),
+        temp: rpiNum(l.cpu_temp),
+        load: rpiNum(l.cpu_load_percent),
+        ram: rpiNum(l.ram_percent),
+        disk: rpiNum(l.disk_percent),
+        rx: rpiNum(l.net_rx_speed_kbps) ?? 0,
+        tx: rpiNum(l.net_tx_speed_kbps) ?? 0
+    };
+}
 
+function rpiDiagToPoint(d) {
+    return {
+        t: new Date().toLocaleTimeString('fr-FR'),
+        temp: rpiNum(d.cpu?.temperature),
+        load: rpiNum(d.cpu?.load_percent),
+        ram: rpiNum(d.memory?.ram_percent),
+        disk: rpiNum(d.disk?.used_percent),
+        rx: rpiNum(d.network?.rx_speed_kbps) ?? 0,
+        tx: rpiNum(d.network?.tx_speed_kbps) ?? 0
+    };
+}
+
+let rpiLastSparkPushMs = 0;
+const RPI_SPARK_STEP_MS = 30000; // même pas que l'historisation serveur (30 s)
+
+function pushRpiSparkPoint(point) {
+    const now = Date.now();
+    // Entre deux pas de 30 s, on met à jour le dernier point (queue « live »), sinon on ajoute un point
+    if (rpiSparkBuffer.length && (now - rpiLastSparkPushMs) < RPI_SPARK_STEP_MS) {
+        rpiSparkBuffer[rpiSparkBuffer.length - 1] = point;
+    } else {
+        rpiSparkBuffer.push(point);
+        rpiLastSparkPushMs = now;
+    }
+    while (rpiSparkBuffer.length > RPI_SPARK_MAX_POINTS) rpiSparkBuffer.shift();
+    renderRpiSparklines();
+}
+
+async function loadHardwareLogs() {
     try {
-        const res = await fetch('/api/server_monitor.php?action=logs&limit=40');
+        const res = await fetch(`/api/server_monitor.php?action=logs&limit=${RPI_SPARK_MAX_POINTS}`);
         const json = await res.json();
         if (json.success && Array.isArray(json.logs)) {
-            rpiHwLogsData = json.logs;
-            if (json.summary) updateHwSummaryUI(json.summary);
-            renderHwLogsChart(rpiHwLogsData);
-            renderHwLogsTable(rpiHwLogsData);
+            rpiSparkBuffer.length = 0;
+            // L'API renvoie du plus récent au plus ancien : on remet dans l'ordre chronologique
+            [...json.logs].reverse().forEach(l => rpiSparkBuffer.push(rpiLogToPoint(l)));
+            renderRpiSparklines();
         }
     } catch (e) {
-        console.warn('Erreur chargement logs matériels:', e);
+        console.warn('Erreur chargement historique matériel:', e);
     }
 }
 
-function renderHwLogsChart(logs) {
-    if (!logs || !logs.length) return;
-    const container = document.getElementById('rpi-hardware-apex-chart');
-    if (!container) return;
+function updateRpiSparkRange(key, def) {
+    const el = document.getElementById(`rpi-spark-${key}-range`);
+    if (!el) return;
+    const vals = [];
+    def.fields.forEach(f => rpiSparkBuffer.forEach(p => { if (p[f] !== null) vals.push(p[f]); }));
+    if (!vals.length) { el.innerHTML = 'min -- &middot; max --'; return; }
+    const fmt = v => (Math.round(v * 10) / 10);
+    el.innerHTML = `min ${fmt(Math.min(...vals))}${def.unit === '°C' ? '°' : ''} &middot; max ${fmt(Math.max(...vals))}${def.unit === '°C' ? '°' : (def.unit === '%' ? '%' : '')}`;
+}
 
-    // Trier les logs par ordre chronologique pour le graphique
-    const sorted = [...logs].reverse();
-    const categories = sorted.map(l => l.time_label || (l.datetime ? l.datetime.split(' ')[1] : ''));
-    const seriesTemp = sorted.map(l => (l.cpu_temp !== null ? parseFloat(l.cpu_temp) : null));
-    const seriesLoad = sorted.map(l => parseFloat(l.cpu_load_percent || (l.cpu_load_1m * 25) || 0));
-    const seriesRam = sorted.map(l => parseFloat(l.ram_percent || 0));
-    const seriesNet = sorted.map(l => parseFloat((l.net_rx_speed_kbps || 0) + (l.net_tx_speed_kbps || 0)));
+function renderRpiSvgFallback(container, def) {
+    const w = container.clientWidth || 200, h = 56;
+    let svg = `<svg width="100%" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">`;
+    def.fields.forEach((f, idx) => {
+        const vals = rpiSparkBuffer.map(p => p[f] ?? 0);
+        if (vals.length < 2) return;
+        const maxV = def.max ?? Math.max(1, ...vals) * 1.15;
+        const pts = vals.map((v, i) => `${(i / (vals.length - 1)) * w},${h - (v / maxV) * (h - 4) - 2}`).join(' ');
+        svg += `<polyline fill="none" stroke="${def.color[idx]}" stroke-width="2" points="${pts}"/>`;
+    });
+    container.innerHTML = svg + '</svg>';
+}
 
-    if (typeof ApexCharts === 'undefined') {
-        // Rendu SVG léger de repli
-        container.innerHTML = `
-            <div class="p-3 text-center text-muted font-monospace small">
-                <i class="fa-solid fa-chart-line text-primary me-1"></i>Historique : <strong>${sorted.length} points</strong> enregistrés &bull; 
-                Dernière température : <strong class="text-danger">${sorted[sorted.length-1].cpu_temp || 'N/A'} °C</strong> &bull; 
-                RAM : <strong class="text-teal">${sorted[sorted.length-1].ram_percent || '0'} %</strong>
-            </div>
-        `;
-        return;
-    }
+function renderRpiSparklines() {
+    Object.entries(RPI_SPARK_DEFS).forEach(([key, def]) => {
+        const container = document.getElementById(`rpi-spark-${key}`);
+        if (!container) return;
 
-    const options = {
-        chart: {
-            type: 'area',
-            height: 220,
-            sparkline: { enabled: false },
-            toolbar: { show: false },
-            animations: { enabled: true, easing: 'easeinout', speed: 300 }
-        },
-        dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: [2.5, 2, 2, 1.5] },
-        colors: ['#ef4444', '#3b82f6', '#10b981', '#06b6d4'],
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: [0.35, 0.25, 0.2, 0.15],
-                opacityTo: [0.05, 0.05, 0.05, 0.02],
-                stops: [0, 95]
-            }
-        },
-        series: [
-            { name: 'Température CPU (°C)', data: seriesTemp },
-            { name: 'Charge CPU (%)', data: seriesLoad },
-            { name: 'Mémoire RAM (%)', data: seriesRam },
-            { name: 'Débit Réseau (Ko/s)', data: seriesNet }
-        ],
-        xaxis: {
-            categories: categories,
-            labels: {
-                rotate: 0,
-                style: { fontSize: '10px', fontFamily: 'monospace' },
-                hideOverlappingLabels: true
-            },
-            axisBorder: { show: false },
-            axisTicks: { show: false }
-        },
-        yaxis: [
-            {
-                title: { text: 'Temp / Charge / RAM (%)', style: { fontSize: '10px', color: '#64748b' } },
-                min: 0,
-                max: 100,
-                labels: { style: { fontSize: '10px', fontFamily: 'monospace' } }
-            }
-        ],
-        grid: {
-            borderColor: '#f1f5f9',
-            strokeDashArray: 3,
-            padding: { top: 0, right: 10, bottom: 0, left: 10 }
-        },
-        tooltip: {
-            theme: 'light',
-            shared: true,
-            intersect: false,
-            style: { fontSize: '11px', fontFamily: 'monospace' }
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'right',
-            fontSize: '11px',
-            fontFamily: 'monospace'
+        updateRpiSparkRange(key, def);
+
+        const categories = rpiSparkBuffer.map(p => p.t);
+        const series = def.fields.map((f, idx) => ({ name: def.names[idx], data: rpiSparkBuffer.map(p => p[f]) }));
+
+        if (typeof ApexCharts === 'undefined') {
+            renderRpiSvgFallback(container, def);
+            return;
         }
-    };
 
-    if (rpiHwApexChart) {
-        rpiHwApexChart.updateOptions({
-            xaxis: { categories: categories },
-            series: options.series
-        });
-    } else {
+        if (rpiSparkCharts[key]) {
+            rpiSparkCharts[key].updateOptions({ xaxis: { categories } }, false, false);
+            rpiSparkCharts[key].updateSeries(series, false);
+            return;
+        }
+
+        const options = {
+            chart: { type: 'area', height: 56, sparkline: { enabled: true }, animations: { enabled: false } },
+            series,
+            colors: def.color,
+            stroke: { curve: 'smooth', width: 2 },
+            fill: { type: 'gradient', gradient: { opacityFrom: 0.35, opacityTo: 0.02 } },
+            xaxis: { categories },
+            yaxis: { min: 0, max: def.max ?? undefined },
+            tooltip: {
+                fixed: { enabled: false },
+                x: { show: true },
+                y: { formatter: v => (v === null || v === undefined) ? 'N/A' : `${v} ${def.unit}` },
+                marker: { show: true }
+            }
+        };
+        if (def.threshold) {
+            options.annotations = { yaxis: [{ y: def.threshold, borderColor: '#ef4444', strokeDashArray: 3, opacity: 0.6 }] };
+        }
+
         container.innerHTML = '';
-        rpiHwApexChart = new ApexCharts(container, options);
-        rpiHwApexChart.render();
-    }
-}
-
-function renderHwLogsTable(logs) {
-    const tbody = document.getElementById('rpi-hw-logs-tbody');
-    if (!tbody || !logs) return;
-
-    if (!logs.length) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">Aucun relevé télémétrique disponible.</td></tr>';
-        return;
-    }
-
-    tbody.innerHTML = logs.slice(0, 25).map(l => {
-        const tempClass = (l.cpu_temp >= 75 ? 'danger' : (l.cpu_temp >= 65 ? 'warning' : 'success'));
-        const ramClass = (l.ram_percent >= 90 ? 'danger' : (l.ram_percent >= 75 ? 'warning' : 'teal'));
-        const loadClass = (l.cpu_load_percent >= 90 ? 'danger' : (l.cpu_load_percent >= 70 ? 'warning' : 'dark'));
-
-        return `
-            <tr>
-                <td class="fw-bold text-dark">${l.time_label || (l.datetime ? l.datetime.split(' ')[1] : '--')}</td>
-                <td>
-                    <span class="badge bg-${tempClass}-lt font-monospace">
-                        <i class="fa-solid fa-temperature-half me-1"></i>${l.cpu_temp !== null ? l.cpu_temp + ' °C' : 'N/A'}
-                    </span>
-                </td>
-                <td class="text-${loadClass}">
-                    <strong>${l.cpu_load_1m || '0.0'}</strong> <span class="text-muted small">(${l.cpu_load_percent || 0}%)</span>
-                </td>
-                <td class="text-secondary">${l.cpu_freq_mhz ? l.cpu_freq_mhz + ' MHz' : '--'}</td>
-                <td>
-                    <span class="badge bg-${ramClass}-lt font-monospace">${l.ram_percent || 0}%</span>
-                    <span class="text-muted small">(${Math.round(l.ram_used_mb || 0)} Mo)</span>
-                </td>
-                <td class="text-muted">${l.swap_used_mb ? Math.round(l.swap_used_mb) + ' Mo' : '0 Mo'}</td>
-                <td class="text-azure">
-                    &darr; ${l.net_rx_speed_kbps || 0} &bull; &uarr; ${l.net_tx_speed_kbps || 0} <span class="small text-muted">Ko/s</span>
-                </td>
-                <td>
-                    <span class="badge bg-${(l.health_score >= 80 ? 'success' : (l.health_score >= 60 ? 'warning' : 'danger'))}-lt">
-                        ${l.health_score || 100}%
-                    </span>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
-
-function switchHwLogsView(view) {
-    const chartCont = document.getElementById('rpi-hw-chart-container');
-    const tableCont = document.getElementById('rpi-hw-table-container');
-    const btnChart = document.getElementById('btn-view-hw-chart');
-    const btnTable = document.getElementById('btn-view-hw-table');
-
-    if (view === 'table') {
-        if (chartCont) chartCont.classList.add('d-none');
-        if (tableCont) tableCont.classList.remove('d-none');
-        if (btnChart) btnChart.classList.remove('active');
-        if (btnTable) btnTable.classList.add('active');
-    } else {
-        if (tableCont) tableCont.classList.add('d-none');
-        if (chartCont) chartCont.classList.remove('d-none');
-        if (btnTable) btnTable.classList.remove('active');
-        if (btnChart) btnChart.classList.add('active');
-        if (rpiHwApexChart) {
-            setTimeout(() => { rpiHwApexChart.windowResizeHandler(); }, 50);
-        }
-    }
-}
-
-async function triggerRecordHardwareSnapshot(btn) {
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>';
-    }
-    try {
-        const res = await fetch('/api/server_monitor.php?action=record_log', { method: 'POST' });
-        const json = await res.json();
-        if (json.success) {
-            await loadHardwareLogs(true);
-            if (typeof showModalAlert === 'function') {
-                showModalAlert(json.message, 'success');
-            } else {
-                alert(json.message);
-            }
-        }
-    } catch (e) {
-        alert("Erreur lors de l'enregistrement de l'instantané.");
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-camera me-1"></i>Prendre Instantané';
-        }
-    }
-}
-
-async function triggerPurgeHardwareLogs(btn) {
-    if (!confirm("Voulez-vous purger l'ensemble de l'historique de télémétrie matérielle ?\nUn instantané récent sera conservé pour initialiser les compteurs.")) {
-        return;
-    }
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>';
-    }
-    try {
-        const res = await fetch('/api/server_monitor.php?action=purge_logs', { method: 'POST' });
-        const json = await res.json();
-        if (json.success) {
-            await loadHardwareLogs(true);
-            alert(json.message);
-        }
-    } catch (e) {
-        alert("Erreur lors de la purge de l'historique.");
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-trash-can me-1"></i>Purger';
-        }
-    }
+        rpiSparkCharts[key] = new ApexCharts(container, options);
+        rpiSparkCharts[key].render();
+    });
 }
 
 function toggleRpiLiveMonitoring() {
