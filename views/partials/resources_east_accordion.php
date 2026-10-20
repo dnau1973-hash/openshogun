@@ -33,13 +33,30 @@ $questSummary = ($user && $planet) ? $questEngine->getPlayerQuestsStatus((int)$u
 $activeQuest = $questSummary['active_quest'] ?? null;
 $hasActiveQuest = !empty($activeQuest) && empty($questSummary['all_completed']);
 
-// Données de la Garnison
+// Données de la Garnison (Troupes du Dojo & Armes de Siège)
 $barracksEngine = new BarracksEngine();
 $stationedTroops = ($user && $planet) ? $barracksEngine->getStationedUnits((int)$planet['id'], $user['faction'] ?? 'terran') : [];
 $totalTroopsCount = 0;
 foreach ($stationedTroops as $t) {
     $totalTroopsCount += (int)($t['stationed_count'] ?? 0);
 }
+
+require_once __DIR__ . '/../../core/ShipyardEngine.php';
+$shipyardEngine = new ShipyardEngine();
+$allStationedShips = ($user && $planet) ? $shipyardEngine->getAvailableShips((int)$planet['id'], $user['faction'] ?? 'terran') : [];
+$totalSiegeCount = 0;
+$siegeCodesList = ['terran_cruiser', 'terran_dreadnought', 'vorash_leviathan', 'aethelis_prism', 'aethelis_titan'];
+foreach ($allStationedShips as $s) {
+    $isSiege = in_array($s['code'], $siegeCodesList, true)
+               || (stripos($s['name'], 'siège') !== false)
+               || (stripos($s['name'], 'catapulte') !== false)
+               || (stripos($s['name'], 'bélier') !== false)
+               || (stripos($s['name'], 'tour') !== false);
+    if ($isSiege) {
+        $totalSiegeCount += (int)($s['stationed_count'] ?? 0);
+    }
+}
+$totalMilitaryGarrison = $totalTroopsCount + $totalSiegeCount;
 
 // Données de la Main-d'œuvre & Démographie
 $curPop = (int)($planet['population'] ?? 0);
@@ -419,14 +436,26 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
                 <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate pe-2">
                     <i class="fa-solid fa-khanda text-danger"></i>
                     <span class="fw-bold">Garnison du Domaine</span>
-                    <a href="?page=barracks" 
-                       class="btn btn-sm btn-outline-secondary py-0 px-1.5 ms-auto" 
-                       style="font-size: 0.65rem;" 
-                       onclick="event.stopPropagation();" 
-                       title="Accéder au Dojo Militaire">
-                        Dojo &rarr;
-                    </a>
-                    <span class="badge bg-secondary-lt fw-bold font-monospace" style="font-size:0.68rem;"><?= number_format($totalTroopsCount) ?> troupes</span>
+                    <div class="d-flex align-items-center gap-1 ms-auto" onclick="event.stopPropagation();">
+                        <a href="?page=shipyard" 
+                           class="btn btn-sm btn-outline-danger py-0 px-1.5" 
+                           style="font-size: 0.65rem;" 
+                           title="Atelier de Siège & Écuries">
+                            <i class="fa-solid fa-bomb"></i> Siège
+                        </a>
+                        <a href="?page=barracks" 
+                           class="btn btn-sm btn-outline-secondary py-0 px-1.5" 
+                           style="font-size: 0.65rem;" 
+                           title="Accéder au Dojo Militaire">
+                            Dojo &rarr;
+                        </a>
+                    </div>
+                    <span class="badge bg-secondary-lt fw-bold font-monospace" style="font-size:0.68rem;" title="<?= $totalTroopsCount ?> soldat(s), <?= $totalSiegeCount ?> arme(s) de siège">
+                        <?= number_format($totalMilitaryGarrison) ?>
+                        <?php if ($totalSiegeCount > 0): ?>
+                            <span class="text-danger ms-0.5" title="<?= $totalSiegeCount ?> engin(s) de siège"><i class="fa-solid fa-bomb"></i><?= $totalSiegeCount ?></span>
+                        <?php endif; ?>
+                    </span>
                 </div>
                 <span class="accordion-button-toggle">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon"><path d="M6 9l6 6l6 -6" /></svg>
