@@ -2469,17 +2469,17 @@ function renderCityResearchPane(data) {
     const activeResearch = window.CITY_CONFIG.activeResearch;
 
     const techImages = {
-        'fishing_tech': '/public/assets/units/pecheur.jpg',
+        'fishing_tech': '/public/assets/researches/fishing_tech.jpeg',
         'mining_tech': '/public/assets/units/mineur.jpg',
-        'energy_tech': '/public/assets/items/omamori_sacree.jpeg',
-        'espionage_tech': '/public/assets/units/eclaireur_shinobi_furtif.jpg',
-        'laser_tech': '/public/assets/items/yumi_asagao.jpeg',
-        'shield_tech': '/public/assets/items/cuirasse_oyoroi.jpeg',
-        'armor_tech': '/public/assets/items/katana_tamahagane.jpeg',
-        'propulsion_tech': '/public/assets/items/destrier_cuirasse_bamen.jpeg',
-        'gunpowder_tech': '/public/assets/units/arquebusier_oda_tanegashima.jpg',
-        'katana_prestige_tech': '/public/assets/items/tanto_masamune.jpeg',
-        'warp_tech': '/public/assets/items/parchemin_art_guerre.jpeg'
+        'energy_tech': '/public/assets/researches/energy_tech.jpeg',
+        'espionage_tech': '/public/assets/researches/espionage_tech.jpeg',
+        'laser_tech': '/public/assets/researches/laser_tech.jpeg',
+        'shield_tech': '/public/assets/researches/shield_tech.jpeg',
+        'armor_tech': '/public/assets/researches/armor_tech.jpeg',
+        'propulsion_tech': '/public/assets/researches/propulsion_tech.jpeg',
+        'gunpowder_tech': '/public/assets/researches/gunpowder_tech.jpeg',
+        'katana_prestige_tech': '/public/assets/researches/katana_prestige_tech.jpeg',
+        'warp_tech': '/public/assets/researches/warp_tech.jpeg'
     };
     const defaultTechImg = '/public/assets/quests/quest_11_academy_forge.jpg';
 

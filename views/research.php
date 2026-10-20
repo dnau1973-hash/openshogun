@@ -196,13 +196,28 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
         <!-- ========================================== -->
         <!-- RECHERCHE EN COURS (FILE ACTIVE)           -->
         <!-- ========================================== -->
-        <?php if ($activeResearch): ?>
+        <?php if ($activeResearch): 
+            $activeCode = (string)($activeResearch['research_code'] ?? $activeResearch['code'] ?? '');
+            $activeImg = match($activeCode) {
+                'fishing_tech' => '/public/assets/researches/fishing_tech.jpeg',
+                'energy_tech' => '/public/assets/researches/energy_tech.jpeg',
+                'espionage_tech' => '/public/assets/researches/espionage_tech.jpeg',
+                'laser_tech' => '/public/assets/researches/laser_tech.jpeg',
+                'shield_tech' => '/public/assets/researches/shield_tech.jpeg',
+                'armor_tech' => '/public/assets/researches/armor_tech.jpeg',
+                'propulsion_tech' => '/public/assets/researches/propulsion_tech.jpeg',
+                'gunpowder_tech' => '/public/assets/researches/gunpowder_tech.jpeg',
+                'katana_prestige_tech' => '/public/assets/researches/katana_prestige_tech.jpeg',
+                'warp_tech' => '/public/assets/researches/warp_tech.jpeg',
+                default => '/public/assets/quests/quest_11_academy_forge.jpg'
+            };
+        ?>
             <div class="card shadow-sm mb-4 border-purple-subtle bg-purple-lt">
                 <div class="card-status-top bg-purple"></div>
                 <div class="card-body p-3">
                     <div class="row align-items-center g-3">
                         <div class="col-auto">
-                            <span class="avatar avatar-md bg-purple text-white rounded shadow-sm fs-2"><i class="fa-solid fa-scroll"></i></span>
+                            <img src="<?= htmlspecialchars($activeImg) ?>" alt="Étude active" class="rounded shadow-sm" style="width: 64px; height: 64px; object-fit: cover; border: 2px solid #a855f7;">
                         </div>
                         <div class="col">
                             <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
@@ -334,19 +349,31 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                 <div class="row row-cards mb-4">
                     <?php foreach ($items as $r): /** @var ResearchDTO $r */ ?>
                         <div class="col-sm-6 col-lg-4">
-                            <div class="card shadow-sm h-100 <?= !$r->canAfford ? 'opacity-90' : '' ?>">
-                                <div class="card-header border-bottom py-2 d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center gap-2 text-truncate">
-                                        <span class="fs-2"><?= $r->icon ?></span>
-                                        <h3 class="card-title fs-4 fw-bold text-truncate mb-0" title="<?= htmlspecialchars($r->name) ?>">
-                                            <?= htmlspecialchars($r->name) ?>
-                                        </h3>
+                            <div class="card shadow-sm h-100 overflow-hidden <?= !$r->canAfford ? 'opacity-90' : '' ?>">
+                                <!-- Bannière d'illustration HD -->
+                                <div class="position-relative" style="height: 140px; background: #0f172a; overflow: hidden;">
+                                    <img src="<?= htmlspecialchars($r->getImageUrl()) ?>"
+                                         alt="<?= htmlspecialchars($r->name) ?>"
+                                         style="width: 100%; height: 100%; object-fit: cover; object-position: center;"
+                                         onerror="this.src='/public/assets/quests/quest_11_academy_forge.jpg';">
+                                    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.85) 100%);"></div>
+                                    <div class="position-absolute top-0 start-0 p-2">
+                                        <span class="badge bg-dark bg-opacity-75 text-white font-monospace border border-secondary shadow-sm" style="font-size:0.72rem;">
+                                            <i class="fa-solid fa-layer-group me-1"></i>Palier <?= $r->civLevelRequired ?> &bull; <?= htmlspecialchars($r->civLevelName) ?>
+                                        </span>
                                     </div>
-                                    <span class="badge bg-primary-lt fw-bold flex-shrink-0">
-                                        Niveau <?= $r->currentLevel ?>
-                                    </span>
+                                    <div class="position-absolute top-0 end-0 p-2">
+                                        <span class="badge bg-primary text-white shadow-sm font-monospace" style="font-size:0.72rem;">
+                                            Niveau <?= $r->currentLevel ?>
+                                        </span>
+                                    </div>
+                                    <div class="position-absolute bottom-0 start-0 p-2.5 text-white">
+                                        <h4 class="m-0 fw-bold fs-5 text-white text-shadow-sm d-flex align-items-center gap-1.5">
+                                            <span><?= $r->icon ?></span> <?= htmlspecialchars($r->name) ?>
+                                        </h4>
+                                    </div>
                                 </div>
-                                <div class="card-body d-flex flex-column">
+                                <div class="card-body d-flex flex-column pt-3">
                                     <div class="mb-2 d-flex align-items-center justify-content-between flex-wrap gap-1">
                                         <span class="badge bg-secondary-lt text-secondary" style="font-size: 0.7rem;">
                                             <?= htmlspecialchars($r->categoryLabel) ?>
@@ -438,11 +465,12 @@ function renderResearchPagination(int $currentPage, int $totalPages, array $filt
                                 <?php foreach ($items as $r): /** @var ResearchDTO $r */ ?>
                                     <tr>
                                         <td>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="fs-2 flex-shrink-0"><?= $r->icon ?></span>
+                                            <div class="d-flex align-items-center gap-2.5">
+                                                <img src="<?= htmlspecialchars($r->getImageUrl()) ?>" alt="<?= htmlspecialchars($r->name) ?>" class="rounded shadow-xs border flex-shrink-0" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.src='/public/assets/quests/quest_11_academy_forge.jpg';">
                                                 <div>
                                                     <div class="fw-bold text-dark d-flex align-items-center gap-1">
                                                         <span><?= htmlspecialchars($r->name) ?></span>
+                                                        <span class="ms-1"><?= $r->icon ?></span>
                                                         <?php if (!$r->civLevelMet): ?>
                                                             <span class="badge bg-danger-lt text-danger font-monospace" style="font-size:0.65rem;">
                                                                 <i class="fa-solid fa-lock me-1"></i>Palier <?= $r->civLevelRequired ?>
