@@ -106,6 +106,21 @@ class BarracksEngine {
             $filteredUnits[] = $u;
         }
 
+        // Positionner le Pionnier Féodal (colonizer) en 3e position (index 2)
+        $colonKey = null;
+        foreach ($filteredUnits as $k => $item) {
+            if ($item['code'] === 'colonizer') {
+                $colonKey = $k;
+                break;
+            }
+        }
+        if ($colonKey !== null) {
+            $colonItem = $filteredUnits[$colonKey];
+            array_splice($filteredUnits, $colonKey, 1);
+            $insertPos = min(2, count($filteredUnits));
+            array_splice($filteredUnits, $insertPos, 0, [$colonItem]);
+        }
+
         return $filteredUnits;
     }
 

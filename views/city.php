@@ -423,13 +423,37 @@ foreach ($citySlots as $s => $sd) {
 .city-troop-card, .city-tech-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 .city-troop-card:hover, .city-tech-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    border-color: #94a3b8;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.city-troop-content {
+    padding: 1.15rem 1.15rem 0.5rem 1.15rem;
+}
+.city-troop-stats-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.85rem;
+}
+.city-troop-costs-box {
+    background: #fdfbf7;
+    border: 1px solid #f1ece1;
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    margin-bottom: 0.85rem;
+}
+.city-troop-actions {
+    padding: 0 1.15rem 1.15rem 1.15rem;
 }
 
 /* Scrollbar esthétique pour la modale à dimension fixe */
@@ -1961,7 +1985,15 @@ function renderCityTroopsPane(data) {
     const container = document.getElementById('cityModalTroopsContent');
     if (!container) return;
 
-    const units = window.CITY_CONFIG.availableUnits || [];
+    let units = [...(window.CITY_CONFIG.availableUnits || [])];
+    // Positionner impérativement le Pionnier Féodal en 3e position (index 2)
+    const colIdx = units.findIndex(u => u.code === 'colonizer');
+    if (colIdx > -1) {
+        const colUnit = units.splice(colIdx, 1)[0];
+        const targetPos = Math.min(2, units.length);
+        units.splice(targetPos, 0, colUnit);
+    }
+
     const queue = window.CITY_CONFIG.barracksQueue || [];
 
     let queueHtml = '';
@@ -1976,7 +2008,7 @@ function renderCityTroopsPane(data) {
                         return `
                             <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded border small">
                                 <div class="d-flex align-items-center gap-2">
-                                    <img src="${imgThumb}" alt="${q.unit_name || q.unit_code}" style="width: 28px; height: 28px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'">
+                                    <img src="${imgThumb}" alt="${q.unit_name || q.unit_code}" style="width: 30px; height: 30px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'">
                                     <span><strong>${q.unit_name || q.unit_code}</strong> &times; ${q.count}</span>
                                 </div>
                                 <span class="badge bg-secondary font-monospace">Fin : ${dateFin.toLocaleTimeString()}</span>
@@ -2023,10 +2055,10 @@ function renderCityTroopsPane(data) {
 
         return `
             <div class="col-md-6 col-lg-4">
-                <div class="city-troop-card h-100 d-flex flex-column justify-content-between shadow-sm">
+                <div class="city-troop-card h-100 shadow-sm">
                     <div>
                         <!-- Bannière Visuelle HD -->
-                        <div class="position-relative" style="height: 145px; background: #0f172a; overflow: hidden;">
+                        <div class="position-relative" style="height: 150px; background: #0f172a; overflow: hidden;">
                             <img src="${imgSrc}" 
                                  alt="${u.name}" 
                                  style="width: 100%; height: 100%; object-fit: cover; object-position: center top;"
@@ -2035,80 +2067,107 @@ function renderCityTroopsPane(data) {
                             
                             <!-- Badges flottants -->
                             <div class="position-absolute top-0 start-0 p-2">
-                                <span class="badge bg-dark bg-opacity-75 text-white font-monospace border border-secondary shadow-sm" style="font-size:0.7rem;">
+                                <span class="badge bg-dark bg-opacity-75 text-white font-monospace border border-secondary shadow-sm" style="font-size:0.72rem;">
                                     Tier ${u.tier || 1}
                                 </span>
                             </div>
                             <div class="position-absolute top-0 end-0 p-2">
-                                <span class="badge bg-danger text-white shadow-sm font-monospace" style="font-size:0.7rem;">
+                                <span class="badge bg-danger text-white shadow-sm font-monospace" style="font-size:0.72rem;">
                                     ${Number(u.stationed_count || 0).toLocaleString()} en garnison
                                 </span>
                             </div>
-                            <div class="position-absolute bottom-0 start-0 p-2 text-white">
+                            <div class="position-absolute bottom-0 start-0 p-2.5 text-white">
                                 <h5 class="m-0 fw-bold fs-6 text-white text-shadow-sm d-flex align-items-center gap-1.5">
                                     <span>${u.icon || '🥷'}</span> ${u.name}
                                 </h5>
                             </div>
                         </div>
 
-                        <!-- Caractéristiques & Coûts -->
-                        <div class="p-2.5">
-                            <p class="small text-muted mb-2 text-truncate-2" style="font-size:0.75rem; line-height:1.35; min-height: 2rem;">
+                        <!-- Contenu & Caractéristiques avec Padding Spacieux -->
+                        <div class="city-troop-content">
+                            <p class="text-secondary mb-3 text-truncate-2" style="font-size:0.8rem; line-height:1.45; min-height: 2.3rem;">
                                 ${u.description || ''}
                             </p>
 
-                            <!-- Métriques martiales -->
-                            <div class="d-flex justify-content-between small text-secondary p-1.5 rounded bg-light mb-2 font-monospace" style="font-size:0.73rem;">
-                                <span title="Puissance d'attaque">⚔️ Atk: <strong class="text-dark">${u.attack ?? 0}</strong></span>
-                                <span title="Défense Infanterie / Cavalerie">🛡️ Déf: <strong class="text-dark">${u.def_infantry ?? 0}/${u.def_mech ?? 0}</strong></span>
-                                <span title="Vitesse de déplacement">⚡ Vit: <strong class="text-dark">${u.speed ?? 0}</strong></span>
-                                <span title="Capacité de chargement / butin">🎒 Fret: <strong class="text-dark">${Number(u.cargo_capacity ?? 0).toLocaleString()}</strong></span>
+                            <!-- Bloc Métriques Martiales Aéré -->
+                            <div class="city-troop-stats-box">
+                                <div class="row g-1 text-center font-monospace" style="font-size: 0.76rem;">
+                                    <div class="col-3" title="Puissance d'attaque">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">⚔️ Atk</span>
+                                        <strong class="text-danger">${u.attack ?? 0}</strong>
+                                    </div>
+                                    <div class="col-3" title="Défense Infanterie / Cavalerie">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">🛡️ Déf</span>
+                                        <strong class="text-primary">${u.def_infantry ?? 0}/${u.def_mech ?? 0}</strong>
+                                    </div>
+                                    <div class="col-3" title="Vitesse de déplacement">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">⚡ Vit</span>
+                                        <strong class="text-dark">${u.speed ?? 0}</strong>
+                                    </div>
+                                    <div class="col-3" title="Capacité de chargement / butin">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">🎒 Fret</span>
+                                        <strong class="text-dark">${Number(u.cargo_capacity ?? 0).toLocaleString()}</strong>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- Coûts d'équipement -->
-                            <div class="d-flex flex-wrap gap-1.5 mb-2 font-monospace" style="font-size:0.72rem;">
-                                <span style="color:${window.CITY_CONFIG.metal >= metalCost ? '#16a34a' : '#dc2626'};" title="Bois">
-                                    <i class="fa-solid fa-tree me-0.5"></i>${metalCost.toLocaleString()}
-                                </span>
-                                <span style="color:${window.CITY_CONFIG.crystal >= crystalCost ? '#16a34a' : '#dc2626'};" title="Pierre">
-                                    <i class="fa-solid fa-mountain me-0.5"></i>${crystalCost.toLocaleString()}
-                                </span>
-                                <span style="color:${window.CITY_CONFIG.deuterium >= deutCost ? '#16a34a' : '#dc2626'};" title="Riz">
-                                    <i class="fa-solid fa-wheat-awn me-0.5"></i>${deutCost.toLocaleString()}
-                                </span>
-                                ${flourCost > 0 ? `
-                                    <span style="color:${window.CITY_CONFIG.rice_flour >= flourCost ? '#16a34a' : '#dc2626'};" title="Farine de Riz">
-                                        <i class="fa-solid fa-bowl-rice me-0.5"></i>${flourCost.toLocaleString()}
+                            <!-- Bloc Coûts d'Équipement Structuré -->
+                            <div class="city-troop-costs-box">
+                                <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                    <span class="text-muted small text-uppercase fw-bold" style="font-size: 0.68rem;"><i class="fa-solid fa-coins me-1"></i>Armement requis :</span>
+                                    <span class="text-muted font-monospace small" style="font-size: 0.72rem;"><i class="fa-regular fa-clock me-1"></i>${formatCityDuration(u.effective_train_time || 60)}</span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1.5 font-monospace" style="font-size: 0.73rem;">
+                                    <span class="badge ${window.CITY_CONFIG.metal >= metalCost ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'} border px-1.5 py-1">
+                                        <i class="fa-solid fa-tree me-0.5"></i>${metalCost.toLocaleString()}
                                     </span>
-                                ` : ''}
-                                <span class="text-muted ms-auto" title="Temps d'entraînement">
-                                    <i class="fa-regular fa-clock me-0.5"></i>${formatCityDuration(u.effective_train_time || 60)}
-                                </span>
+                                    <span class="badge ${window.CITY_CONFIG.crystal >= crystalCost ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'} border px-1.5 py-1">
+                                        <i class="fa-solid fa-mountain me-0.5"></i>${crystalCost.toLocaleString()}
+                                    </span>
+                                    <span class="badge ${window.CITY_CONFIG.deuterium >= deutCost ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'} border px-1.5 py-1">
+                                        <i class="fa-solid fa-wheat-awn me-0.5"></i>${deutCost.toLocaleString()}
+                                    </span>
+                                    ${flourCost > 0 ? `
+                                        <span class="badge ${window.CITY_CONFIG.rice_flour >= flourCost ? 'bg-warning-lt text-dark' : 'bg-danger-lt text-danger'} border px-1.5 py-1">
+                                            <i class="fa-solid fa-bowl-rice me-0.5"></i>${flourCost.toLocaleString()}
+                                        </span>
+                                    ` : ''}
+                                </div>
                             </div>
 
                             ${isColonizer ? `
-                                <div class="p-1.5 mb-2 rounded bg-info-lt text-info small font-monospace" style="font-size:0.72rem;">
-                                    <i class="fa-solid fa-torii-gate me-1"></i>Slots d'expansion Tenshu : <strong>${u.available_slots ?? 0} libre(s)</strong>
+                                <div class="p-2 mb-2 rounded border border-info-subtle bg-info-lt small font-monospace d-flex justify-content-between align-items-center" style="font-size:0.75rem;">
+                                    <span><i class="fa-solid fa-torii-gate text-info me-1"></i>Slots Tenshu :</span>
+                                    <span class="badge bg-info text-white">${u.available_slots ?? 0} libre(s)</span>
                                 </div>
                             ` : ''}
                         </div>
                     </div>
 
-                    <!-- Actions d'enrôlement -->
-                    <div class="p-2.5 pt-0">
+                    <!-- Actions d'enrôlement avec Boutons Rapides 5, 10, 50, Max -->
+                    <div class="city-troop-actions">
                         ${u.can_train ? `
                             <div>
-                                <div class="input-group input-group-sm mb-1.5">
-                                    <input type="number" class="form-control font-monospace" id="input-troop-${u.code}" value="1" min="1" max="${Math.max(1, maxAffordable)}">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('input-troop-${u.code}').value = Math.max(1, ${maxAffordable})">Max (${maxAffordable})</button>
+                                <!-- Boutons d'accès rapide -->
+                                <div class="btn-group btn-group-sm w-100 mb-2 shadow-xs" role="group">
+                                    <button type="button" class="btn btn-outline-secondary fw-bold city-quick-qty-btn" onclick="setCityTroopQty('${u.code}', 5, ${maxAffordable})">5</button>
+                                    <button type="button" class="btn btn-outline-secondary fw-bold city-quick-qty-btn" onclick="setCityTroopQty('${u.code}', 10, ${maxAffordable})">10</button>
+                                    <button type="button" class="btn btn-outline-secondary fw-bold city-quick-qty-btn" onclick="setCityTroopQty('${u.code}', 50, ${maxAffordable})">50</button>
+                                    <button type="button" class="btn btn-outline-danger fw-bold city-quick-qty-btn" onclick="setCityTroopQty('${u.code}', ${maxAffordable}, ${maxAffordable})">Max (${maxAffordable})</button>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-danger w-100 fw-bold" onclick="submitCityTrainUnits('${u.code}', 'input-troop-${u.code}', this)" ${maxAffordable <= 0 ? 'disabled' : ''}>
+
+                                <div class="input-group input-group-sm mb-2">
+                                    <span class="input-group-text bg-light text-muted small"><i class="fa-solid fa-users me-1"></i>Recrues</span>
+                                    <input type="number" class="form-control font-monospace text-center fw-bold" id="input-troop-${u.code}" value="1" min="1" max="${Math.max(1, maxAffordable)}">
+                                </div>
+
+                                <button type="button" class="btn btn-sm btn-danger w-100 fw-bold py-1.5 shadow-sm" onclick="submitCityTrainUnits('${u.code}', 'input-troop-${u.code}', this)" ${maxAffordable <= 0 ? 'disabled' : ''}>
                                     <i class="fa-solid fa-user-plus me-1"></i>${isColonizer ? 'Équiper le Pionnier Féodal' : 'Enrôler au Dojo'}
                                 </button>
                             </div>
                         ` : `
-                            <div class="alert alert-secondary py-1 px-2 small m-0 text-center" style="font-size:0.75rem;">
-                                <i class="fa-solid fa-lock me-1"></i>${isColonizer && (u.available_slots <= 0) ? 'Tenshu Niv. 10/15/20 requis (Slots pleins)' : `Requis : Dojo Niveau ${u.required_barracks_level}`}
+                            <div class="alert alert-secondary py-2 px-2 small m-0 text-center" style="font-size:0.76rem; border-radius: 8px;">
+                                <i class="fa-solid fa-lock me-1"></i>${isColonizer && (u.available_slots <= 0) ? 'Tenshu Niv. 10/15/20 requis (Emplacements pleins)' : `Requis : Dojo Niveau ${u.required_barracks_level}`}
                             </div>
                         `}
                     </div>
@@ -2118,7 +2177,7 @@ function renderCityTroopsPane(data) {
     }).join('');
 
     container.innerHTML = `
-        <div class="p-3 mb-3 rounded border bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="p-3 mb-3 rounded border bg-light d-flex justify-content-between align-items-center flex-wrap gap-2 shadow-xs">
             <div>
                 <span class="text-muted small text-uppercase fw-bold d-block">Terrains d'Exercice &amp; Recrutement du Fief :</span>
                 <div class="d-flex gap-3 mt-1 flex-wrap font-monospace small">
@@ -2159,7 +2218,7 @@ function renderCityShipsPane(data) {
                         return `
                             <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded border small">
                                 <div class="d-flex align-items-center gap-2">
-                                    <img src="${imgThumb}" alt="${q.ship_name || q.ship_code}" style="width: 28px; height: 28px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'">
+                                    <img src="${imgThumb}" alt="${q.ship_name || q.ship_code}" style="width: 30px; height: 30px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'">
                                     <span><strong>${q.ship_name || q.ship_code}</strong> &times; ${q.count}</span>
                                 </div>
                                 <span class="badge bg-secondary font-monospace">Fin : ${dateFin.toLocaleTimeString()}</span>
@@ -2196,10 +2255,10 @@ function renderCityShipsPane(data) {
 
         return `
             <div class="col-md-6 col-lg-4">
-                <div class="city-troop-card h-100 d-flex flex-column justify-content-between shadow-sm">
+                <div class="city-troop-card h-100 shadow-sm">
                     <div>
                         <!-- Bannière Visuelle HD -->
-                        <div class="position-relative" style="height: 145px; background: #0f172a; overflow: hidden;">
+                        <div class="position-relative" style="height: 150px; background: #0f172a; overflow: hidden;">
                             <img src="${imgSrc}" 
                                  alt="${s.name}" 
                                  style="width: 100%; height: 100%; object-fit: cover; object-position: center top;"
@@ -2208,68 +2267,93 @@ function renderCityShipsPane(data) {
                             
                             <!-- Badges flottants -->
                             <div class="position-absolute top-0 start-0 p-2">
-                                <span class="badge bg-dark bg-opacity-75 text-white font-monospace border border-secondary shadow-sm" style="font-size:0.7rem;">
+                                <span class="badge bg-dark bg-opacity-75 text-white font-monospace border border-secondary shadow-sm" style="font-size:0.72rem;">
                                     ${s.faction ? s.faction.toUpperCase() : 'TOUS'}
                                 </span>
                             </div>
                             <div class="position-absolute top-0 end-0 p-2">
-                                <span class="badge bg-warning text-dark shadow-sm font-monospace" style="font-size:0.7rem;">
+                                <span class="badge bg-warning text-dark shadow-sm font-monospace" style="font-size:0.72rem;">
                                     ${Number(s.stationed_count || 0).toLocaleString()} disponibles
                                 </span>
                             </div>
-                            <div class="position-absolute bottom-0 start-0 p-2 text-white">
+                            <div class="position-absolute bottom-0 start-0 p-2.5 text-white">
                                 <h5 class="m-0 fw-bold fs-6 text-white text-shadow-sm d-flex align-items-center gap-1.5">
                                     <span>${s.icon || '🐎'}</span> ${s.name}
                                 </h5>
                             </div>
                         </div>
 
-                        <!-- Caractéristiques & Coûts -->
-                        <div class="p-2.5">
-                            <p class="small text-muted mb-2 text-truncate-2" style="font-size:0.75rem; line-height:1.35; min-height: 2rem;">
+                        <!-- Caractéristiques avec Padding Spacieux -->
+                        <div class="city-troop-content">
+                            <p class="text-secondary mb-3 text-truncate-2" style="font-size:0.8rem; line-height:1.45; min-height: 2.3rem;">
                                 ${s.description || ''}
                             </p>
 
                             <!-- Métriques martiales -->
-                            <div class="d-flex justify-content-between small text-secondary p-1.5 rounded bg-light mb-2 font-monospace" style="font-size:0.73rem;">
-                                <span title="Puissance d'attaque">⚔️ Atk: <strong class="text-dark">${s.attack ?? 0}</strong></span>
-                                <span title="Défense / Coque">🛡️ Coque: <strong class="text-dark">${s.defense ?? 0}</strong></span>
-                                <span title="Bouclier">🔮 Bouclier: <strong class="text-dark">${s.shield ?? 0}</strong></span>
-                                <span title="Vitesse">⚡ Vit: <strong class="text-dark">${s.speed ?? 0}</strong></span>
+                            <div class="city-troop-stats-box">
+                                <div class="row g-1 text-center font-monospace" style="font-size: 0.76rem;">
+                                    <div class="col-3" title="Puissance d'attaque">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">⚔️ Atk</span>
+                                        <strong class="text-dark">${s.attack ?? 0}</strong>
+                                    </div>
+                                    <div class="col-3" title="Défense / Coque">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">🛡️ Coque</span>
+                                        <strong class="text-dark">${s.defense ?? 0}</strong>
+                                    </div>
+                                    <div class="col-3" title="Bouclier">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">🔮 Boucl.</span>
+                                        <strong class="text-info">${s.shield ?? 0}</strong>
+                                    </div>
+                                    <div class="col-3" title="Vitesse">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">⚡ Vit</span>
+                                        <strong class="text-dark">${s.speed ?? 0}</strong>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Coûts -->
-                            <div class="d-flex flex-wrap gap-1.5 mb-2 font-monospace" style="font-size:0.72rem;">
-                                <span style="color:${window.CITY_CONFIG.metal >= metalCost ? '#16a34a' : '#dc2626'};" title="Bois">
-                                    <i class="fa-solid fa-tree me-0.5"></i>${metalCost.toLocaleString()}
-                                </span>
-                                <span style="color:${window.CITY_CONFIG.crystal >= crystalCost ? '#16a34a' : '#dc2626'};" title="Pierre">
-                                    <i class="fa-solid fa-mountain me-0.5"></i>${crystalCost.toLocaleString()}
-                                </span>
-                                <span style="color:${window.CITY_CONFIG.deuterium >= deutCost ? '#16a34a' : '#dc2626'};" title="Riz">
-                                    <i class="fa-solid fa-wheat-awn me-0.5"></i>${deutCost.toLocaleString()}
-                                </span>
-                                <span class="text-muted ms-auto" title="Temps de mobilisation">
-                                    <i class="fa-regular fa-clock me-0.5"></i>${formatCityDuration(s.effective_build_time || 60)}
-                                </span>
+                            <div class="city-troop-costs-box">
+                                <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                    <span class="text-muted small text-uppercase fw-bold" style="font-size: 0.68rem;"><i class="fa-solid fa-coins me-1"></i>Armement requis :</span>
+                                    <span class="text-muted font-monospace small" style="font-size: 0.72rem;"><i class="fa-regular fa-clock me-1"></i>${formatCityDuration(s.effective_build_time || 60)}</span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1.5 font-monospace" style="font-size: 0.73rem;">
+                                    <span class="badge ${window.CITY_CONFIG.metal >= metalCost ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'} border px-1.5 py-1">
+                                        <i class="fa-solid fa-tree me-0.5"></i>${metalCost.toLocaleString()}
+                                    </span>
+                                    <span class="badge ${window.CITY_CONFIG.crystal >= crystalCost ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'} border px-1.5 py-1">
+                                        <i class="fa-solid fa-mountain me-0.5"></i>${crystalCost.toLocaleString()}
+                                    </span>
+                                    <span class="badge ${window.CITY_CONFIG.deuterium >= deutCost ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'} border px-1.5 py-1">
+                                        <i class="fa-solid fa-wheat-awn me-0.5"></i>${deutCost.toLocaleString()}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Actions -->
-                    <div class="p-2.5 pt-0">
+                    <!-- Actions avec Boutons Rapides 5, 10, 50, Max -->
+                    <div class="city-troop-actions">
                         ${s.can_build ? `
                             <div>
-                                <div class="input-group input-group-sm mb-1.5">
-                                    <input type="number" class="form-control font-monospace" id="input-ship-${s.code}" value="1" min="1" max="${Math.max(1, maxAffordable)}">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('input-ship-${s.code}').value = Math.max(1, ${maxAffordable})">Max (${maxAffordable})</button>
+                                <div class="btn-group btn-group-sm w-100 mb-2 shadow-xs" role="group">
+                                    <button type="button" class="btn btn-outline-secondary fw-bold city-quick-qty-btn" onclick="setCityShipQty('${s.code}', 5, ${maxAffordable})">5</button>
+                                    <button type="button" class="btn btn-outline-secondary fw-bold city-quick-qty-btn" onclick="setCityShipQty('${s.code}', 10, ${maxAffordable})">10</button>
+                                    <button type="button" class="btn btn-outline-secondary fw-bold city-quick-qty-btn" onclick="setCityShipQty('${s.code}', 50, ${maxAffordable})">50</button>
+                                    <button type="button" class="btn btn-outline-warning text-dark fw-bold city-quick-qty-btn" onclick="setCityShipQty('${s.code}', ${maxAffordable}, ${maxAffordable})">Max (${maxAffordable})</button>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-warning text-dark w-100 fw-bold" onclick="submitCityBuildShips('${s.code}', 'input-ship-${s.code}', this)" ${maxAffordable <= 0 ? 'disabled' : ''}>
+
+                                <div class="input-group input-group-sm mb-2">
+                                    <span class="input-group-text bg-light text-muted small"><i class="fa-solid fa-horse me-1"></i>Unités</span>
+                                    <input type="number" class="form-control font-monospace text-center fw-bold" id="input-ship-${s.code}" value="1" min="1" max="${Math.max(1, maxAffordable)}">
+                                </div>
+
+                                <button type="button" class="btn btn-sm btn-warning text-dark w-100 fw-bold py-1.5 shadow-sm" onclick="submitCityBuildShips('${s.code}', 'input-ship-${s.code}', this)" ${maxAffordable <= 0 ? 'disabled' : ''}>
                                     <i class="fa-solid fa-horse me-1"></i>Mobiliser
                                 </button>
                             </div>
                         ` : `
-                            <div class="alert alert-secondary py-1 px-2 small m-0 text-center" style="font-size:0.75rem;">
+                            <div class="alert alert-secondary py-2 px-2 small m-0 text-center" style="font-size:0.76rem; border-radius: 8px;">
                                 <i class="fa-solid fa-lock me-1"></i>Requis : Écuries Niveau 1
                             </div>
                         `}
@@ -2280,7 +2364,7 @@ function renderCityShipsPane(data) {
     }).join('');
 
     container.innerHTML = `
-        <div class="p-3 mb-3 rounded border bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="p-3 mb-3 rounded border bg-light d-flex justify-content-between align-items-center flex-wrap gap-2 shadow-xs">
             <div>
                 <span class="text-muted small text-uppercase fw-bold d-block">Haras de Guerre &amp; Flotte Navale :</span>
                 <div class="d-flex gap-3 mt-1 flex-wrap font-monospace small">
@@ -2493,6 +2577,22 @@ function renderCityAlliancePane(data) {
 // ==========================================
 // 9. SOUMISSION DES ACTIONS DE TROUPES, NAVIRES, RECHERCHE ET ALLIANCE
 // ==========================================
+function setCityTroopQty(code, qty, max) {
+    const input = document.getElementById('input-troop-' + code);
+    if (!input) return;
+    const maxVal = Math.max(1, parseInt(max || 1, 10));
+    const target = Math.min(Math.max(1, parseInt(qty || 1, 10)), maxVal);
+    input.value = target;
+}
+
+function setCityShipQty(code, qty, max) {
+    const input = document.getElementById('input-ship-' + code);
+    if (!input) return;
+    const maxVal = Math.max(1, parseInt(max || 1, 10));
+    const target = Math.min(Math.max(1, parseInt(qty || 1, 10)), maxVal);
+    input.value = target;
+}
+
 async function submitCityTrainUnits(unitCode, inputId, btn) {
     const input = document.getElementById(inputId);
     const count = input ? parseInt(input.value, 10) : 0;
