@@ -2047,69 +2047,132 @@ function renderCityTroopsPane(data) {
 
         const isColonizer = (u.code === 'colonizer');
         if (isColonizer && !window.CITY_CONFIG.isAdmin) {
-            const availSlots = parseInt(u.available_slots ?? 1, 10);
+            const availSlots = parseInt(u.available_slots ?? 0, 10);
             maxAffordable = Math.min(maxAffordable, availSlots);
         }
 
-        const imgSrc = `/public/assets/units/${u.image || (u.code + '.jpg')}`;
+        const imgSrc = isColonizer ? '/public/assets/units/expedition_etablissement_castral.jpg' : `/public/assets/units/${u.image || (u.code + '.jpg')}`;
+        const hqLvl = parseInt(u.hq_level ?? 1, 10);
+        const totalUsed = parseInt(u.total_used ?? 0, 10);
+        const availSlots = parseInt(u.available_slots ?? 0, 10);
 
         return `
             <div class="col-md-6 col-lg-4">
-                <div class="city-troop-card h-100 shadow-sm">
+                <div class="city-troop-card h-100 shadow-sm ${isColonizer ? 'border-primary-subtle' : ''}">
                     <div>
                         <!-- Bannière Visuelle HD -->
                         <div class="position-relative" style="height: 150px; background: #0f172a; overflow: hidden;">
                             <img src="${imgSrc}" 
                                  alt="${u.name}" 
                                  style="width: 100%; height: 100%; object-fit: cover; object-position: center top;"
-                                 onerror="this.src='/public/assets/units/${u.code}.jpg'; this.onerror=function(){this.src='/public/assets/tiles/tile_barracks.png';};">
+                                 onerror="this.src='/public/assets/units/expedition_etablissement_castral.jpg'; this.onerror=function(){this.src='/public/assets/tiles/tile_barracks.png';};">
                             <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.85) 100%);"></div>
                             
                             <!-- Badges flottants -->
                             <div class="position-absolute top-0 start-0 p-2">
-                                <span class="badge bg-dark bg-opacity-75 text-white font-monospace border border-secondary shadow-sm" style="font-size:0.72rem;">
-                                    Tier ${u.tier || 1}
-                                </span>
+                                ${isColonizer ? `
+                                    <span class="badge bg-danger bg-opacity-90 text-white font-monospace border border-danger shadow-sm" style="font-size:0.72rem;">
+                                        ⛩️ Colonisation
+                                    </span>
+                                ` : `
+                                    <span class="badge bg-dark bg-opacity-75 text-white font-monospace border border-secondary shadow-sm" style="font-size:0.72rem;">
+                                        Tier ${u.tier || 1}
+                                    </span>
+                                `}
                             </div>
                             <div class="position-absolute top-0 end-0 p-2">
-                                <span class="badge bg-danger text-white shadow-sm font-monospace" style="font-size:0.72rem;">
-                                    ${Number(u.stationed_count || 0).toLocaleString()} en garnison
+                                <span class="badge ${isColonizer ? 'bg-primary' : 'bg-danger'} text-white shadow-sm font-monospace" style="font-size:0.72rem;">
+                                    ${Number(u.stationed_count || 0).toLocaleString()} ${isColonizer ? 'colon(s) formé(s)' : 'en garnison'}
                                 </span>
                             </div>
                             <div class="position-absolute bottom-0 start-0 p-2.5 text-white">
                                 <h5 class="m-0 fw-bold fs-6 text-white text-shadow-sm d-flex align-items-center gap-1.5">
-                                    <span>${u.icon || '🥷'}</span> ${u.name}
+                                    <span>${u.icon || (isColonizer ? '⛩️' : '🥷')}</span> ${u.name}
                                 </h5>
                             </div>
                         </div>
 
                         <!-- Contenu & Caractéristiques avec Padding Spacieux -->
                         <div class="city-troop-content">
-                            <p class="text-secondary mb-3 text-truncate-2" style="font-size:0.8rem; line-height:1.45; min-height: 2.3rem;">
+                            <p class="text-secondary mb-2.5 text-truncate-2" style="font-size:0.8rem; line-height:1.45; min-height: 2.3rem;">
                                 ${u.description || ''}
                             </p>
 
-                            <!-- Bloc Métriques Martiales Aéré -->
-                            <div class="city-troop-stats-box">
-                                <div class="row g-1 text-center font-monospace" style="font-size: 0.76rem;">
-                                    <div class="col-3" title="Puissance d'attaque">
-                                        <span class="text-muted d-block small" style="font-size:0.67rem;">⚔️ Atk</span>
-                                        <strong class="text-danger">${u.attack ?? 0}</strong>
-                                    </div>
-                                    <div class="col-3" title="Défense Infanterie / Cavalerie">
-                                        <span class="text-muted d-block small" style="font-size:0.67rem;">🛡️ Déf</span>
-                                        <strong class="text-primary">${u.def_infantry ?? 0}/${u.def_mech ?? 0}</strong>
-                                    </div>
-                                    <div class="col-3" title="Vitesse de déplacement">
-                                        <span class="text-muted d-block small" style="font-size:0.67rem;">⚡ Vit</span>
-                                        <strong class="text-dark">${u.speed ?? 0}</strong>
-                                    </div>
-                                    <div class="col-3" title="Capacité de chargement / butin">
-                                        <span class="text-muted d-block small" style="font-size:0.67rem;">🎒 Fret</span>
-                                        <strong class="text-dark">${Number(u.cargo_capacity ?? 0).toLocaleString()}</strong>
+                            ${isColonizer ? `
+                                <!-- Métriques d'expansion du Fief -->
+                                <div class="city-troop-stats-box">
+                                    <div class="row g-1 text-center font-monospace" style="font-size: 0.76rem;">
+                                        <div class="col-4" title="Fiefs déjà fondés par ce Tenshu">
+                                            <span class="text-muted d-block small" style="font-size:0.67rem;">🏰 Fondés</span>
+                                            <strong class="text-dark">${u.colonies_count ?? 0} fief(s)</strong>
+                                        </div>
+                                        <div class="col-4" title="Colons mobilisés ou en mission">
+                                            <span class="text-muted d-block small" style="font-size:0.67rem;">⛩️ Mobilisés</span>
+                                            <strong class="text-primary">${(u.stationed_colons ?? 0) + (u.in_mission_colons ?? 0) + (u.queued_colons ?? 0)}</strong>
+                                        </div>
+                                        <div class="col-4" title="Emplacements de colonisation disponibles">
+                                            <span class="text-muted d-block small" style="font-size:0.67rem;">🟢 Slots Libres</span>
+                                            <strong class="${availSlots > 0 ? 'text-success' : 'text-danger'}">${availSlots} dispo</strong>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+
+                                <!-- Règle des 3 Paliers Tenshu : 1 Colon aux niveaux 10, 15 et 20 -->
+                                <div class="p-2 mb-2 rounded border bg-light shadow-2xs">
+                                    <div class="d-flex justify-content-between align-items-center mb-1.5 small font-monospace">
+                                        <span class="fw-bold text-dark" style="font-size:0.73rem;"><i class="fa-solid fa-torii-gate text-danger me-1"></i>Paliers Tenshu (1 Colon / Palier) :</span>
+                                        <span class="badge ${availSlots > 0 ? 'bg-success text-white' : 'bg-secondary text-white'}" style="font-size:0.7rem;">${availSlots} slot(s) libre(s)</span>
+                                    </div>
+                                    <div class="row g-1 text-center font-monospace" style="font-size:0.68rem;">
+                                        <!-- Slot 1 : Tenshu 10 -->
+                                        <div class="col-4">
+                                            <div class="p-1 rounded border ${(hqLvl >= 10) ? ((totalUsed >= 1) ? 'border-primary bg-primary-lt text-primary' : 'border-success bg-success-lt text-success fw-bold') : 'border-secondary-subtle bg-white text-muted'}">
+                                                <div>Tenshu 10</div>
+                                                <span style="font-size:0.64rem;">${(hqLvl >= 10) ? ((totalUsed >= 1) ? '✅ Utilisé' : '🟢 Dispo') : '🔒 Verrouillé'}</span>
+                                            </div>
+                                        </div>
+                                        <!-- Slot 2 : Tenshu 15 -->
+                                        <div class="col-4">
+                                            <div class="p-1 rounded border ${(hqLvl >= 15) ? ((totalUsed >= 2) ? 'border-primary bg-primary-lt text-primary' : 'border-success bg-success-lt text-success fw-bold') : 'border-secondary-subtle bg-white text-muted'}">
+                                                <div>Tenshu 15</div>
+                                                <span style="font-size:0.64rem;">${(hqLvl >= 15) ? ((totalUsed >= 2) ? '✅ Utilisé' : '🟢 Dispo') : '🔒 Verrouillé'}</span>
+                                            </div>
+                                        </div>
+                                        <!-- Slot 3 : Tenshu 20 -->
+                                        <div class="col-4">
+                                            <div class="p-1 rounded border ${(hqLvl >= 20) ? ((totalUsed >= 3) ? 'border-primary bg-primary-lt text-primary' : 'border-success bg-success-lt text-success fw-bold') : 'border-secondary-subtle bg-white text-muted'}">
+                                                <div>Tenshu 20</div>
+                                                <span style="font-size:0.64rem;">${(hqLvl >= 20) ? ((totalUsed >= 3) ? '✅ Utilisé' : '🟢 Dispo') : '🔒 Verrouillé'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-1 text-muted text-center" style="font-size:0.68rem;">
+                                        Règle impériale : 1 seul colon par palier aux Niveaux 10, 15 et 20 du Tenshu.
+                                    </div>
+                                </div>
+                            ` : `
+                                <!-- Bloc Métriques Martiales Aéré -->
+                                <div class="city-troop-stats-box">
+                                    <div class="row g-1 text-center font-monospace" style="font-size: 0.76rem;">
+                                        <div class="col-3" title="Puissance d'attaque">
+                                            <span class="text-muted d-block small" style="font-size:0.67rem;">⚔️ Atk</span>
+                                            <strong class="text-danger">${u.attack ?? 0}</strong>
+                                        </div>
+                                        <div class="col-3" title="Défense Infanterie / Cavalerie">
+                                            <span class="text-muted d-block small" style="font-size:0.67rem;">🛡️ Déf</span>
+                                            <strong class="text-primary">${u.def_infantry ?? 0}/${u.def_mech ?? 0}</strong>
+                                        </div>
+                                        <div class="col-3" title="Vitesse de déplacement">
+                                            <span class="text-muted d-block small" style="font-size:0.67rem;">⚡ Vit</span>
+                                            <strong class="text-dark">${u.speed ?? 0}</strong>
+                                        </div>
+                                        <div class="col-3" title="Capacité de chargement / butin">
+                                            <span class="text-muted d-block small" style="font-size:0.67rem;">🎒 Fret</span>
+                                            <strong class="text-dark">${Number(u.cargo_capacity ?? 0).toLocaleString()}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            `}
 
                             <!-- Bloc Coûts d'Équipement Structuré -->
                             <div class="city-troop-costs-box">
@@ -2134,19 +2197,32 @@ function renderCityTroopsPane(data) {
                                     ` : ''}
                                 </div>
                             </div>
-
-                            ${isColonizer ? `
-                                <div class="p-2 mb-2 rounded border border-info-subtle bg-info-lt small font-monospace d-flex justify-content-between align-items-center" style="font-size:0.75rem;">
-                                    <span><i class="fa-solid fa-torii-gate text-info me-1"></i>Slots Tenshu :</span>
-                                    <span class="badge bg-info text-white">${u.available_slots ?? 0} libre(s)</span>
-                                </div>
-                            ` : ''}
                         </div>
                     </div>
 
-                    <!-- Actions d'enrôlement avec Boutons Rapides 5, 10, 50, Max -->
+                    <!-- Actions d'enrôlement -->
                     <div class="city-troop-actions">
-                        ${u.can_train ? `
+                        ${isColonizer ? `
+                            ${availSlots > 0 && canAfford ? `
+                                <div>
+                                    <input type="hidden" id="input-troop-${u.code}" value="1">
+                                    <button type="button" class="btn btn-sm btn-danger w-100 fw-bold py-2 shadow-sm" onclick="submitCityTrainUnits('${u.code}', 'input-troop-${u.code}', this)">
+                                        <i class="fa-solid fa-user-plus me-1"></i>Équiper 1 Pionnier Féodal
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="alert ${(!canAfford && availSlots > 0) ? 'alert-danger' : 'alert-secondary'} py-2 px-2 small m-0 text-center" style="font-size:0.75rem; border-radius: 8px;">
+                                    ${!canAfford && availSlots > 0 ? `
+                                        <i class="fa-solid fa-coins me-1"></i>Ressources Insuffisantes
+                                    ` : (
+                                        (hqLvl < 10) ? '<i class="fa-solid fa-lock me-1"></i>Tenshu Niveau 10 requis (1er colon)' :
+                                        (hqLvl < 15) ? '<i class="fa-solid fa-lock me-1"></i>1er colon mobilisé &bull; Tenshu Niveau 15 requis (2e colon)' :
+                                        (hqLvl < 20) ? '<i class="fa-solid fa-lock me-1"></i>2 colons mobilisés &bull; Tenshu Niveau 20 requis (3e colon)' :
+                                        '<i class="fa-solid fa-circle-check me-1"></i>Capacité maximale atteinte (3 colons formés)'
+                                    )}
+                                </div>
+                            `}
+                        ` : (u.can_train ? `
                             <div>
                                 <!-- Boutons d'accès rapide -->
                                 <div class="btn-group btn-group-sm w-100 mb-2 shadow-xs" role="group">
@@ -2162,14 +2238,14 @@ function renderCityTroopsPane(data) {
                                 </div>
 
                                 <button type="button" class="btn btn-sm btn-danger w-100 fw-bold py-1.5 shadow-sm" onclick="submitCityTrainUnits('${u.code}', 'input-troop-${u.code}', this)" ${maxAffordable <= 0 ? 'disabled' : ''}>
-                                    <i class="fa-solid fa-user-plus me-1"></i>${isColonizer ? 'Équiper le Pionnier Féodal' : 'Enrôler au Dojo'}
+                                    <i class="fa-solid fa-user-plus me-1"></i>Enrôler au Dojo
                                 </button>
                             </div>
                         ` : `
                             <div class="alert alert-secondary py-2 px-2 small m-0 text-center" style="font-size:0.76rem; border-radius: 8px;">
-                                <i class="fa-solid fa-lock me-1"></i>${isColonizer && (u.available_slots <= 0) ? 'Tenshu Niv. 10/15/20 requis (Emplacements pleins)' : `Requis : Dojo Niveau ${u.required_barracks_level}`}
+                                <i class="fa-solid fa-lock me-1"></i>Requis : Dojo Niveau ${u.required_barracks_level}
                             </div>
-                        `}
+                        `)}
                     </div>
                 </div>
             </div>
@@ -2392,6 +2468,35 @@ function renderCityResearchPane(data) {
     const researches = window.CITY_CONFIG.researches || [];
     const activeResearch = window.CITY_CONFIG.activeResearch;
 
+    const techImages = {
+        'fishing_tech': '/public/assets/units/pecheur.jpg',
+        'mining_tech': '/public/assets/units/mineur.jpg',
+        'energy_tech': '/public/assets/items/omamori_sacree.jpeg',
+        'espionage_tech': '/public/assets/units/eclaireur_shinobi_furtif.jpg',
+        'laser_tech': '/public/assets/items/yumi_asagao.jpeg',
+        'shield_tech': '/public/assets/items/cuirasse_oyoroi.jpeg',
+        'armor_tech': '/public/assets/items/katana_tamahagane.jpeg',
+        'propulsion_tech': '/public/assets/items/destrier_cuirasse_bamen.jpeg',
+        'gunpowder_tech': '/public/assets/units/arquebusier_oda_tanegashima.jpg',
+        'katana_prestige_tech': '/public/assets/items/tanto_masamune.jpeg',
+        'warp_tech': '/public/assets/items/parchemin_art_guerre.jpeg'
+    };
+    const defaultTechImg = '/public/assets/quests/quest_11_academy_forge.jpg';
+
+    const techIcons = {
+        'fishing_tech': '🐟',
+        'mining_tech': '⛏️',
+        'energy_tech': '🕯️',
+        'espionage_tech': '🥷',
+        'laser_tech': '🏹',
+        'shield_tech': '⛩️',
+        'armor_tech': '🛡️',
+        'propulsion_tech': '🐎',
+        'gunpowder_tech': '💥',
+        'katana_prestige_tech': '⚔️',
+        'warp_tech': '🗾'
+    };
+
     let activeHtml = '';
     if (activeResearch) {
         const finishesAt = parseInt(activeResearch.finishes_at, 10);
@@ -2408,6 +2513,16 @@ function renderCityResearchPane(data) {
                 </div>
             </div>
         `;
+
+        const updateResearchTimer = () => {
+            const now = Math.floor(Date.now() / 1000);
+            const remaining = Math.max(0, finishesAt - now);
+            const cdEl = document.getElementById('cityModalResearchCountdown');
+            if (cdEl) cdEl.textContent = formatCityDuration(remaining);
+        };
+        setTimeout(updateResearchTimer, 50);
+        if (window.cityResearchTimerInterval) clearInterval(window.cityResearchTimerInterval);
+        window.cityResearchTimerInterval = setInterval(updateResearchTimer, 1000);
     }
 
     const cardsHtml = researches.map(r => {
@@ -2418,43 +2533,103 @@ function renderCityResearchPane(data) {
         ) || window.CITY_CONFIG.isAdmin;
 
         const isBusy = !!activeResearch;
+        const imgSrc = techImages[r.code] || defaultTechImg;
+        const icon = techIcons[r.code] || r.icon || '📜';
 
         return `
-            <div class="col-md-6">
-                <div class="city-tech-card h-100 d-flex flex-column justify-content-between">
+            <div class="col-md-6 col-lg-4">
+                <div class="city-troop-card h-100 shadow-sm">
                     <div>
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <h5 class="m-0 fw-bold text-dark fs-6">${r.name}</h5>
-                                <span class="badge bg-primary-lt text-primary font-monospace small">Niveau ${r.current_level} &rarr; Niveau ${r.next_level}</span>
+                        <!-- Bannière Visuelle HD -->
+                        <div class="position-relative" style="height: 150px; background: #0f172a; overflow: hidden;">
+                            <img src="${imgSrc}" 
+                                 alt="${r.name}" 
+                                 style="width: 100%; height: 100%; object-fit: cover; object-position: center center;"
+                                 onerror="this.src='${defaultTechImg}';">
+                            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.85) 100%);"></div>
+                            
+                            <!-- Badges flottants -->
+                            <div class="position-absolute top-0 start-0 p-2">
+                                <span class="badge ${r.civ_tier_met ? 'bg-dark bg-opacity-75 text-white' : 'bg-danger bg-opacity-90 text-white'} font-monospace border border-secondary shadow-sm" style="font-size:0.72rem;">
+                                    <i class="fa-solid fa-layer-group me-1"></i>Palier ${r.civ_tier_required || 1} &bull; ${r.civ_tier_name || 'Castes'}
+                                </span>
                             </div>
-                            <span class="fs-4">📜</span>
+                            <div class="position-absolute top-0 end-0 p-2">
+                                <span class="badge bg-primary text-white shadow-sm font-monospace" style="font-size:0.72rem;">
+                                    Niveau ${r.current_level}
+                                </span>
+                            </div>
+                            <div class="position-absolute bottom-0 start-0 p-2.5 text-white">
+                                <h5 class="m-0 fw-bold fs-6 text-white text-shadow-sm d-flex align-items-center gap-1.5">
+                                    <span>${icon}</span> ${r.name}
+                                </h5>
+                            </div>
                         </div>
-                        <p class="small text-secondary mb-2" style="font-size:0.8rem; line-height:1.4;">${r.description || ''}</p>
 
-                        <!-- Coûts -->
-                        <div class="d-flex flex-wrap gap-2 mb-3 font-monospace small">
-                            <span style="color:${window.CITY_CONFIG.metal >= r.cost_metal ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-tree me-1"></i>${Number(r.cost_metal).toLocaleString()}</span>
-                            <span style="color:${window.CITY_CONFIG.crystal >= r.cost_crystal ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-mountain me-1"></i>${Number(r.cost_crystal).toLocaleString()}</span>
-                            <span style="color:${window.CITY_CONFIG.deuterium >= r.cost_deuterium ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-wheat-awn me-1"></i>${Number(r.cost_deuterium).toLocaleString()}</span>
-                            <span class="text-muted"><i class="fa-regular fa-clock me-1"></i>${formatCityDuration(r.duration || 60)}</span>
+                        <!-- Contenu & Caractéristiques avec Padding Harmonisé -->
+                        <div class="city-troop-content">
+                            <p class="text-secondary mb-2.5 text-truncate-2" style="font-size:0.8rem; line-height:1.45; min-height: 2.3rem;">
+                                ${r.description || ''}
+                            </p>
+
+                            <!-- Boîte de Statistiques d'Évolution -->
+                            <div class="city-troop-stats-box">
+                                <div class="row g-1 text-center font-monospace" style="font-size: 0.76rem;">
+                                    <div class="col-4" title="Niveau actuel de la technologie">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">Niv Actuel</span>
+                                        <strong class="text-dark">Niv ${r.current_level}</strong>
+                                    </div>
+                                    <div class="col-4" title="Niveau visé par la recherche">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">Objectif</span>
+                                        <strong class="text-primary fw-bold">Niv ${r.next_level}</strong>
+                                    </div>
+                                    <div class="col-4" title="Prérequis de Caste">
+                                        <span class="text-muted d-block small" style="font-size:0.67rem;">Statut Caste</span>
+                                        <strong class="${r.civ_tier_met ? 'text-success' : 'text-danger'}">${r.civ_tier_met ? '🟢 Débloqué' : '🔒 Requis'}</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bloc Coûts d'Évolution Structuré -->
+                            <div class="city-troop-costs-box">
+                                <div class="d-flex justify-content-between align-items-center mb-1 text-muted small" style="font-size:0.72rem;">
+                                    <span><i class="fa-solid fa-coins me-1"></i>Investissement Niv ${r.next_level} :</span>
+                                    <span class="text-secondary"><i class="fa-regular fa-clock me-1"></i>${formatCityDuration(r.duration || 60)}</span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1.5 font-monospace" style="font-size:0.75rem;">
+                                    <span class="badge ${window.CITY_CONFIG.metal >= r.cost_metal ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'} border px-1.5 py-1">
+                                        <i class="fa-solid fa-tree me-0.5"></i>${Number(r.cost_metal).toLocaleString()}
+                                    </span>
+                                    <span class="badge ${window.CITY_CONFIG.crystal >= r.cost_crystal ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'} border px-1.5 py-1">
+                                        <i class="fa-solid fa-mountain me-0.5"></i>${Number(r.cost_crystal).toLocaleString()}
+                                    </span>
+                                    <span class="badge ${window.CITY_CONFIG.deuterium >= r.cost_deuterium ? 'bg-success-lt text-success' : 'bg-danger-lt text-danger'} border px-1.5 py-1">
+                                        <i class="fa-solid fa-wheat-awn me-0.5"></i>${Number(r.cost_deuterium).toLocaleString()}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div>
+                    <!-- Actions de recherche -->
+                    <div class="city-troop-actions">
                         ${isBusy ? `
-                            <button type="button" class="btn btn-sm btn-outline-secondary w-100 disabled" disabled>
+                            <button type="button" class="btn btn-sm btn-outline-secondary w-100 disabled py-2 shadow-xs" disabled>
                                 <i class="fa-solid fa-hourglass-half me-1"></i>Académie Déjà Occupée
                             </button>
+                        ` : (!r.civ_tier_met && !window.CITY_CONFIG.isAdmin ? `
+                            <div class="alert alert-secondary py-2 px-2 small m-0 text-center" style="font-size:0.75rem; border-radius: 8px;">
+                                <i class="fa-solid fa-lock me-1"></i>Requiert Caste : ${r.civ_tier_name} (Palier ${r.civ_tier_required})
+                            </div>
                         ` : (canAfford ? `
-                            <button type="button" class="btn btn-sm btn-info text-white w-100 fw-bold" onclick="submitCityStartResearch('${r.code}', this)">
+                            <button type="button" class="btn btn-sm btn-info text-white w-100 fw-bold py-2 shadow-sm" onclick="submitCityStartResearch('${r.code}', this)">
                                 <i class="fa-solid fa-flask-vial me-1"></i>Lancer l'Étude (Niveau ${r.next_level})
                             </button>
                         ` : `
-                            <button type="button" class="btn btn-sm btn-outline-secondary w-100 disabled" disabled>
-                                <i class="fa-solid fa-lock me-1"></i>Ressources Insuffisantes
-                            </button>
-                        `)}
+                            <div class="alert alert-danger py-2 px-2 small m-0 text-center" style="font-size:0.75rem; border-radius: 8px;">
+                                <i class="fa-solid fa-coins me-1"></i>Ressources Insuffisantes
+                            </div>
+                        `))}
                     </div>
                 </div>
             </div>
@@ -2462,7 +2637,7 @@ function renderCityResearchPane(data) {
     }).join('');
 
     container.innerHTML = `
-        <div class="p-3 mb-3 rounded border bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="p-3 mb-3 rounded border bg-light d-flex justify-content-between align-items-center flex-wrap gap-2 shadow-xs">
             <div>
                 <span class="text-muted small text-uppercase fw-bold d-block">Académie des Savoirs &amp; Parchemins Féodaux :</span>
                 <div class="d-flex gap-3 mt-1 flex-wrap font-monospace small">

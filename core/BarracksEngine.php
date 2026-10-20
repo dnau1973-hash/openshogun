@@ -83,15 +83,25 @@ class BarracksEngine {
             if (in_array($u['code'], $excludedCodes)) {
                 continue; // Les animaux ne sont plus entraînables (capturés via cages)
             }
-            $requiredLvl = ($u['code'] === 'colonizer') ? 10 : ($tierReqs[$u['tier']] ?? 1);
-            $u['required_barracks_level'] = $requiredLvl;
-
             if ($u['code'] === 'colonizer') {
                 $colonStatus = $this->planetEngine->getTenshuColonizerStatus($planetId);
                 $u['available_slots'] = (int)($colonStatus['available_slots'] ?? 0);
                 $u['max_slots'] = (int)($colonStatus['max_slots'] ?? 0);
-                $u['can_train'] = $isAdmin ? true : ($barracksLvl >= $requiredLvl && $u['available_slots'] > 0);
+                $u['hq_level'] = (int)($colonStatus['hq_level'] ?? 1);
+                $u['colonies_count'] = (int)($colonStatus['colonies_count'] ?? 0);
+                $u['stationed_colons'] = (int)($colonStatus['stationed_colons'] ?? 0);
+                $u['queued_colons'] = (int)($colonStatus['queued_colons'] ?? 0);
+                $u['in_mission_colons'] = (int)($colonStatus['in_mission_colons'] ?? 0);
+                $u['total_used'] = (int)($colonStatus['total_used'] ?? 0);
+                $u['next_threshold'] = $colonStatus['next_threshold'] ?? null;
+                $u['required_barracks_level'] = 1;
+                $u['can_train'] = $isAdmin ? true : ($barracksLvl >= 1 && $u['available_slots'] > 0);
+                if (empty($u['image'])) {
+                    $u['image'] = 'expedition_etablissement_castral.jpg';
+                }
             } else {
+                $requiredLvl = $tierReqs[$u['tier']] ?? 1;
+                $u['required_barracks_level'] = $requiredLvl;
                 $u['can_train'] = $isAdmin ? true : ($barracksLvl >= $requiredLvl);
             }
 
@@ -197,6 +207,18 @@ class BarracksEngine {
             $status = $this->planetEngine->getTenshuColonizerStatus($planetId);
             $isAdmin = $this->isPlanetAdmin($planetId);
             if (!$isAdmin && $count > $status['available_slots']) {
+                $tenshuLvl = (int)($status['hq_level'] ?? 1);
+                if ($status['available_slots'] <= 0) {
+                    if ($tenshuLvl < 10) {
+                        throw new Exception("Tenshu niveau 10 requis pour former votre premier Pionnier Féodal.");
+                    } elseif ($tenshuLvl < 15) {
+                        throw new Exception("Votre 1er colon est déjà mobilisé. Élevez votre Tenshu au niveau 15 pour débloquer le 2e colon.");
+                    } elseif ($tenshuLvl < 20) {
+                        throw new Exception("Vos 2 premiers colons sont déjà mobilisés. Élevez votre Tenshu au niveau 20 pour débloquer le 3e colon.");
+                    } else {
+                        throw new Exception("Capacité maximale d'expansion atteinte pour ce fief (3 colons formés).");
+                    }
+                }
                 throw new Exception("Emplacements d'expansion insuffisants. Vous pouvez recruter au maximum {$status['available_slots']} Pionnier(s) Féodal(s).");
             }
         }
@@ -214,7 +236,7 @@ class BarracksEngine {
         }
 
         $tierReqs = [1 => 1, 2 => 3, 3 => 5, 4 => 8];
-        $reqLvl = ($unitCode === 'colonizer') ? 10 : ($tierReqs[$unit['tier']] ?? 1);
+        $reqLvl = ($unitCode === 'colonizer') ? 1 : ($tierReqs[$unit['tier']] ?? 1);
         if (!$isAdmin && $barracksLvl < $reqLvl) {
             throw new Exception("Dojo & Quartier Militaire niveau $reqLvl requis pour recruter cette troupe.");
         }
