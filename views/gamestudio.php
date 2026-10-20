@@ -57,7 +57,7 @@ if (($_GET['tab'] ?? '') === 'backups') {
     header('Location: ?page=gamestudio&tab=general&subtab=backups');
     exit;
 }
-if (in_array($_GET['tab'] ?? '', ['world', 'world_config'], true)) {
+if (in_array($_GET['tab'] ?? '', ['world', 'world_config', 'elevate_speed', 'elevate_survey', 'elevate_oases'], true)) {
     header('Location: ?page=gamestudio&tab=general&subtab=world_config');
     exit;
 }
@@ -66,8 +66,7 @@ if (in_array($_GET['tab'] ?? '', ['world', 'world_config'], true)) {
 $allowedTabs = [
     'dashboard', 'general',
     'elevate_research', 'elevate_bots',
-    'elevate_combat', 'elevate_castles', 'elevate_village', 'elevate_speed',
-    'elevate_survey', 'elevate_oases', 'elevate_buildings',
+    'elevate_combat', 'elevate_castles', 'elevate_village', 'elevate_buildings',
     'elevate_events', 'elevate_weekly_events',
     'narrative_scenarios', 'narrative_storyboard', 'narrative_lore',
     'liveops_events', 'liveops_features', 'liveops_broadcast', 'liveops_support',
@@ -901,27 +900,6 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div>
                                 <div>Vie du Village</div>
                                 <div class="small text-secondary">Sandbox démographique, Contentement &amp; Saké</div>
-                            </div>
-                        </a>
-                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_speed' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_speed">
-                            <i class="fa-solid fa-bolt text-warning"></i>
-                            <div>
-                                <div>Vitesse &amp; Équilibrage</div>
-                                <div class="small text-secondary">Constantes monde, Chantiers &amp; Famine</div>
-                            </div>
-                        </a>
-                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_survey' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_survey">
-                            <i class="fa-solid fa-map-location-dot text-primary"></i>
-                            <div>
-                                <div>Arpentage &amp; Provinces</div>
-                                <div class="small text-secondary">Répartition procédurale des tuiles féodales</div>
-                            </div>
-                        </a>
-                        <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_oases' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_oases">
-                            <i class="fa-solid fa-seedling text-teal"></i>
-                            <div>
-                                <div>Écosystèmes des Oasis</div>
-                                <div class="small text-secondary">Havres naturels, Faune &amp; Densité</div>
                             </div>
                         </a>
                         <a class="dropdown-item d-flex align-items-center gap-2 <?= $currentTab === 'elevate_buildings' ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=elevate_buildings">

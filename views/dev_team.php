@@ -117,9 +117,9 @@ if (empty($allowedMetiers)) {
 
 // ── Redirections des modules Game Elevate Designer vers Game Studio ────────
 $elevateRedirectTabs = [
-    'game_speeds'         => 'elevate_speed',
-    'world_expansion'     => 'elevate_survey',
-    'oases_ecosystem'     => 'elevate_oases',
+    'game_speeds'         => 'general&subtab=world_config#section-world-speed-config',
+    'world_expansion'     => 'general&subtab=world_config#section-world-tiles-config',
+    'oases_ecosystem'     => 'general&subtab=world_config#section-world-oases-config',
     'combat_simulator'    => 'elevate_combat',
     'village_simulator'   => 'elevate_village',
     'building_derivation' => 'elevate_buildings',
@@ -130,9 +130,9 @@ if (isset($_GET['tab']) && isset($elevateRedirectTabs[$_GET['tab']])) {
 }
 if (($_GET['metier'] ?? '') === 'game-elevate-designer') {
     $elevateModuleMap = [
-        'speed-balancing'        => 'elevate_speed',
-        'shogunat-survey'        => 'elevate_survey',
-        'oasis-ecosystem'        => 'elevate_oases',
+        'speed-balancing'        => 'general&subtab=world_config#section-world-speed-config',
+        'shogunat-survey'        => 'general&subtab=world_config#section-world-tiles-config',
+        'oasis-ecosystem'        => 'general&subtab=world_config#section-world-oases-config',
         'combat-simulator'       => 'elevate_combat',
         'village-life-simulator' => 'elevate_village',
         'building-derivation'    => 'elevate_buildings',
