@@ -43,6 +43,245 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
         </div>
     </div>
 
+    <!-- ── SUPERVISION EN TEMPS RÉEL DU SERVEUR RASPBERRY PI & INFRASTRUCTURE ── -->
+    <div class="card shadow-sm mb-4" id="rpi-monitor-panel">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3 py-3 bg-light">
+            <div class="d-flex align-items-center gap-3">
+                <span class="avatar avatar-md rounded bg-danger-lt text-danger shadow-xs" style="font-size:1.6rem;">
+                    <i class="fa-brands fa-raspberry-pi"></i>
+                </span>
+                <div>
+                    <h3 class="card-title text-dark m-0 d-flex align-items-center gap-2" style="font-size:1.2rem;">
+                        <span>Supervision Matérielle Serveur &bull; Raspberry Pi</span>
+                        <span id="rpi-live-dot" class="status-dot status-dot-animated bg-success" title="Sonde en direct"></span>
+                    </h3>
+                    <div class="text-muted small mt-0.5">
+                        <span id="rpi-model-name" class="fw-bold text-secondary"><?= htmlspecialchars($serverDiag['hardware']['model']) ?></span> &bull; 
+                        <span id="rpi-os-name"><?= htmlspecialchars($serverDiag['hardware']['os']) ?> (<?= $serverDiag['hardware']['arch'] ?>)</span> &bull; 
+                        Uptime : <strong id="rpi-uptime-str" class="text-dark font-monospace"><?= $serverDiag['uptime']['formatted'] ?></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <!-- Score de santé global -->
+                <span id="rpi-health-badge" class="badge bg-<?= $serverDiag['health_score']['class'] ?>-lt px-3 py-2 fs-6">
+                    <i class="fa-solid fa-heart-pulse me-1"></i>Santé Hôte : <strong id="rpi-health-score"><?= $serverDiag['health_score']['score'] ?>%</strong> (<span id="rpi-health-label"><?= $serverDiag['health_score']['label'] ?></span>)
+                </span>
+
+                <!-- Interrupteur Live Polling (3s) -->
+                <button type="button" id="btn-toggle-rpi-live" class="btn btn-sm btn-outline-success active" onclick="toggleRpiLiveMonitoring()" title="Activer / Mettre en pause le rafraîchissement temps réel (3s)">
+                    <i class="fa-solid fa-satellite-dish me-1"></i><span id="rpi-live-text">Live 3s (Actif)</span>
+                </button>
+
+                <!-- Actions de maintenance -->
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-secondary" onclick="triggerServerPingDb(this)" title="Mesurer le temps de réponse SQL en millisecondes">
+                        <i class="fa-solid fa-bolt text-warning me-1"></i>Ping SQL
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="triggerServerResetOpcache(this)" title="Purger le cache d'opcodes PHP sans redémarrer PHP-FPM">
+                        <i class="fa-solid fa-broom text-info me-1"></i>Purge OPcache
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="refreshRpiMetrics(this)" title="Interroger immédiatement les sondes système">
+                        <i class="fa-solid fa-arrows-rotate me-1"></i>Actualiser
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-3">
+            <!-- ── 4 Jauges Hardware Clés (Température, CPU, RAM, Disque) ── -->
+            <div class="row row-cards mb-3">
+                <!-- 1. Température CPU (Critique Raspberry Pi) -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-sm border shadow-none h-100 bg-white">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                <span class="text-muted small fw-bold text-uppercase" style="font-size:0.72rem;">
+                                    <i class="fa-solid fa-temperature-three-quarters text-danger me-1"></i>Température CPU
+                                </span>
+                                <span id="rpi-cpu-temp-badge" class="badge bg-<?= $serverDiag['cpu']['thermal_class'] ?>-lt font-monospace small">
+                                    <span id="rpi-cpu-temp-status"><?= $serverDiag['cpu']['thermal_label'] ?></span>
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-baseline gap-2 mb-2">
+                                <div id="rpi-cpu-temp" class="h1 m-0 fw-bold font-monospace text-<?= $serverDiag['cpu']['thermal_class'] ?>">
+                                    <?= $serverDiag['cpu']['temperature'] !== null ? $serverDiag['cpu']['temperature'] . ' °C' : 'N/A' ?>
+                                </div>
+                                <span class="text-muted small" style="font-size:0.72rem;">Alerte &ge; 75°C</span>
+                            </div>
+                            <div class="progress progress-sm mb-1.5">
+                                <div id="rpi-cpu-temp-bar" class="progress-bar bg-<?= $serverDiag['cpu']['thermal_class'] ?>" 
+                                     style="width: <?= min(100, (($serverDiag['cpu']['temperature'] ?? 40) / 90) * 100) ?>%"></div>
+                            </div>
+                            <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
+                                <span>Refroidissement</span>
+                                <span>Throttling : 80°C</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Charge Processeur (Load Average) -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-sm border shadow-none h-100 bg-white">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                <span class="text-muted small fw-bold text-uppercase" style="font-size:0.72rem;">
+                                    <i class="fa-solid fa-microchip text-primary me-1"></i>Charge Système
+                                </span>
+                                <span class="badge bg-primary-lt font-monospace small">
+                                    <span id="rpi-cpu-cores"><?= $serverDiag['cpu']['cores'] ?></span> Cœurs
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-baseline gap-2 mb-2">
+                                <div id="rpi-cpu-load" class="h1 m-0 fw-bold font-monospace text-dark">
+                                    <?= $serverDiag['cpu']['load_1m'] ?>
+                                </div>
+                                <span class="text-muted small font-monospace">
+                                    (<span id="rpi-cpu-load-pct"><?= $serverDiag['cpu']['load_percent'] ?></span>%)
+                                </span>
+                            </div>
+                            <div class="progress progress-sm mb-1.5">
+                                <div id="rpi-cpu-load-bar" class="progress-bar bg-primary" 
+                                     style="width: <?= min(100, $serverDiag['cpu']['load_percent']) ?>%"></div>
+                            </div>
+                            <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
+                                <span>5m : <strong id="rpi-cpu-load-5m"><?= $serverDiag['cpu']['load_5m'] ?></strong></span>
+                                <span>15m : <strong id="rpi-cpu-load-15m"><?= $serverDiag['cpu']['load_15m'] ?></strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Mémoire Vive & Swap -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-sm border shadow-none h-100 bg-white">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                <span class="text-muted small fw-bold text-uppercase" style="font-size:0.72rem;">
+                                    <i class="fa-solid fa-memory text-teal me-1"></i>Mémoire RAM
+                                </span>
+                                <span id="rpi-ram-badge" class="badge bg-<?= $serverDiag['memory']['ram_status_class'] ?>-lt font-monospace small">
+                                    <span id="rpi-ram-pct"><?= $serverDiag['memory']['ram_percent'] ?></span>% utilisé
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-baseline gap-1 mb-2">
+                                <div id="rpi-ram-used" class="h1 m-0 fw-bold font-monospace text-dark">
+                                    <?= number_format($serverDiag['memory']['ram_used_mb'] / 1024, 1) ?>
+                                </div>
+                                <span class="text-muted font-monospace fs-5">/ <span id="rpi-ram-total"><?= number_format($serverDiag['memory']['ram_total_mb'] / 1024, 1) ?> Go</span></span>
+                            </div>
+                            <div class="progress progress-sm mb-1.5">
+                                <div id="rpi-ram-bar" class="progress-bar bg-<?= $serverDiag['memory']['ram_status_class'] ?>" 
+                                     style="width: <?= $serverDiag['memory']['ram_percent'] ?>%"></div>
+                            </div>
+                            <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
+                                <span>Swap : <strong id="rpi-swap-used"><?= number_format($serverDiag['memory']['swap_used_mb'], 0) ?> Mo</strong> (<span id="rpi-swap-pct"><?= $serverDiag['memory']['swap_percent'] ?></span>%)</span>
+                                <span class="<?= $serverDiag['memory']['swap_warning'] ? 'text-danger fw-bold' : '' ?>" id="rpi-swap-status">
+                                    <?= $serverDiag['memory']['swap_warning'] ? '⚠️ Swap Actif' : 'Nominal' ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Espace Disque SD / SSD -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-sm border shadow-none h-100 bg-white">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                <span class="text-muted small fw-bold text-uppercase" style="font-size:0.72rem;">
+                                    <i class="fa-solid fa-hard-drive text-indigo me-1"></i>Stockage Hôte (/)
+                                </span>
+                                <span id="rpi-disk-badge" class="badge bg-<?= $serverDiag['disk']['status_class'] ?>-lt font-monospace small">
+                                    <span id="rpi-disk-pct"><?= $serverDiag['disk']['used_percent'] ?></span>% plein
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-baseline gap-1 mb-2">
+                                <div id="rpi-disk-free" class="h1 m-0 fw-bold font-monospace text-dark">
+                                    <?= $serverDiag['disk']['free_gb'] ?> Go
+                                </div>
+                                <span class="text-muted small">libres sur <span id="rpi-disk-total"><?= $serverDiag['disk']['total_gb'] ?> Go</span></span>
+                            </div>
+                            <div class="progress progress-sm mb-1.5">
+                                <div id="rpi-disk-bar" class="progress-bar bg-<?= $serverDiag['disk']['status_class'] ?>" 
+                                     style="width: <?= $serverDiag['disk']['used_percent'] ?>%"></div>
+                            </div>
+                            <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
+                                <span>Utilisé : <strong id="rpi-disk-used"><?= $serverDiag['disk']['used_gb'] ?> Go</strong></span>
+                                <span>Carte SD / SSD</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Synthèse Technique des Services & Pile Logicielle ── -->
+            <div class="row g-3 font-monospace small">
+                <!-- Base MySQL -->
+                <div class="col-md-3">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
+                        <div>
+                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-database text-primary me-1"></i>Base de Données SQL</span>
+                            <div class="d-flex align-items-center gap-1.5 mt-1">
+                                <strong id="rpi-db-latency" class="text-<?= $serverDiag['database']['latency_class'] ?> fs-6">
+                                    <?= $serverDiag['database']['latency_ms'] ?> ms
+                                </strong>
+                                <span class="text-muted small">&bull; <span id="rpi-db-threads"><?= $serverDiag['database']['threads_active'] ?></span> conn.</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary-lt px-2.5 py-1.5" id="rpi-db-size"><?= $serverDiag['database']['db_size_mb'] ?> Mo</span>
+                    </div>
+                </div>
+
+                <!-- PHP & OPcache -->
+                <div class="col-md-3">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
+                        <div>
+                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-brands fa-php text-purple me-1"></i>Moteur PHP &amp; OPcache</span>
+                            <div class="mt-1">
+                                <strong class="text-dark">v<?= $serverDiag['php']['version'] ?></strong>
+                                <span class="text-muted small">(<?= $serverDiag['php']['memory_limit'] ?>)</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-success-lt px-2.5 py-1.5" id="rpi-opcache-badge" title="Taux de succès du cache d'opcodes">
+                            <span id="rpi-opcache-hit"><?= $serverDiag['php']['opcache_hit_rate'] ?></span>% Hit
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Simulation & Game Loop -->
+                <div class="col-md-3">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
+                        <div>
+                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-gear text-secondary me-1"></i>Simulation IA &amp; Ticks</span>
+                            <div class="mt-1">
+                                <strong class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Active</strong>
+                                <span class="text-muted small">&bull; <?= (int)($totalBots ?? 0) ?> bots</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-secondary-lt font-monospace px-2.5 py-1.5">Auto</span>
+                    </div>
+                </div>
+
+                <!-- Déploiement Git -->
+                <div class="col-md-3">
+                    <div class="rounded border bg-light d-flex justify-content-between align-items-center h-100 shadow-none" style="padding: 1.15rem 1.25rem;">
+                        <div>
+                            <span class="text-muted d-block small" style="font-size:0.75rem;"><i class="fa-solid fa-code-branch text-teal me-1"></i>Version Déployée (Git)</span>
+                            <div class="mt-1">
+                                <strong class="text-teal font-monospace"><?= htmlspecialchars($localGitInfo['branch'] ?? 'main') ?></strong>
+                                <span class="text-muted small">(<?= htmlspecialchars($localGitInfo['short_sha'] ?? 'HEAD') ?>)</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-teal-lt px-2.5 py-1.5">Synchronisé</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ── 4 CARTES KPIS TÉLÉMÉTRIE & PERFORMANCE ── -->
     <div class="row row-cards mb-4">
         <!-- 1. Total Pages Vues -->
@@ -511,245 +750,6 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                             <?php endif; ?>
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ── SUPERVISION EN TEMPS RÉEL DU SERVEUR RASPBERRY PI & INFRASTRUCTURE ── -->
-    <div class="card shadow-sm mb-4 border-start border-3 border-danger" id="rpi-monitor-panel">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3 py-3 bg-light">
-            <div class="d-flex align-items-center gap-3">
-                <span class="avatar avatar-md rounded bg-danger-lt text-danger shadow-xs" style="font-size:1.6rem;">
-                    <i class="fa-brands fa-raspberry-pi"></i>
-                </span>
-                <div>
-                    <h3 class="card-title text-dark m-0 d-flex align-items-center gap-2" style="font-size:1.2rem;">
-                        <span>Supervision Matérielle Serveur &bull; Raspberry Pi</span>
-                        <span id="rpi-live-dot" class="status-dot status-dot-animated bg-success" title="Sonde en direct"></span>
-                    </h3>
-                    <div class="text-muted small mt-0.5">
-                        <span id="rpi-model-name" class="fw-bold text-secondary"><?= htmlspecialchars($serverDiag['hardware']['model']) ?></span> &bull; 
-                        <span id="rpi-os-name"><?= htmlspecialchars($serverDiag['hardware']['os']) ?> (<?= $serverDiag['hardware']['arch'] ?>)</span> &bull; 
-                        Uptime : <strong id="rpi-uptime-str" class="text-dark font-monospace"><?= $serverDiag['uptime']['formatted'] ?></strong>
-                    </div>
-                </div>
-            </div>
-
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <!-- Score de santé global -->
-                <span id="rpi-health-badge" class="badge bg-<?= $serverDiag['health_score']['class'] ?>-lt px-3 py-2 fs-6">
-                    <i class="fa-solid fa-heart-pulse me-1"></i>Santé Hôte : <strong id="rpi-health-score"><?= $serverDiag['health_score']['score'] ?>%</strong> (<span id="rpi-health-label"><?= $serverDiag['health_score']['label'] ?></span>)
-                </span>
-
-                <!-- Interrupteur Live Polling (3s) -->
-                <button type="button" id="btn-toggle-rpi-live" class="btn btn-sm btn-outline-success active" onclick="toggleRpiLiveMonitoring()" title="Activer / Mettre en pause le rafraîchissement temps réel (3s)">
-                    <i class="fa-solid fa-satellite-dish me-1"></i><span id="rpi-live-text">Live 3s (Actif)</span>
-                </button>
-
-                <!-- Actions de maintenance -->
-                <div class="btn-group btn-group-sm">
-                    <button type="button" class="btn btn-outline-secondary" onclick="triggerServerPingDb(this)" title="Mesurer le temps de réponse SQL en millisecondes">
-                        <i class="fa-solid fa-bolt text-warning me-1"></i>Ping SQL
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" onclick="triggerServerResetOpcache(this)" title="Purger le cache d'opcodes PHP sans redémarrer PHP-FPM">
-                        <i class="fa-solid fa-broom text-info me-1"></i>Purge OPcache
-                    </button>
-                    <button type="button" class="btn btn-outline-primary" onclick="refreshRpiMetrics(this)" title="Interroger immédiatement les sondes système">
-                        <i class="fa-solid fa-arrows-rotate me-1"></i>Actualiser
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="card-body p-3">
-            <!-- ── 4 Jauges Hardware Clés (Température, CPU, RAM, Disque) ── -->
-            <div class="row row-cards mb-3">
-                <!-- 1. Température CPU (Critique Raspberry Pi) -->
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-sm border shadow-none h-100 bg-white">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-1.5">
-                                <span class="text-muted small fw-bold text-uppercase" style="font-size:0.72rem;">
-                                    <i class="fa-solid fa-temperature-three-quarters text-danger me-1"></i>Température CPU
-                                </span>
-                                <span id="rpi-cpu-temp-badge" class="badge bg-<?= $serverDiag['cpu']['thermal_class'] ?>-lt font-monospace small">
-                                    <span id="rpi-cpu-temp-status"><?= $serverDiag['cpu']['thermal_label'] ?></span>
-                                </span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-2 mb-2">
-                                <div id="rpi-cpu-temp" class="h1 m-0 fw-bold font-monospace text-<?= $serverDiag['cpu']['thermal_class'] ?>">
-                                    <?= $serverDiag['cpu']['temperature'] !== null ? $serverDiag['cpu']['temperature'] . ' °C' : 'N/A' ?>
-                                </div>
-                                <span class="text-muted small" style="font-size:0.72rem;">Alerte &ge; 75°C</span>
-                            </div>
-                            <div class="progress progress-sm mb-1.5">
-                                <div id="rpi-cpu-temp-bar" class="progress-bar bg-<?= $serverDiag['cpu']['thermal_class'] ?>" 
-                                     style="width: <?= min(100, (($serverDiag['cpu']['temperature'] ?? 40) / 90) * 100) ?>%"></div>
-                            </div>
-                            <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
-                                <span>Refroidissement</span>
-                                <span>Throttling : 80°C</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. Charge Processeur (Load Average) -->
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-sm border shadow-none h-100 bg-white">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-1.5">
-                                <span class="text-muted small fw-bold text-uppercase" style="font-size:0.72rem;">
-                                    <i class="fa-solid fa-microchip text-primary me-1"></i>Charge Système
-                                </span>
-                                <span class="badge bg-primary-lt font-monospace small">
-                                    <span id="rpi-cpu-cores"><?= $serverDiag['cpu']['cores'] ?></span> Cœurs
-                                </span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-2 mb-2">
-                                <div id="rpi-cpu-load" class="h1 m-0 fw-bold font-monospace text-dark">
-                                    <?= $serverDiag['cpu']['load_1m'] ?>
-                                </div>
-                                <span class="text-muted small font-monospace">
-                                    (<span id="rpi-cpu-load-pct"><?= $serverDiag['cpu']['load_percent'] ?></span>%)
-                                </span>
-                            </div>
-                            <div class="progress progress-sm mb-1.5">
-                                <div id="rpi-cpu-load-bar" class="progress-bar bg-primary" 
-                                     style="width: <?= min(100, $serverDiag['cpu']['load_percent']) ?>%"></div>
-                            </div>
-                            <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
-                                <span>5m : <strong id="rpi-cpu-load-5m"><?= $serverDiag['cpu']['load_5m'] ?></strong></span>
-                                <span>15m : <strong id="rpi-cpu-load-15m"><?= $serverDiag['cpu']['load_15m'] ?></strong></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Mémoire Vive & Swap -->
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-sm border shadow-none h-100 bg-white">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-1.5">
-                                <span class="text-muted small fw-bold text-uppercase" style="font-size:0.72rem;">
-                                    <i class="fa-solid fa-memory text-teal me-1"></i>Mémoire RAM
-                                </span>
-                                <span id="rpi-ram-badge" class="badge bg-<?= $serverDiag['memory']['ram_status_class'] ?>-lt font-monospace small">
-                                    <span id="rpi-ram-pct"><?= $serverDiag['memory']['ram_percent'] ?></span>% utilisé
-                                </span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-1 mb-2">
-                                <div id="rpi-ram-used" class="h1 m-0 fw-bold font-monospace text-dark">
-                                    <?= number_format($serverDiag['memory']['ram_used_mb'] / 1024, 1) ?>
-                                </div>
-                                <span class="text-muted font-monospace fs-5">/ <span id="rpi-ram-total"><?= number_format($serverDiag['memory']['ram_total_mb'] / 1024, 1) ?> Go</span></span>
-                            </div>
-                            <div class="progress progress-sm mb-1.5">
-                                <div id="rpi-ram-bar" class="progress-bar bg-<?= $serverDiag['memory']['ram_status_class'] ?>" 
-                                     style="width: <?= $serverDiag['memory']['ram_percent'] ?>%"></div>
-                            </div>
-                            <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
-                                <span>Swap : <strong id="rpi-swap-used"><?= number_format($serverDiag['memory']['swap_used_mb'], 0) ?> Mo</strong> (<span id="rpi-swap-pct"><?= $serverDiag['memory']['swap_percent'] ?></span>%)</span>
-                                <span class="<?= $serverDiag['memory']['swap_warning'] ? 'text-danger fw-bold' : '' ?>" id="rpi-swap-status">
-                                    <?= $serverDiag['memory']['swap_warning'] ? '⚠️ Swap Actif' : 'Nominal' ?>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4. Espace Disque SD / SSD -->
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-sm border shadow-none h-100 bg-white">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-1.5">
-                                <span class="text-muted small fw-bold text-uppercase" style="font-size:0.72rem;">
-                                    <i class="fa-solid fa-hard-drive text-indigo me-1"></i>Stockage Hôte (/)
-                                </span>
-                                <span id="rpi-disk-badge" class="badge bg-<?= $serverDiag['disk']['status_class'] ?>-lt font-monospace small">
-                                    <span id="rpi-disk-pct"><?= $serverDiag['disk']['used_percent'] ?></span>% plein
-                                </span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-1 mb-2">
-                                <div id="rpi-disk-free" class="h1 m-0 fw-bold font-monospace text-dark">
-                                    <?= $serverDiag['disk']['free_gb'] ?> Go
-                                </div>
-                                <span class="text-muted small">libres sur <span id="rpi-disk-total"><?= $serverDiag['disk']['total_gb'] ?> Go</span></span>
-                            </div>
-                            <div class="progress progress-sm mb-1.5">
-                                <div id="rpi-disk-bar" class="progress-bar bg-<?= $serverDiag['disk']['status_class'] ?>" 
-                                     style="width: <?= $serverDiag['disk']['used_percent'] ?>%"></div>
-                            </div>
-                            <div class="text-muted small d-flex justify-content-between font-monospace" style="font-size:0.7rem;">
-                                <span>Utilisé : <strong id="rpi-disk-used"><?= $serverDiag['disk']['used_gb'] ?> Go</strong></span>
-                                <span>Carte SD / SSD</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ── Synthèse Technique des Services & Pile Logicielle ── -->
-            <div class="row g-2 font-monospace small">
-                <!-- Base MySQL -->
-                <div class="col-md-3">
-                    <div class="p-2.5 rounded border bg-light d-flex justify-content-between align-items-center h-100">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.68rem;"><i class="fa-solid fa-database text-primary me-1"></i>Base de Données SQL</span>
-                            <div class="d-flex align-items-center gap-1.5 mt-0.5">
-                                <strong id="rpi-db-latency" class="text-<?= $serverDiag['database']['latency_class'] ?> fs-6">
-                                    <?= $serverDiag['database']['latency_ms'] ?> ms
-                                </strong>
-                                <span class="text-muted small">&bull; <span id="rpi-db-threads"><?= $serverDiag['database']['threads_active'] ?></span> conn.</span>
-                            </div>
-                        </div>
-                        <span class="badge bg-primary-lt" id="rpi-db-size"><?= $serverDiag['database']['db_size_mb'] ?> Mo</span>
-                    </div>
-                </div>
-
-                <!-- PHP & OPcache -->
-                <div class="col-md-3">
-                    <div class="p-2.5 rounded border bg-light d-flex justify-content-between align-items-center h-100">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.68rem;"><i class="fa-brands fa-php text-purple me-1"></i>Moteur PHP &amp; OPcache</span>
-                            <div class="mt-0.5">
-                                <strong class="text-dark">v<?= $serverDiag['php']['version'] ?></strong>
-                                <span class="text-muted small">(<?= $serverDiag['php']['memory_limit'] ?>)</span>
-                            </div>
-                        </div>
-                        <span class="badge bg-success-lt" id="rpi-opcache-badge" title="Taux de succès du cache d'opcodes">
-                            <span id="rpi-opcache-hit"><?= $serverDiag['php']['opcache_hit_rate'] ?></span>% Hit
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Simulation & Game Loop -->
-                <div class="col-md-3">
-                    <div class="p-2.5 rounded border bg-light d-flex justify-content-between align-items-center h-100">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.68rem;"><i class="fa-solid fa-gear text-secondary me-1"></i>Simulation IA &amp; Ticks</span>
-                            <div class="mt-0.5">
-                                <strong class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Active</strong>
-                                <span class="text-muted small">&bull; <?= (int)($totalBots ?? 0) ?> bots</span>
-                            </div>
-                        </div>
-                        <span class="badge bg-secondary-lt font-monospace">Auto</span>
-                    </div>
-                </div>
-
-                <!-- Déploiement Git -->
-                <div class="col-md-3">
-                    <div class="p-2.5 rounded border bg-light d-flex justify-content-between align-items-center h-100">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size:0.68rem;"><i class="fa-solid fa-code-branch text-teal me-1"></i>Version Déployée (Git)</span>
-                            <div class="mt-0.5">
-                                <strong class="text-teal font-monospace"><?= htmlspecialchars($localGitInfo['branch'] ?? 'main') ?></strong>
-                                <span class="text-muted small">(<?= htmlspecialchars($localGitInfo['short_sha'] ?? 'HEAD') ?>)</span>
-                            </div>
-                        </div>
-                        <span class="badge bg-teal-lt">Synchronisé</span>
-                    </div>
                 </div>
             </div>
         </div>
