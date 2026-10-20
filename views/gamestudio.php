@@ -84,7 +84,47 @@ if ($currentTab === 'dashboard') {
 } elseif ($currentTab === 'general') {
     // Traitement des actions en POST pour Général
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-        if ($_POST['action'] === 'save_world_radius') {
+        if ($_POST['action'] === 'save_all_world_settings') {
+            $warnings = [];
+
+            // 1. Rayon du monde
+            if (isset($_POST['world_radius'])) {
+                $radiusRes = $gameStudioEngine->saveWorldRadius((int)$_POST['world_radius']);
+                if (!empty($radiusRes['warning'])) {
+                    $warnings[] = $radiusRes['warning'];
+                }
+            }
+
+            // 2. Oasis
+            if (isset($_POST['oasis_density_percent'])) {
+                $gameStudioEngine->saveOasisSettings(
+                    (float)$_POST['oasis_density_percent'],
+                    !empty($_POST['oasis_respawn_on_capture'])
+                );
+            }
+
+            // 3. Vitesses & Équilibrage
+            $gameStudioEngine->saveSpeedBalancing($_POST);
+
+            // 4. Dotation Initiale & Immunité Débutant
+            $gameStudioEngine->saveStartingEndowment($_POST);
+
+            // 5. Clans IA & Daimyōs Autonomes
+            $gameStudioEngine->saveBotsSettings($_POST);
+
+            // 6. Option de régénération
+            if (isset($_POST['preserve_human_users'])) {
+                $gameStudioEngine->saveRegenerationSettings(!empty($_POST['preserve_human_users']));
+            }
+
+            $_SESSION['general_flash'] = [
+                'type' => 'success',
+                'msg'  => "Ensemble des paramètres de la configuration du monde enregistré avec succès !" . (!empty($warnings) ? ' ' . implode(' ', $warnings) : '')
+            ];
+            $tabHash = !empty($_POST['active_config_tab']) ? '#' . preg_replace('/[^a-zA-Z0-9_\-]/', '', (string)$_POST['active_config_tab']) : '';
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config' . $tabHash);
+            exit;
+        } elseif ($_POST['action'] === 'save_world_radius') {
             $radius = (int)($_POST['world_radius'] ?? 35);
             $res = $gameStudioEngine->saveWorldRadius($radius);
             $_SESSION['general_flash'] = [

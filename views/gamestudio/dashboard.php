@@ -16,33 +16,6 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
 ?>
 
 <div class="gamestudio-dashboard">
-    <!-- En-tête du Dashboard & Filtres Temporels -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-        <div>
-            <h3 class="card-title text-primary d-flex align-items-center gap-2 m-0" style="font-size:1.35rem;">
-                <i class="fa-solid fa-chart-line text-primary me-1"></i>Tableau de Bord Exécutif &amp; Télémétrie
-            </h3>
-            <div class="text-secondary small mt-1">
-                Supervision globale de l'activité des Daimyōs, progression moyenne des quêtes, santé du serveur et métriques de production.
-            </div>
-        </div>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <span class="badge bg-success-lt d-inline-flex align-items-center gap-1 py-2 px-3">
-                <span class="status-dot status-dot-animated bg-success"></span>
-                <span>Système Opérationnel</span>
-            </span>
-            <div class="btn-group btn-group-sm" role="group">
-                <a href="?page=<?= $currentPageSlug ?>&tab=dashboard&period=today" class="btn btn-outline-secondary <?= $analyticsPeriod === 'today' ? 'active fw-bold' : '' ?>">Aujourd'hui</a>
-                <a href="?page=<?= $currentPageSlug ?>&tab=dashboard&period=7d" class="btn btn-outline-secondary <?= $analyticsPeriod === '7d' ? 'active fw-bold' : '' ?>">7 jours</a>
-                <a href="?page=<?= $currentPageSlug ?>&tab=dashboard&period=30d" class="btn btn-outline-secondary <?= $analyticsPeriod === '30d' ? 'active fw-bold' : '' ?>">30 jours</a>
-                <a href="?page=<?= $currentPageSlug ?>&tab=dashboard&period=all" class="btn btn-outline-secondary <?= $analyticsPeriod === 'all' ? 'active fw-bold' : '' ?>">Tout</a>
-            </div>
-            <button type="button" onclick="location.reload()" class="btn btn-sm btn-outline-primary" title="Actualiser les métriques">
-                <i class="fa-solid fa-arrows-rotate me-1"></i>Actualiser
-            </button>
-        </div>
-    </div>
-
     <!-- ── SUPERVISION EN TEMPS RÉEL DU SERVEUR RASPBERRY PI & INFRASTRUCTURE ── -->
     <div class="card shadow-sm mb-4" id="rpi-monitor-panel">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3 py-3 bg-light">
@@ -279,6 +252,33 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- En-tête du Dashboard & Filtres Temporels -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h3 class="card-title text-primary d-flex align-items-center gap-2 m-0" style="font-size:1.35rem;">
+                <i class="fa-solid fa-chart-line text-primary me-1"></i>Tableau de Bord Exécutif &amp; Télémétrie
+            </h3>
+            <div class="text-secondary small mt-1">
+                Supervision globale de l'activité des Daimyōs, progression moyenne des quêtes, santé du serveur et métriques de production.
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="badge bg-success-lt d-inline-flex align-items-center gap-1 py-2 px-3">
+                <span class="status-dot status-dot-animated bg-success"></span>
+                <span>Système Opérationnel</span>
+            </span>
+            <div class="btn-group btn-group-sm" role="group">
+                <a href="?page=<?= $currentPageSlug ?>&tab=dashboard&period=today" class="btn btn-outline-secondary <?= $analyticsPeriod === 'today' ? 'active fw-bold' : '' ?>">Aujourd'hui</a>
+                <a href="?page=<?= $currentPageSlug ?>&tab=dashboard&period=7d" class="btn btn-outline-secondary <?= $analyticsPeriod === '7d' ? 'active fw-bold' : '' ?>">7 jours</a>
+                <a href="?page=<?= $currentPageSlug ?>&tab=dashboard&period=30d" class="btn btn-outline-secondary <?= $analyticsPeriod === '30d' ? 'active fw-bold' : '' ?>">30 jours</a>
+                <a href="?page=<?= $currentPageSlug ?>&tab=dashboard&period=all" class="btn btn-outline-secondary <?= $analyticsPeriod === 'all' ? 'active fw-bold' : '' ?>">Tout</a>
+            </div>
+            <button type="button" onclick="location.reload()" class="btn btn-sm btn-outline-primary" title="Actualiser les métriques">
+                <i class="fa-solid fa-arrows-rotate me-1"></i>Actualiser
+            </button>
         </div>
     </div>
 
