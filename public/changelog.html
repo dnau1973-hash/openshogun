@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-indigo font-monospace m-0">v1.33.0</div>
+                                    <div class="h2 text-indigo font-monospace m-0">v1.34.0</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,6 +123,55 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.34.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #ef4444; box-shadow: 0 0 0 2px #ef4444;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.34.0</span>
+                                <span class="badge bg-danger-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-red-lt fw-bold">🍓 Supervision Raspberry Pi &amp; Sparklines</span>
+                                <span class="badge bg-purple-lt fw-bold">📜 Académie HD &amp; 10 Savoirs</span>
+                                <span class="badge bg-indigo-lt fw-bold">⛩️ Paliers Tenshu (10/15/20)</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 20 Octobre 2026
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body p-4">
+                                <h4 class="card-title text-danger d-flex align-items-center gap-2 mb-3">
+                                    <span>🍓</span> Supervision Matérielle Raspberry Pi, Illustrations de l'Académie &amp; Paliers Tenshu
+                                </h4>
+                                <ul class="text-secondary mb-0" style="line-height: 1.8;">
+                                    <li><strong>Supervision Matérielle Hôte &amp; Mini-Graphiques Dédiés (Game Studio) :</strong> Déploiement d'un tableau de bord de télémétrie matérielle haute précision optimisé pour Raspberry Pi et serveurs Linux. Les 5 jauges clés disposent désormais chacune de leur propre mini-graphique (sparkline dynamique <em>ApexCharts</em>) avec suivi en temps réel :
+                                        <ul class="mt-1 mb-2">
+                                            <li><em>Température CPU (°C) :</em> Détection des pics de chauffe avec seuil critique de <em>throttling</em> à 75/80 °C.</li>
+                                            <li><em>Charge Système (%) &amp; Fréquence CPU (MHz) :</em> Suivi des calculs et vérification du bridage d'horloge.</li>
+                                            <li><em>Mémoire RAM &amp; Swap :</em> Surveillance de la consommation physique et de l'activité du fichier d'échange.</li>
+                                            <li><em>Stockage Hôte (Carte SD / SSD) :</em> Espace libre et utilisé sur la racine système.</li>
+                                            <li><em>Trafic Réseau &amp; Bande Passante :</em> Analyse en direct de <code>/proc/net/dev</code>, calcul du débit instantané ($\text{Ko/s}$) en réception $\downarrow$ ($\text{Rx}$) et émission $\uparrow$ ($\text{Tx}$), identification de l'interface active (Ethernet filaire ou Wi-Fi) et cumul des Mo/Go échangés.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Journalisation Télémétrique &amp; Export CSV :</strong> Moteur autonome d'historisation en continu dans <code>ServerMonitorEngine</code> avec calcul automatique des minima/maxima (<code>min · max</code>), protection contre la saturation de la carte SD (rotation à 300 entrées) et bouton d'export CSV 1-clic.</li>
+                                    <li><strong>Alignement Épuré des Blocs Techniques :</strong> Restructuration des 4 blocs (Base de données SQL, Moteur PHP &amp; OPcache, Simulation IA &amp; Ticks, et Version Déployée Git) sur une seule et même ligne avec padding harmonisé.</li>
+                                    <li><strong>Règle Impériale du Pionnier Féodal (Paliers Tenshu 10, 15 et 20) :</strong> Réforme complète du recrutement des colons au Dojo :
+                                        <ul class="mt-1 mb-2">
+                                            <li>Le recrutement du colon ne dépend plus d'un niveau arbitraire de caserne mais directement de l'élévation du <strong>Tenshu (Palais Central)</strong>.</li>
+                                            <li>Gestion stricte des 3 paliers d'expansion : 1<sup>er</sup> colon au Tenshu Niv. 10, 2<sup>e</sup> colon au Niv. 15, et 3<sup>e</sup> colon au Niv. 20 (plafond absolu de 3 fiefs par joueur).</li>
+                                            <li>Affichage dynamique dans l'onglet des troupes avec grille visuelle des 3 paliers (<code>🟢 Dispo</code>, <code>✅ Utilisé</code>, <code>🔒 Verrouillé</code>), bannière HD dédiée et bouton d'enrôlement direct.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Académie des Savoirs &bull; 10 Illustrations HD &amp; Harmonisation :</strong> Intégration de 10 œuvres originales haute définition au format 16:9 dans <code>/public/assets/researches/</code> couvrant l'ensemble des technologies féodales (Halieutique, Méditation Shintō, Réseau Shinobi, Art du Tir, Pavois, Forge Tamahagane, Relais de Poste, Kayaku, Katanas de Prestige, Voies Gokaidō). Alignement des cartes sur le standard visuel du Dojo avec bannières 150px, badges de caste et boîtes de progression.</li>
+                                    <li><strong>Épuration de Game Elevate Designer :</strong> Suppression des blocs redondants de vitesse et d'écosystème d'oasis pour concentrer l'outil sur les directives stratégiques des Daimyōs IA.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
                     <!-- VERSION 1.33.0 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
@@ -130,7 +179,6 @@
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.33.0</span>
-                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
                                 <span class="badge bg-green-lt fw-bold">🤝 Bourse de Troc P2P (Niv. 10)</span>
                                 <span class="badge bg-blue-lt fw-bold">📱 Layout Fluide 1 Colonne</span>
                                 <span class="badge bg-warning-lt fw-bold">⚖️ Intendant &amp; Troc 1:1</span>
