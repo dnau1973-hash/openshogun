@@ -259,6 +259,8 @@ ob_start();
                              id="rural-badge-<?= $type ?>"
                              style="left: <?= $p['pos_x'] ?>%; top: <?= $p['pos_y'] ?>%; --badge-color: <?= $p['color'] ?>; --badge-glow: <?= $p['color'] ?>80;"
                              data-type="<?= $type ?>"
+                             data-category="<?= htmlspecialchars($p['category'] ?? '') ?>"
+                             data-res-name="<?= htmlspecialchars($p['res_name'] ?? '') ?>"
                              data-name="<?= htmlspecialchars($p['name']) ?>"
                              data-jp-name="<?= htmlspecialchars($p['jp_name']) ?>"
                              data-desc="<?= htmlspecialchars($p['desc']) ?>"
@@ -333,75 +335,91 @@ ob_start();
 ?>
 
 <!-- ========================================================
-     MODALE D'AMÉLIORATION INTERACTIVE D'UNE PARCELLE (TABLER)
+     MODALE D'AMÉLIORATION DU TERROIR FÉODAL (STYLE ÉLITE SENGOKU)
+     Illustration d'en-tête HD, dégradé sombre et badges d'élite
      ======================================================== -->
-<div class="modal fade" id="plotUpgradeModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="plotUpgradeModal" tabindex="-1" aria-labelledby="modalPlotTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow-lg border-0">
-            <div class="modal-header py-2 bg-dark text-white">
-                <h4 class="modal-title d-flex align-items-center gap-2 mb-0 fs-3">
-                    <span id="modalPlotIconAvatar" class="avatar avatar-sm rounded text-white bg-primary"></span>
-                    <div>
-                        <span id="modalPlotTitle">Parcelle</span>
-                        <div class="text-muted font-monospace" style="font-size:0.72rem;" id="modalPlotJpSubtitle"></div>
+        <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 12px;">
+            <!-- Illustration d'en-tête (215px) avec overlay dégradé -->
+            <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
+                <img id="modalPlotBannerImg" src="/public/assets/resources/terroir_wood.jpg" alt="Terroir Féodal" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
+                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                    <div style="max-width: 72%;">
+                        <span id="modalPlotCategoryBadge" class="badge bg-primary text-white fw-bold px-2 py-1 mb-1 shadow-sm" style="font-size:0.75rem;">
+                            🌾 TERROIR &bull; FORET
+                        </span>
+                        <h3 class="m-0 fw-bold text-white shadow-sm text-truncate" id="modalPlotTitle" style="font-size: 1.25rem;">
+                            Forêt de Cèdres
+                        </h3>
+                        <div class="text-white-50 font-monospace small mt-0.5" id="modalPlotJpSubtitle">杉林 (Sugi-bayashi)</div>
                     </div>
-                </h4>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    <div>
+                        <span id="modalPlotLevelBadge" class="badge bg-warning text-dark font-monospace fs-6 px-3 py-1 shadow-sm">
+                            Niveau 1 / 100
+                        </span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
             </div>
 
-            <div class="modal-body p-3">
-                <!-- Visuel & Statut -->
-                <div class="d-flex gap-3 mb-3">
-                    <div id="modalPlotVisualThumb" class="rounded border shadow-sm flex-shrink-0" style="width: 100px; height: 100px; background-size: cover; background-position: center;"></div>
-                    <div>
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge bg-primary fw-bold" id="modalPlotLevelBadge">Niveau 1 / 30</span>
-                        </div>
-                        <p class="text-muted mb-2" style="font-size:0.82rem;" id="modalPlotDesc"></p>
-                        <div class="d-flex align-items-center gap-2 text-muted flex-wrap" style="font-size:0.78rem;">
-                            <div class="d-flex align-items-center gap-1">
-                                <i class="fa-solid fa-person-digging text-warning"></i>
-                                <span><strong id="modalPlotWorkerRole">Ouvriers</strong> : <strong class="text-body" id="modalPlotWorkersCount">2</strong> requis</span>
-                            </div>
-                            <div id="modalPlotEnergyConsBox" class="d-none align-items-center gap-1 text-info">
-                                <i class="fa-solid fa-bolt text-info"></i>
-                                <span><strong>Ferveur</strong> : <strong class="text-body" id="modalPlotEnergyCons">0</strong> / h</span>
-                            </div>
-                        </div>
+            <!-- Corps de la modale -->
+            <div class="modal-body p-4 bg-white">
+                <!-- Encart Descriptif Féodal du Terroir -->
+                <div class="p-3 rounded border mb-3" style="background: #fdfbf7; border-left: 4px solid #b91c1c !important;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span id="modalPlotIconSpan" style="font-size: 1.15rem;"><i class="fa-solid fa-tree text-success"></i></span>
+                        <strong class="text-danger small" id="modalPlotWorkerRoleHeader">Exploitation Rurale :</strong>
+                    </div>
+                    <p class="small text-secondary m-0 fst-italic" id="modalPlotDesc" style="line-height: 1.5;">
+                        ...
+                    </p>
+                </div>
+
+                <!-- Main-d'œuvre & Ferveur requises -->
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 p-2 px-3 mb-3 rounded border bg-light" style="font-size:0.8rem;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-person-digging text-warning fs-3"></i>
+                        <span><strong id="modalPlotWorkerRole">Ouvriers</strong> : <strong class="text-dark" id="modalPlotWorkersCount">2</strong> requis</span>
+                    </div>
+                    <div id="modalPlotEnergyConsBox" class="d-none align-items-center gap-2 text-info">
+                        <i class="fa-solid fa-bolt text-info fs-3"></i>
+                        <span><strong>Ferveur Shintō</strong> : <strong class="text-dark" id="modalPlotEnergyCons">0</strong> / h</span>
                     </div>
                 </div>
 
-                <!-- Jauge de Potentiel Vertical (20 à 100) -->
+                <!-- Jauge de Potentiel Féodal (20 à 100) -->
                 <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1" style="font-size:0.75rem;">
-                        <span class="text-muted fw-bold">POTENTIEL FÉODAL DE LA PARCELLE</span>
-                        <span class="text-primary font-monospace fw-bold" id="modalPlotPotentialText">35%</span>
+                    <div class="d-flex justify-content-between align-items-center mb-1 small text-muted">
+                        <span class="fw-bold text-uppercase" style="font-size:0.75rem;">Potentiel Féodal du Terroir</span>
+                        <strong class="text-primary font-monospace" id="modalPlotPotentialText">35%</strong>
                     </div>
-                    <div class="progress" style="height: 6px;">
+                    <div class="progress" style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
                         <div class="progress-bar bg-primary" id="modalPlotPotentialBar" role="progressbar" style="width: 35%;"></div>
                     </div>
                 </div>
 
                 <!-- Bénéfices / Production -->
-                <div class="p-2 mb-3 rounded bg-surface-secondary border">
-                    <div class="d-flex justify-content-between align-items-center" style="font-size:0.85rem;">
-                        <span class="text-muted"><i class="fa-solid fa-chart-line text-success me-1"></i> Rendement / Apport actuel :</span>
-                        <strong class="text-success" id="modalPlotCurrentProd">+35 / h</strong>
+                <div class="p-3 mb-3 rounded border" style="background: #f8fafc;">
+                    <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+                        <span class="text-secondary small"><i class="fa-solid fa-chart-line text-success me-1"></i>Rendement actuel :</span>
+                        <strong class="text-success small" id="modalPlotCurrentProd">+35 / h</strong>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mt-1" style="font-size:0.85rem;">
-                        <span class="text-muted"><i class="fa-solid fa-arrow-trend-up text-primary me-1"></i> Prochain niveau :</span>
-                        <strong class="text-primary" id="modalPlotNextProd">+55 / h</strong>
+                    <div class="d-flex justify-content-between align-items-center pt-2">
+                        <span class="text-secondary small"><i class="fa-solid fa-arrow-trend-up text-primary me-1"></i>Prochain niveau :</span>
+                        <strong class="text-primary small" id="modalPlotNextProd">+55 / h</strong>
                     </div>
                 </div>
 
                 <!-- Statut Chantier en cours (si actif) -->
-                <div id="modalPlotActiveWorkBox" class="d-none alert alert-warning p-2 mb-3">
+                <div id="modalPlotActiveWorkBox" class="d-none p-3 mb-3 rounded border border-warning-subtle" style="background: #fffbeb;">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="fw-bold fs-4 text-dark"><i class="fa-solid fa-hammer me-1"></i> Chantier en cours</span>
-                        <span class="font-monospace fw-bold text-dark fs-3" id="modalPlotWorkCountdown">--:--:--</span>
+                        <span class="fw-bold text-dark"><i class="fa-solid fa-hammer text-warning me-1"></i>Chantier en cours</span>
+                        <span class="font-monospace fw-bold text-danger fs-3" id="modalPlotWorkCountdown">--:--:--</span>
                     </div>
-                    <div class="progress mb-1" style="height: 6px;">
-                        <div class="progress-bar progress-bar-striped bg-warning" id="modalPlotWorkProgressBar" role="progressbar" style="width: 0%;"></div>
+                    <div class="progress mb-2" style="height: 6px; background: #fef3c7; border-radius: 3px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" id="modalPlotWorkProgressBar" role="progressbar" style="width: 0%;"></div>
                     </div>
                     <div class="small text-muted" id="modalPlotWorkFinishLabel"></div>
                 </div>
@@ -409,20 +427,25 @@ ob_start();
                 <!-- Coûts requis & Durée (si pas de chantier en cours) -->
                 <div id="modalPlotNormalUpgradeBox">
                     <div class="mb-3">
-                        <label class="form-label mb-2 fw-bold text-muted" style="font-size:0.75rem;">COÛTS REQUIS POUR L'ÉLÉVATION :</label>
+                        <label class="form-label mb-2 fw-bold text-muted small text-uppercase" style="font-size:0.75rem;">Matériaux Requis pour l'Élévation :</label>
                         <div class="d-flex flex-wrap gap-2" id="modalPlotCostTags"></div>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center text-muted mb-3" style="font-size:0.8rem;">
-                        <span><i class="fa-regular fa-clock me-1"></i> Durée estimée du chantier :</span>
-                        <strong class="font-monospace text-body" id="modalPlotDuration">00:01:30</strong>
+                    <div class="d-flex justify-content-between align-items-center text-muted small mb-0 p-2 rounded bg-light border">
+                        <span><i class="fa-regular fa-clock me-1 text-primary"></i>Durée estimée des travaux :</span>
+                        <strong class="font-monospace text-dark" id="modalPlotDuration">00:01:30</strong>
                     </div>
                 </div>
+            </div>
 
-                <!-- Bouton d'action -->
-                <div id="modalPlotActionContainer">
-                    <button type="button" class="btn btn-primary w-100" id="btnModalPlotUpgrade">
-                        <i class="fa-solid fa-arrow-up me-1"></i> Élever la structure
+            <!-- Pied de modale avec confirmation -->
+            <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i>Fermer
+                </button>
+                <div id="modalPlotActionContainer" class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary fw-bold px-4 shadow-sm" id="btnModalPlotUpgrade">
+                        <i class="fa-solid fa-arrow-up me-1"></i>Élever la structure
                     </button>
                 </div>
             </div>

@@ -71,18 +71,42 @@
         const workersCountEl = document.getElementById('modalPlotWorkersCount');
         if (workersCountEl) workersCountEl.textContent = d.workers || '2';
 
-        // Miniature visuelle
+        // Bannière visuelle HD (Charte Modale d'Élite)
+        const bannerImgEl = document.getElementById('modalPlotBannerImg');
+        if (bannerImgEl) {
+            bannerImgEl.src = d.bgImg || '/public/assets/resources/terroir_wood.jpg';
+        }
+
+        // Badge de catégorie & couleur
+        const catBadge = document.getElementById('modalPlotCategoryBadge');
+        if (catBadge) {
+            const catName = d.resName || d.category || 'Exploitation';
+            catBadge.innerHTML = `🌾 TERROIR &bull; ${catName.toUpperCase()}`;
+            catBadge.style.backgroundColor = d.color || '#3b82f6';
+        }
+
+        // Miniature visuelle de secours si présente
         const thumbEl = document.getElementById('modalPlotVisualThumb');
         if (thumbEl) {
             const bg = d.bgImg || d.tileImg || '';
             thumbEl.style.backgroundImage = bg ? `url('${bg}')` : 'none';
         }
 
-        // Avatar icône
+        // Avatar / Icône thématique
         const avatarEl = document.getElementById('modalPlotIconAvatar');
         if (avatarEl) {
             avatarEl.style.backgroundColor = d.color || '#3b82f6';
             avatarEl.innerHTML = `<i class="${d.icon}"></i>`;
+        }
+
+        const iconSpan = document.getElementById('modalPlotIconSpan');
+        if (iconSpan) {
+            iconSpan.innerHTML = `<i class="${d.icon}" style="color:${d.color || '#16a34a'};"></i>`;
+        }
+
+        const workerRoleHeader = document.getElementById('modalPlotWorkerRoleHeader');
+        if (workerRoleHeader) {
+            workerRoleHeader.textContent = `${d.workerRole || 'Exploitation'} :`;
         }
 
         // Rendements
@@ -159,13 +183,12 @@
             const isAdm = (window.IS_ADMIN === true);
             if (actionContainer) {
                 actionContainer.innerHTML = `
-                    <button type="button" class="btn btn-warning w-100 py-2 mb-2 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" onclick="instantFinishBuild(${queueId})">
+                    <button type="button" class="btn btn-warning fw-bold px-3 shadow-sm d-flex align-items-center gap-1.5" onclick="instantFinishBuild(${queueId})">
                         <i class="fa-solid fa-bolt text-danger"></i>
-                        <span>${isAdm ? '⚡ Finir instantanément (Gratuit Admin)' : 'Finir instantanément (2 Kobans)'}</span>
-                        <i class="fa-solid ${isAdm ? 'fa-bolt text-warning' : 'fa-coins'}"></i>
+                        <span>${isAdm ? '⚡ Finir Gratuit' : 'Terminer (2 Kobans)'}</span>
                     </button>
-                    <button type="button" class="btn btn-outline-danger w-100 py-1" onclick="cancelRuralUpgrade(${queueId}, this)">
-                        <i class="fa-solid fa-ban me-1"></i> Annuler le chantier (Remboursement 80%)
+                    <button type="button" class="btn btn-outline-danger px-3" onclick="cancelRuralUpgrade(${queueId}, this)">
+                        <i class="fa-solid fa-ban me-1"></i> Annuler (-20%)
                     </button>`;
             }
         } else {
@@ -211,18 +234,18 @@
             if (actionContainer) {
                 if (isMax) {
                     actionContainer.innerHTML = `
-                        <button type="button" class="btn btn-secondary w-100 disabled" style="font-size:0.9rem;">
-                            <i class="fa-solid fa-check me-1"></i> Apogée de la structure atteinte
+                        <button type="button" class="btn btn-secondary disabled px-4" disabled>
+                            <i class="fa-solid fa-check me-1"></i> Apogée atteinte
                         </button>`;
                 } else if (canAfford || isAdm) {
                     actionContainer.innerHTML = `
-                        <button type="button" class="btn btn-${d.colorClass || 'primary'} w-100 fw-bold py-2 fs-3" onclick="upgradeRuralPlot('${d.type}', this)">
-                            <i class="fa-solid fa-bolt text-warning me-1"></i> ${isAdm ? '⚡ [Admin] Élévation Immédiate (Niv. ' + d.nextLevel + ' sans coût)' : 'Lancer le chantier (Niveau ' + d.nextLevel + ' / ' + d.maxLevel + ')'}
+                        <button type="button" class="btn btn-${d.colorClass || 'primary'} fw-bold px-4 shadow-sm pulse-btn" onclick="upgradeRuralPlot('${d.type}', this)">
+                            <i class="fa-solid fa-arrow-up me-1"></i> ${isAdm ? '⚡ [Admin] Élévation Immédiate (Niv. ' + d.nextLevel + ')' : 'Lancer le chantier (Niv. ' + d.nextLevel + ')'}
                         </button>`;
                 } else {
                     actionContainer.innerHTML = `
-                        <button type="button" class="btn btn-outline-secondary w-100 disabled py-2" style="font-size:0.85rem;">
-                            <i class="fa-solid fa-lock me-1"></i> Ressources insuffisantes pour lancer ce chantier
+                        <button type="button" class="btn btn-outline-secondary disabled px-3" disabled style="opacity: 0.7;">
+                            <i class="fa-solid fa-lock me-1"></i> Ressources insuffisantes
                         </button>`;
                 }
             }
