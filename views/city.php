@@ -400,6 +400,21 @@ foreach ($citySlots as $s => $sd) {
 .city-feast-card:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
+
+/* Scrollbar esthétique pour la modale à dimension fixe */
+#buildingSlotModal .modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+#buildingSlotModal .modal-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+#buildingSlotModal .modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+#buildingSlotModal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
 </style>
 <?= SlotPositionEngine::renderCss('city') ?>
 <?php
@@ -611,10 +626,10 @@ ob_start();
      Bannière HD, dégradé sombre, comparatifs, navigation entre slots
      ======================================================== -->
 <div class="modal fade" id="buildingSlotModal" tabindex="-1" aria-labelledby="cityModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 12px;">
+    <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 980px; width: 95vw; margin: 1.75rem auto;">
+        <div class="modal-content shadow-lg border-0 overflow-hidden d-flex flex-column" style="border-radius: 12px; height: 86vh; max-height: 820px; min-height: 600px;">
             <!-- Illustration d'en-tête (215px) avec overlay dégradé -->
-            <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
+            <div style="position: relative; width: 100%; height: 215px; flex-shrink: 0; overflow: hidden; background: #0f172a;">
                 <img id="cityModalBannerImg" src="/public/assets/buildings/building_tenshu.jpg" alt="Édifice de la Cité" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
                 <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
@@ -654,7 +669,7 @@ ob_start();
             </div>
 
             <!-- Onglets d'action & gestion du bâtiment (Bootstrap Tabs) -->
-            <ul class="nav nav-tabs nav-fill px-3 pt-2 bg-light border-bottom" id="cityModalTabsNav" role="tablist">
+            <ul class="nav nav-tabs nav-fill px-3 pt-2 bg-light border-bottom flex-shrink-0" id="cityModalTabsNav" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active fw-bold text-dark py-2" id="city-tab-evolution-btn" data-bs-toggle="tab" data-bs-target="#city-pane-evolution" type="button" role="tab" aria-controls="city-pane-evolution" aria-selected="true">
                         <i class="fa-solid fa-arrow-up-right-dots text-danger me-1"></i>Évolution
@@ -677,8 +692,8 @@ ob_start();
                 </li>
             </ul>
 
-            <!-- Corps de la modale -->
-            <div class="modal-body p-0 bg-white">
+            <!-- Corps de la modale avec hauteur fixe et défilement fluide -->
+            <div class="modal-body p-0 bg-white" style="flex: 1 1 auto; overflow-y: auto;">
                 <!-- PANNEAU A : BÂTIMENT EXISTANT / ATTRIBUÉ -->
                 <div id="cityModalExistingView">
                     <div class="tab-content" id="cityModalTabContent">
@@ -781,15 +796,15 @@ ob_start();
                         </button>
                     </div>
 
-                    <!-- Liste défilante des structures constructibles -->
-                    <div class="d-flex flex-column gap-2" style="max-height: 340px; overflow-y: auto;" id="cityModalAvailableBuildingsList">
+                    <!-- Liste des structures constructibles -->
+                    <div class="d-flex flex-column gap-2" id="cityModalAvailableBuildingsList">
                         <!-- Rempli dynamiquement -->
                     </div>
                 </div>
             </div>
 
             <!-- Pied de modale avec confirmation -->
-            <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+            <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center flex-shrink-0">
                 <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">
                     <i class="fa-solid fa-xmark me-1"></i>Fermer
                 </button>
