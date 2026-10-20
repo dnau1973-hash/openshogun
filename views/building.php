@@ -39,6 +39,11 @@ if (!$slot || $slot < 19 || $slot > 34) {
     $slot = 19;
 }
 
+// Redirection ergonomique vers la Cité Castrale avec ouverture directe de la modale d'élite du slot
+$targetUrl = '/?page=city&slot=' . $slot . ($codeParam ? '&code=' . urlencode($codeParam) : '');
+header('Location: ' . $targetUrl);
+exit;
+
 $slotData = $citySlots[$slot] ?? ['slot' => $slot, 'code' => CITY_SLOT_LAYOUT[$slot] ?? 'free_plot', 'level' => 0];
 $code = $slotData['code'];
 $lvl = (int)$slotData['level'];

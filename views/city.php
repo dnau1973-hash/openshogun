@@ -96,6 +96,216 @@ foreach (BUILDINGS as $code => $bInfo) {
         ];
     }
 }
+
+// Cartographie complète des données de chaque emplacement pour la modale d'élite interactive
+$buildingHeroImages = [
+    'hq' => '/public/assets/buildings/building_tenshu.jpg',
+    'barracks' => '/public/assets/buildings/building_barracks.jpg',
+    'shipyard' => '/public/assets/buildings/building_shipyard.jpg',
+    'research_lab' => '/public/assets/buildings/building_research_lab.jpg',
+    'radar' => '/public/assets/buildings/building_radar.jpg',
+    'storage' => '/public/assets/buildings/building_storage.jpg',
+    'tank' => '/public/assets/buildings/building_tank.jpg',
+    'market' => '/public/assets/buildings/building_market.jpg',
+    'embassy' => '/public/assets/buildings/building_embassy.jpg',
+    'quantum_vault' => '/public/assets/buildings/building_quantum_vault.jpg',
+    'wall' => '/public/assets/buildings/building_wall.jpg',
+    'sawmill' => '/public/assets/buildings/building_sawmill.jpg',
+    'stonemason' => '/public/assets/buildings/building_stonemason.jpg',
+    'grain_mill' => '/public/assets/buildings/building_grain_mill.jpg',
+    'blacksmith' => '/public/assets/buildings/building_blacksmith.jpg',
+    'teahouse' => '/public/assets/buildings/building_teahouse.jpg',
+    'tournament_square' => '/public/assets/buildings/building_tournament_square.jpg',
+];
+
+$citySlotsJsonData = [];
+foreach ($citySlots as $s => $sd) {
+    $code = $sd['code'];
+    if ($code === 'free_plot' && isset(CITY_SLOT_LAYOUT[$s])) {
+        $code = CITY_SLOT_LAYOUT[$s];
+    }
+    $lvl = (int)($sd['level'] ?? 0);
+    if ($lvl === 0 && isset($buildings[$code])) {
+        $lvl = (int)$buildings[$code];
+    }
+
+    $bInfo = BUILDINGS[$code] ?? null;
+    $isEmpty = ($sd['code'] === 'free_plot' && $lvl === 0);
+    $isBuildingInQ = isset($activeBuildingQueue[$code]);
+    $job = $isBuildingInQ ? $activeBuildingQueue[$code] : null;
+    $isDemolishing = ($isBuildingInQ && (int)($job['target_level'] ?? -1) === 0);
+    $isUpgrading = ($isBuildingInQ && !$isDemolishing);
+
+    $maxLvl = (int)($bInfo['max_level'] ?? 20);
+    $isMax = ($lvl >= $maxLvl);
+
+    $upgradeDetails = $buildingEngine->getUpgradeDetails('building', $code, $lvl, $hqLevel);
+    $cost = $upgradeDetails['cost'];
+    $duration = (int)$upgradeDetails['duration'];
+    $targetLvl = (int)$upgradeDetails['target_level'];
+
+    $canAfford = $isAdmin ? true : ($planet['metal'] >= $cost['metal'] && $planet['crystal'] >= $cost['crystal'] && $planet['deuterium'] >= $cost['deuterium']);
+
+    $secKey = $buildingSectors[$code] ?? 'logistics';
+    $secLabel = match($secKey) {
+        'hq' => 'Commandement',
+        'military' => 'Militaire & Défense',
+        'science' => 'Savoirs & Académie',
+        default => 'Logistique & Marché'
+    };
+    $secColor = match($secKey) {
+        'hq' => '#b91c1c',
+        'military' => '#ef4444',
+        'science' => '#0284c7',
+        default => '#16a34a'
+    };
+
+    $statData = match($code) {
+        'wall' => [
+            'label' => 'Bonus Défense Garnison',
+            'cur' => '+' . ($lvl * 4) . '% (+' . ($lvl * 25) . ' pts mur)',
+            'next' => '+' . ($targetLvl * 4) . '% (+' . ($targetLvl * 25) . ' pts mur)',
+            'gain' => '+4% déf. & +25 pts structure'
+        ],
+        'hq' => [
+            'label' => 'Réduction Temps Travaux',
+            'cur' => '-' . min(80, (int)($lvl * 5)) . '%',
+            'next' => '-' . min(80, (int)($targetLvl * 5)) . '%',
+            'gain' => '-5% durée de tous les chantiers'
+        ],
+        'storage' => [
+            'label' => 'Capacité Bois & Pierre',
+            'cur' => number_format(10000 + $lvl * 15000),
+            'next' => number_format(10000 + $targetLvl * 15000),
+            'gain' => '+15,000 capacité de stockage'
+        ],
+        'tank' => [
+            'label' => 'Capacité Silo à Riz',
+            'cur' => number_format(10000 + $lvl * 15000),
+            'next' => number_format(10000 + $targetLvl * 15000),
+            'gain' => '+15,000 koku de réserve'
+        ],
+        'quantum_vault' => [
+            'label' => 'Ressources Protégées (Cachette)',
+            'cur' => number_format(1000 + $lvl * 1000),
+            'next' => number_format(1000 + $targetLvl * 1000),
+            'gain' => '+1,000 protégés du pillage'
+        ],
+        'barracks' => [
+            'label' => 'Vitesse Entraînement Dojo',
+            'cur' => 'Niveau ' . $lvl . ' (Accéléré)',
+            'next' => 'Niveau ' . $targetLvl . ' (Plus Rapide)',
+            'gain' => 'Cadence d\'enrôlement accrue'
+        ],
+        'shipyard' => [
+            'label' => 'Écuries & Haras Féodaux',
+            'cur' => 'Niveau ' . $lvl,
+            'next' => 'Niveau ' . $targetLvl,
+            'gain' => 'Mobilisation de cavalerie accélérée'
+        ],
+        'research_lab' => [
+            'label' => 'Vitesse de Recherche Académique',
+            'cur' => 'Niveau ' . $lvl,
+            'next' => 'Niveau ' . $targetLvl,
+            'gain' => 'Découvertes accélérées'
+        ],
+        'market' => [
+            'label' => 'Capacité Marchande (Caravanes)',
+            'cur' => ($lvl * 500) . ' ressource / convoi',
+            'next' => ($targetLvl * 500) . ' ressource / convoi',
+            'gain' => '+500 transport par convoi'
+        ],
+        'embassy' => [
+            'label' => 'Influence Diplomatique de Clan',
+            'cur' => 'Niveau ' . $lvl,
+            'next' => 'Niveau ' . $targetLvl,
+            'gain' => '+3 membres max dans l\'alliance'
+        ],
+        'sawmill' => [
+            'label' => 'Bonus Bois de Cèdre',
+            'cur' => '+' . ($lvl * 5) . '%',
+            'next' => '+' . ($targetLvl * 5) . '%',
+            'gain' => '+5% débit de scierie'
+        ],
+        'stonemason' => [
+            'label' => 'Bonus Pierre de Taille',
+            'cur' => '+' . ($lvl * 5) . '%',
+            'next' => '+' . ($targetLvl * 5) . '%',
+            'gain' => '+5% taille de granit'
+        ],
+        'grain_mill' => [
+            'label' => 'Bonus Riz Impérial',
+            'cur' => '+' . ($lvl * 5) . '%',
+            'next' => '+' . ($targetLvl * 5) . '%',
+            'gain' => '+5% mouture de riz'
+        ],
+        'blacksmith' => [
+            'label' => 'Armement & Tamahagane',
+            'cur' => 'Niveau ' . $lvl,
+            'next' => 'Niveau ' . $targetLvl,
+            'gain' => 'Forge d\'équipements supérieurs'
+        ],
+        'teahouse' => [
+            'label' => 'Sérénité & Cérémonie du Thé',
+            'cur' => '+' . ($lvl * 25) . ' sérénité',
+            'next' => '+' . ($targetLvl * 25) . ' sérénité',
+            'gain' => '+25 sérénité villageoise'
+        ],
+        'tournament_square' => [
+            'label' => 'Vitesse de Marche Terrestre',
+            'cur' => '+' . ($lvl * 10) . '% sur 20+ cases',
+            'next' => '+' . ($targetLvl * 10) . '% sur 20+ cases',
+            'gain' => '+10% cadence de marche'
+        ],
+        default => [
+            'label' => 'Développement Féodal',
+            'cur' => 'Niveau ' . $lvl,
+            'next' => 'Niveau ' . $targetLvl,
+            'gain' => 'Prestige accru du domaine'
+        ]
+    };
+
+    $feature = match($code) {
+        'barracks' => ($lvl > 0) ? ['url' => '?page=barracks', 'label' => 'Ouvrir le Dojo Militaire', 'icon' => 'fa-solid fa-user-ninja'] : null,
+        'shipyard' => ($lvl > 0) ? ['url' => '?page=shipyard', 'label' => 'Mobiliser la Cavalerie & Engins', 'icon' => 'fa-solid fa-horse'] : null,
+        'research_lab' => ($lvl > 0) ? ['url' => '?page=research', 'label' => 'Consulter l\'Académie des Savoirs', 'icon' => 'fa-solid fa-scroll'] : null,
+        'market' => ($lvl > 0) ? ['url' => '?page=market', 'label' => 'Ouvrir le Marché Féodal', 'icon' => 'fa-solid fa-scale-balanced'] : null,
+        'embassy' => ($lvl > 0) ? ['url' => '?page=alliance', 'label' => 'Affaires de Clan & Ambassade', 'icon' => 'fa-solid fa-torii-gate'] : null,
+        'grain_mill' => ($lvl >= 10) ? ['url' => '/?page=building&code=grain_mill#craftSection', 'label' => 'Raffiner Saké & Farine de Riz', 'icon' => 'fa-solid fa-wine-bottle'] : null,
+        'sawmill' => ($lvl >= 10) ? ['url' => '/?page=building&code=sawmill#craftSection', 'label' => 'Façonner les Poutres de Cèdre', 'icon' => 'fa-solid fa-hammer'] : null,
+        'stonemason' => ($lvl > 0) ? ['url' => '/?page=building&code=stonemason#craftSection', 'label' => 'Raffiner Minerais & Tuiles Kawara', 'icon' => 'fa-solid fa-gem'] : null,
+        'blacksmith' => ($lvl >= 15) ? ['url' => '/?page=building&code=blacksmith#craftSection', 'label' => 'Fourneaux de Prestige & Armes', 'icon' => 'fa-solid fa-fire-burner'] : null,
+        default => null
+    };
+
+    $citySlotsJsonData[$s] = [
+        'slot' => $s,
+        'code' => $code,
+        'name' => $bInfo['name'] ?? 'Bâtiment Castral',
+        'desc' => $bInfo['description'] ?? '',
+        'icon' => $bInfo['icon'] ?? '<i class="fa-solid fa-landmark"></i>',
+        'sector' => $secKey,
+        'sector_label' => $secLabel,
+        'sector_color' => $secColor,
+        'level' => $lvl,
+        'max_level' => $maxLvl,
+        'is_max' => $isMax,
+        'is_empty' => $isEmpty,
+        'is_upgrading' => $isUpgrading,
+        'is_demolishing' => $isDemolishing,
+        'queue_id' => (int)($job['id'] ?? 0),
+        'finishes_at' => (int)($job['finishes_at'] ?? 0),
+        'started_at' => (int)($job['started_at'] ?? 0),
+        'target_level' => $targetLvl,
+        'cost' => $cost,
+        'duration' => $duration,
+        'can_afford' => $canAfford,
+        'can_queue' => $canQueueNewBuilding,
+        'img_url' => $buildingHeroImages[$code] ?? '/public/assets/shogun_castle_city_bg.jpg',
+        'stat_data' => $statData,
+        'feature' => $feature
+    ];
+}
 ?>
 
 <style>
@@ -261,7 +471,8 @@ ob_start();
                          data-slot="<?= $slot ?>"
                          data-building="<?= $code ?>"
                          title="<?= htmlspecialchars($bInfo['name']) ?> (<?= $isLevelZero ? 'Non bâti - Cliquez pour fonder' : ($isDemolishing ? 'Démantèlement en cours' : ($isUnderConstruction ? 'Chantier en cours (Niv. 1)' : 'Niveau ' . $lvl)) ?>)"
-                         onclick="window.location.href='/?page=building&slot=<?= $slot ?>'">
+                         onclick="openBuildingSlotModal(<?= $slot ?>)"
+                         style="cursor: pointer;">
 
                         <!-- Badge féodal de niveau (ou marqueur de fondation) -->
                         <div class="rts-level-bubble <?= ($code === 'hq') ? 'rts-tenshu-bubble' : '' ?> <?= $isLevelZero ? 'level-zero' : '' ?> <?= $isDemolishing ? 'demolishing' : (($isUnderConstruction || $isUpgrading) ? 'upgrading' : '') ?>"
@@ -333,13 +544,13 @@ ob_start();
                             <?php endif; ?>
 
                             <?php if ($isMaxLevel): ?>
-                                <a href="/?page=building&code=<?= $code ?>" class="btn btn-outline-success" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">
+                                <button type="button" onclick="openBuildingSlotModalByCode('<?= $code ?>')" class="btn btn-outline-success" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center;">
                                     <i class="fa-solid fa-crown text-warning me-1"></i>Niveau Maximum (<?= $lvl ?>)
-                                </a>
+                                </button>
                             <?php else: ?>
-                                <a href="/?page=building&code=<?= $code ?>" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center; text-decoration:none;">
-                                    <?= ($lvl === 0) ? '<i class="fa-solid fa-hammer me-1"></i>Construire' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Améliorer le niveau' ?>
-                                </a>
+                                <button type="button" onclick="openBuildingSlotModalByCode('<?= $code ?>')" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center;">
+                                    <?= ($lvl === 0) ? '<i class="fa-solid fa-hammer me-1"></i>Construire' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Gérer &amp; Améliorer' ?>
+                                </button>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -353,213 +564,632 @@ ob_start();
 ?>
 
 
-<!-- Modale de Fondation sur Emplacement Libre (Style Travian) -->
-<div class="modal-overlay" id="freeSlotModal" style="display:none; position:fixed; inset:0; background:rgba(5,7,15,0.88); backdrop-filter:blur(10px); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
-    <div class="modal-card" style="background:#0f172a; border:1px solid #334155; border-radius:12px; width:100%; max-width:920px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.7); overflow:hidden;">
+<!-- ========================================================
+     MODALE D'ÉLITE DU BÂTIMENT CASTRAL & EMPLACEMENT (STYLE TRAVIAN CRAFT)
+     Bannière HD, dégradé sombre, comparatifs, navigation entre slots
+     ======================================================== -->
+<div class="modal fade" id="buildingSlotModal" tabindex="-1" aria-labelledby="cityModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 12px;">
+            <!-- Illustration d'en-tête (215px) avec overlay dégradé -->
+            <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
+                <img id="cityModalBannerImg" src="/public/assets/buildings/building_tenshu.jpg" alt="Édifice de la Cité" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
-        <!-- En-tête -->
-        <div class="card-header" style="background:rgba(15,23,42,0.95); padding:1rem 1.25rem; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <h3 class="card-title" style="margin:0; font-size:1.2rem; color:#f8fafc; display:flex; align-items:center; gap:0.5rem;">
-                    <span><i class="fa-solid fa-helmet-safety text-danger"></i></span> Fonder une Structure Féodale — Emplacement #<span id="modal-slot-title" style="color:#ef4444;">19</span>
-                </h3>
-                <span style="font-size:0.8rem; color:#94a3b8;">Choisissez l'édifice à bâtir sur ce terrain disponible de votre forteresse.</span>
-            </div>
-            <button onclick="closeBuildModal()" class="modal-close-btn" style="background:none; border:none; font-size:1.6rem; color:#94a3b8; cursor:pointer; padding:0.25rem 0.5rem; border-radius:6px; line-height:1;">&times;</button>
-        </div>
-
-        <!-- Filtres par catégorie -->
-        <div style="display:flex; gap:0.5rem; padding:0.75rem 1.25rem; background:rgba(0,0,0,0.25); border-bottom:1px solid #1e293b; flex-wrap:wrap;">
-            <button class="btn btn-secondary modal-filter-btn active" onclick="filterModalBuildings('all')" id="modal-filter-all" style="font-size:0.8rem; padding:0.3rem 0.75rem;"><i class="fa-solid fa-globe me-1"></i>Toutes (<?= count($availableBuildingsToConstruct) ?>)</button>
-            <button class="btn btn-secondary modal-filter-btn" onclick="filterModalBuildings('military')" id="modal-filter-military" style="font-size:0.8rem; padding:0.3rem 0.75rem;"><i class="fa-solid fa-khanda me-1"></i>Militaire & Défense</button>
-            <button class="btn btn-secondary modal-filter-btn" onclick="filterModalBuildings('science')" id="modal-filter-science" style="font-size:0.8rem; padding:0.3rem 0.75rem;"><i class="fa-solid fa-scroll me-1"></i>Savoirs & Diplomatie</button>
-            <button class="btn btn-secondary modal-filter-btn" onclick="filterModalBuildings('logistics')" id="modal-filter-logistics" style="font-size:0.8rem; padding:0.3rem 0.75rem;"><i class="fa-solid fa-boxes-stacked me-1"></i>Logistique & Marché</button>
-        </div>
-
-        <!-- Corps avec défilement de la liste des bâtiments -->
-        <div class="card-body" style="padding:1rem 1.25rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:0.75rem;">
-            <?php if (empty($availableBuildingsToConstruct)): ?>
-                <div style="text-align:center; padding:3rem 1rem; color:#94a3b8;">
-                    <div style="font-size:2.5rem; margin-bottom:0.75rem;"><i class="fa-solid fa-chess-rook text-secondary"></i></div>
-                    <h4 style="color:#f8fafc; margin-bottom:0.5rem;">Toutes les structures féodales sont déjà érigées !</h4>
-                    <p style="font-size:0.85rem; max-width:450px; margin:0 auto;">Vous avez déjà fondé l'ensemble des bâtiments uniques du clan. Vous pouvez améliorer leurs niveaux depuis la vue générale de la cité.</p>
+                <!-- Navigation inter-slots (précédent / suivant) en haut à gauche -->
+                <div style="position: absolute; top: 12px; left: 16px; z-index: 10;" class="d-flex align-items-center gap-1">
+                    <button type="button" class="btn btn-sm btn-dark bg-opacity-75 text-white border-0 py-1 px-2.5 shadow-sm" onclick="navigateCitySlotModal(-1)" title="Emplacement Précédent">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <span class="badge bg-dark bg-opacity-75 text-white font-monospace px-2.5 py-1.5 shadow-sm border border-secondary" id="cityModalSlotNavBadge" style="font-size: 0.75rem;">
+                        Slot #19 / 34
+                    </span>
+                    <button type="button" class="btn btn-sm btn-dark bg-opacity-75 text-white border-0 py-1 px-2.5 shadow-sm" onclick="navigateCitySlotModal(1)" title="Emplacement Suivant">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
                 </div>
-            <?php else: ?>
-                <?php foreach ($availableBuildingsToConstruct as $bCode => $item):
-                    $info = $item['info'];
-                    $det = $item['details'];
-                    $c = $det['cost'];
-                    $dur = $det['duration'];
-                    $canAfford = $item['can_afford'];
-                    $sec = $item['sector'];
-                    $durFormatted = sprintf('%02d:%02d', floor($dur / 60), $dur % 60);
-                ?>
-                    <div class="modal-building-row" data-sector="<?= $sec ?>" style="background:rgba(30,41,59,0.5); border:1px solid #334155; border-radius:8px; padding:0.85rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; transition:border-color 0.2s;">
-                        <div style="display:flex; align-items:center; gap:1rem; flex:1; min-width:280px;">
-                            <div style="width:52px; height:52px; background:rgba(15,23,42,0.8); border:1px solid #475569; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden;">
-                                <?php if (!empty($info['tile_img'])):
-                                    $cityTileUrl = file_exists(__DIR__ . '/../public/assets/tiles/' . $info['tile_img']) ? '/public/assets/tiles/' . $info['tile_img'] : '/public/assets/' . $info['tile_img'];
-                                ?>
-                                    <img src="<?= $cityTileUrl ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:44px; height:44px; object-fit:contain;">
-                                <?php else: ?>
-                                    <span style="font-size:1.8rem;"><?= $info['icon'] ?></span>
-                                <?php endif; ?>
-                            </div>
-                            <div>
-                                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-                                    <h4 style="margin:0; font-size:1rem; color:#f8fafc;"><?= htmlspecialchars($info['name']) ?></h4>
-                                    <span style="font-size:0.7rem; padding:0.1rem 0.4rem; border-radius:4px; background:rgba(255,255,255,0.08); color:#94a3b8; text-transform:uppercase;">
-                                        <?= match($sec) { 'military' => 'Militaire', 'science' => 'Savoirs', default => 'Logistique' } ?>
-                                    </span>
-                                </div>
-                                <p style="margin:0.25rem 0 0 0; font-size:0.8rem; color:#94a3b8; line-height:1.3;">
-                                    <?= htmlspecialchars($info['description']) ?>
-                                </p>
-                            </div>
+
+                <!-- Bouton fermer blanc -->
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+
+                <!-- Infos d'en-tête en bas de la bannière -->
+                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                    <div style="max-width: 72%;">
+                        <span id="cityModalSectorBadge" class="badge bg-danger text-white fw-bold px-2 py-1 mb-1 shadow-sm" style="font-size:0.75rem;">
+                            🏯 COMMANDEMENT
+                        </span>
+                        <h3 class="m-0 fw-bold text-white shadow-sm text-truncate" id="cityModalTitle" style="font-size: 1.25rem;">
+                            Donjon Tenshu
+                        </h3>
+                        <div class="text-white-50 font-monospace small mt-0.5" id="cityModalSubtitle">Cité Castrale &bull; Emplacement #19</div>
+                    </div>
+                    <div>
+                        <span id="cityModalLevelBadge" class="badge bg-warning text-dark font-monospace fs-6 px-3 py-1 shadow-sm">
+                            Niveau 1 / 20
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Corps de la modale -->
+            <div class="modal-body p-4 bg-white">
+                <!-- PANNEAU A : BÂTIMENT EXISTANT / ATTRIBUÉ -->
+                <div id="cityModalExistingView">
+                    <!-- Lore & Dialogue immersif -->
+                    <div class="p-3 rounded border mb-3" style="background: #fdfbf7; border-left: 4px solid #b91c1c !important;">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span id="cityModalIconSpan" style="font-size: 1.15rem;"><i class="fa-solid fa-chess-rook text-danger"></i></span>
+                            <strong class="text-danger small" id="cityModalDescHeading">Édifice du Shogunat :</strong>
                         </div>
+                        <p class="small text-secondary m-0 fst-italic" id="cityModalDesc" style="line-height: 1.5;">
+                            ...
+                        </p>
+                    </div>
 
-                        <div style="display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap;">
-                            <!-- Coûts Niveau 1 -->
-                            <div style="display:flex; gap:0.75rem; font-size:0.82rem; font-weight:600;">
-                                <span style="color:<?= ($planet['metal'] >= $c['metal']) ? '#4ade80' : '#ef4444' ?>;" title="Bois de Cèdre">
-                                    <i class="fa-solid fa-tree me-1"></i><?= number_format($c['metal']) ?>
-                                </span>
-                                <span style="color:<?= ($planet['crystal'] >= $c['crystal']) ? '#4ade80' : '#ef4444' ?>;" title="Pierre de Taille">
-                                    <i class="fa-solid fa-mountain me-1"></i><?= number_format($c['crystal']) ?>
-                                </span>
-                                <span style="color:<?= ($planet['deuterium'] >= $c['deuterium']) ? '#4ade80' : '#ef4444' ?>;" title="Koku de Riz">
-                                    <i class="fa-solid fa-wheat-awn me-1"></i><?= number_format($c['deuterium']) ?>
-                                </span>
-                                <span style="color:#94a3b8;" title="Durée des travaux">
-                                    <i class="fa-solid fa-hourglass-half me-1"></i><?= $durFormatted ?>
-                                </span>
-                            </div>
-
-                            <!-- Bouton Bâtir -->
-                            <div>
-                                <?php if ($canAfford && $canQueueNewBuilding): ?>
-                                    <button type="button" class="btn btn-primary" onclick="confirmBuildOnSlot('<?= $bCode ?>')" style="font-size:0.85rem; padding:0.45rem 0.9rem; font-weight:600; background:linear-gradient(135deg, #b91c1c, #dc2626); border-color:#ef4444; white-space:nowrap;">
-                                        <i class="fa-solid fa-hammer me-1"></i><?= $isAdmin ? '⚡ Bâtir (Gratuit Admin)' : 'Bâtir (Niveau 1)' ?>
-                                    </button>
-                                <?php elseif (!$canAfford): ?>
-                                    <button type="button" class="btn btn-secondary" disabled style="font-size:0.8rem; padding:0.45rem 0.75rem; opacity:0.6; cursor:not-allowed; white-space:nowrap;" title="Ressources insuffisantes dans vos réserves">
-                                        <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i>Ressources insuffisantes
-                                    </button>
-                                <?php else: ?>
-                                    <button type="button" class="btn btn-secondary" disabled style="font-size:0.8rem; padding:0.45rem 0.75rem; opacity:0.6; cursor:not-allowed; white-space:nowrap;" title="Chantier déjà en cours dans la forteresse">
-                                        <i class="fa-solid fa-hourglass-half me-1"></i>Chantier en cours
-                                    </button>
-                                <?php endif; ?>
+                    <!-- Encart comparatif Rendement / Avantage féodal -->
+                    <div class="p-3 mb-3 rounded border" style="background: #f8fafc;" id="cityModalStatsBox">
+                        <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+                            <span class="text-secondary small"><i class="fa-solid fa-chart-line text-success me-1"></i><span id="cityModalStatLabel">Avantage féodal :</span></span>
+                            <strong class="text-dark small font-monospace" id="cityModalStatCurrent">-</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2">
+                            <span class="text-secondary small"><i class="fa-solid fa-arrow-trend-up text-primary me-1"></i>Prochain niveau :</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <strong class="text-primary small font-monospace" id="cityModalStatNext">-</strong>
+                                <span class="badge bg-success-lt text-success small font-monospace" id="cityModalStatGain">+</span>
                             </div>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
 
-        <!-- Pied de modale -->
-        <div style="background:rgba(15,23,42,0.95); padding:0.75rem 1.25rem; border-top:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-            <span style="font-size:0.8rem; color:#64748b;">
-                <i class="fa-solid fa-lightbulb text-warning me-1"></i>Un édifice peut être érigé sur n'importe quel emplacement disponible de votre forteresse.
-            </span>
-            <button class="btn btn-secondary" onclick="closeBuildModal()" style="font-size:0.8rem; padding:0.35rem 0.75rem;">Fermer</button>
+                    <!-- Statut Chantier en cours (si actif) -->
+                    <div id="cityModalActiveWorkBox" class="d-none p-3 mb-3 rounded border border-warning-subtle" style="background: #fffbeb;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-dark"><i class="fa-solid fa-hammer text-warning me-1"></i>Chantier d'élévation en cours</span>
+                            <span class="font-monospace fw-bold text-danger fs-3" id="cityModalWorkCountdown">--:--:--</span>
+                        </div>
+                        <div class="progress mb-2" style="height: 6px; background: #fef3c7; border-radius: 3px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" id="cityModalWorkProgressBar" role="progressbar" style="width: 0%;"></div>
+                        </div>
+                        <div class="small text-muted" id="cityModalWorkFinishLabel"></div>
+                    </div>
+
+                    <!-- Coûts requis & Durée (si pas de chantier) -->
+                    <div id="cityModalUpgradeBox">
+                        <div class="mb-3">
+                            <label class="form-label mb-2 fw-bold text-muted small text-uppercase" style="font-size:0.75rem;">Matériaux Requis pour l'Élévation :</label>
+                            <div class="d-flex flex-wrap gap-2" id="cityModalCostTags"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center text-muted small mb-0 p-2 rounded bg-light border">
+                            <span><i class="fa-regular fa-clock me-1 text-primary"></i>Durée estimée des travaux :</span>
+                            <strong class="font-monospace text-dark" id="cityModalDuration">00:01:30</strong>
+                        </div>
+                    </div>
+
+                    <!-- Raccourci vers la fonction métier du bâtiment (Dojo, Écuries, Académie...) -->
+                    <div id="cityModalFeatureBox" class="mt-3 d-none">
+                        <a href="#" id="cityModalFeatureBtn" class="btn btn-outline-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 py-2">
+                            <i id="cityModalFeatureIcon" class="fa-solid fa-arrow-up-right-from-square"></i>
+                            <span id="cityModalFeatureLabel">Accéder</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- PANNEAU B : TERRAIN VIERGE / FONDATION D'UN NOUVEL ÉDIFICE -->
+                <div id="cityModalFreePlotView" class="d-none">
+                    <p class="text-secondary small mb-3">
+                        Cet emplacement de votre forteresse est libre. Choisissez l'édifice féodal à ériger pour étendre la puissance de votre clan.
+                    </p>
+
+                    <!-- Filtres par secteur -->
+                    <div class="d-flex gap-1.5 mb-3 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-secondary city-build-filter active" onclick="filterCityBuildModal('all', this)">
+                            <i class="fa-solid fa-globe me-1"></i>Toutes
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger city-build-filter" onclick="filterCityBuildModal('military', this)">
+                            <i class="fa-solid fa-khanda me-1"></i>Militaire & Défense
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-info city-build-filter" onclick="filterCityBuildModal('science', this)">
+                            <i class="fa-solid fa-scroll me-1"></i>Savoirs & Diplomatie
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success city-build-filter" onclick="filterCityBuildModal('logistics', this)">
+                            <i class="fa-solid fa-boxes-stacked me-1"></i>Logistique & Marché
+                        </button>
+                    </div>
+
+                    <!-- Liste défilante des structures constructibles -->
+                    <div class="d-flex flex-column gap-2" style="max-height: 340px; overflow-y: auto;" id="cityModalAvailableBuildingsList">
+                        <!-- Rempli dynamiquement -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pied de modale avec confirmation -->
+            <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i>Fermer
+                </button>
+                <div id="cityModalActionContainer" class="d-flex gap-2">
+                    <!-- Boutons d'action injectés dynamiquement -->
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-let currentSelectedSlot = null;
+window.CITY_SLOTS_DATA = <?= json_encode($citySlotsJsonData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+window.AVAILABLE_BUILDINGS = <?= json_encode($availableBuildingsToConstruct, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+window.CITY_CONFIG = {
+    metal: <?= (int)$planet['metal'] ?>,
+    crystal: <?= (int)$planet['crystal'] ?>,
+    deuterium: <?= (int)$planet['deuterium'] ?>,
+    isAdmin: <?= $isAdmin ? 'true' : 'false' ?>,
+    canQueue: <?= $canQueueNewBuilding ? 'true' : 'false' ?>
+};
 
-function openBuildModal(slot) {
-    currentSelectedSlot = slot;
-    const titleEl = document.getElementById('modal-slot-title');
-    if (titleEl) titleEl.innerText = slot;
+let currentCitySlotIndex = 19;
+let cityCountdownInterval = null;
 
-    const modal = document.getElementById('freeSlotModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        filterModalBuildings('all');
+function formatCityDuration(seconds) {
+    if (seconds <= 0) return '00:00:00';
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    const pad = n => n.toString().padStart(2, '0');
+    if (days > 0) {
+        return `${days}j ${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+    }
+    return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+}
+
+function openBuildingSlotModal(slotNum) {
+    slotNum = parseInt(slotNum, 10);
+    if (!slotNum || slotNum < 19 || slotNum > 34) slotNum = 19;
+    currentCitySlotIndex = slotNum;
+    renderCitySlotModal();
+
+    const modalEl = document.getElementById('buildingSlotModal');
+    if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+        const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
     }
 }
 
-function closeBuildModal() {
-    const modal = document.getElementById('freeSlotModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    currentSelectedSlot = null;
-}
-
-function filterModalBuildings(sector) {
-    document.querySelectorAll('.modal-filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.id === 'modal-filter-' + sector);
-    });
-
-    const rows = document.querySelectorAll('.modal-building-row');
-    rows.forEach(r => {
-        if (sector === 'all' || r.dataset.sector === sector) {
-            r.style.display = 'flex';
-        } else {
-            r.style.display = 'none';
+function openBuildingSlotModalByCode(code) {
+    for (const [s, data] of Object.entries(window.CITY_SLOTS_DATA)) {
+        if (data.code === code) {
+            openBuildingSlotModal(parseInt(s, 10));
+            return;
         }
-    });
+    }
+    openBuildingSlotModal(19);
 }
 
-async function confirmBuildOnSlot(code) {
-    if (!currentSelectedSlot) return;
+function navigateCitySlotModal(delta) {
+    let nextSlot = currentCitySlotIndex + delta;
+    if (nextSlot < 19) nextSlot = 34;
+    if (nextSlot > 34) nextSlot = 19;
+    currentCitySlotIndex = nextSlot;
+    renderCitySlotModal();
+}
 
-    const btn = event.target;
-    const originalText = btn.innerText;
-    btn.disabled = true;
-    btn.innerText = 'Chantier...';
+function renderCitySlotModal() {
+    const data = window.CITY_SLOTS_DATA[currentCitySlotIndex];
+    if (!data) return;
+
+    if (cityCountdownInterval) {
+        clearInterval(cityCountdownInterval);
+        cityCountdownInterval = null;
+    }
+
+    // Badge navigation
+    const navBadge = document.getElementById('cityModalSlotNavBadge');
+    if (navBadge) navBadge.textContent = `Slot #${data.slot} / 34`;
+
+    // Bannière HD
+    const bannerImg = document.getElementById('cityModalBannerImg');
+    if (bannerImg) {
+        bannerImg.src = data.img_url || '/public/assets/buildings/building_tenshu.jpg';
+    }
+
+    // Badge secteur
+    const sectorBadge = document.getElementById('cityModalSectorBadge');
+    if (sectorBadge) {
+        sectorBadge.textContent = `${data.sector_label.toUpperCase()}`;
+        sectorBadge.style.backgroundColor = data.sector_color || '#b91c1c';
+    }
+
+    // Titres
+    const titleEl = document.getElementById('cityModalTitle');
+    if (titleEl) {
+        titleEl.textContent = data.is_empty ? `Emplacement #${data.slot} (Terrain Vierge)` : data.name;
+    }
+    const subTitleEl = document.getElementById('cityModalSubtitle');
+    if (subTitleEl) {
+        subTitleEl.textContent = `Cité Castrale • Emplacement #${data.slot}`;
+    }
+
+    // Badge niveau
+    const lvlBadge = document.getElementById('cityModalLevelBadge');
+    if (lvlBadge) {
+        if (data.is_empty) {
+            lvlBadge.className = 'badge bg-secondary text-white font-monospace fs-6 px-3 py-1 shadow-sm';
+            lvlBadge.textContent = 'Terrain Libre';
+        } else if (data.is_max) {
+            lvlBadge.className = 'badge bg-success text-white font-monospace fs-6 px-3 py-1 shadow-sm';
+            lvlBadge.textContent = `Niveau ${data.level} (Apogée)`;
+        } else {
+            lvlBadge.className = 'badge bg-warning text-dark font-monospace fs-6 px-3 py-1 shadow-sm';
+            lvlBadge.textContent = `Niveau ${data.level} / ${data.max_level}`;
+        }
+    }
+
+    const existingView = document.getElementById('cityModalExistingView');
+    const freePlotView = document.getElementById('cityModalFreePlotView');
+    const actionContainer = document.getElementById('cityModalActionContainer');
+
+    if (data.is_empty) {
+        // Affichage panneau terrain vierge
+        if (existingView) existingView.classList.add('d-none');
+        if (freePlotView) freePlotView.classList.remove('d-none');
+
+        renderAvailableBuildingsList('all');
+
+        if (actionContainer) {
+            actionContainer.innerHTML = `
+                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i>Annuler
+                </button>
+            `;
+        }
+    } else {
+        // Affichage panneau bâtiment existant
+        if (existingView) existingView.classList.remove('d-none');
+        if (freePlotView) freePlotView.classList.add('d-none');
+
+        // Lore / Description
+        const descEl = document.getElementById('cityModalDesc');
+        if (descEl) descEl.textContent = data.desc || '';
+
+        const iconSpan = document.getElementById('cityModalIconSpan');
+        if (iconSpan) iconSpan.innerHTML = data.icon || '<i class="fa-solid fa-landmark"></i>';
+
+        // Statistiques comparatives
+        const statsBox = document.getElementById('cityModalStatsBox');
+        if (statsBox && data.stat_data) {
+            const statLabel = document.getElementById('cityModalStatLabel');
+            const statCur = document.getElementById('cityModalStatCurrent');
+            const statNext = document.getElementById('cityModalStatNext');
+            const statGain = document.getElementById('cityModalStatGain');
+            if (statLabel) statLabel.textContent = data.stat_data.label + ' :';
+            if (statCur) statCur.textContent = data.stat_data.cur;
+            if (statNext) statNext.textContent = data.is_max ? 'Apogée' : data.stat_data.next;
+            if (statGain) {
+                statGain.textContent = data.is_max ? 'Max' : (data.stat_data.gain || '+');
+                statGain.style.display = data.is_max ? 'none' : 'inline-block';
+            }
+        }
+
+        // Chantier actif vs boîte d'élévation
+        const workBox = document.getElementById('cityModalActiveWorkBox');
+        const upgradeBox = document.getElementById('cityModalUpgradeBox');
+
+        if (data.is_upgrading) {
+            if (workBox) workBox.classList.remove('d-none');
+            if (upgradeBox) upgradeBox.classList.add('d-none');
+
+            const now = Math.floor(Date.now() / 1000);
+            const finishesAt = data.finishes_at || now;
+            const startedAt = data.started_at || now;
+
+            const updateWorkTimer = () => {
+                const currentNow = Math.floor(Date.now() / 1000);
+                const remaining = Math.max(0, finishesAt - currentNow);
+                const total = Math.max(1, finishesAt - startedAt);
+                const elapsed = Math.max(0, currentNow - startedAt);
+                const progress = Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)));
+
+                const cdEl = document.getElementById('cityModalWorkCountdown');
+                if (cdEl) cdEl.textContent = formatCityDuration(remaining);
+
+                const pBar = document.getElementById('cityModalWorkProgressBar');
+                if (pBar) pBar.style.width = progress + '%';
+
+                const finishLabel = document.getElementById('cityModalWorkFinishLabel');
+                if (finishLabel) {
+                    const dateObj = new Date(finishesAt * 1000);
+                    finishLabel.textContent = `Chantier vers Niveau ${data.target_level}. Fin estimée : ${dateObj.toLocaleTimeString()}`;
+                }
+            };
+
+            updateWorkTimer();
+            cityCountdownInterval = setInterval(updateWorkTimer, 1000);
+
+            if (actionContainer) {
+                const isAdm = window.CITY_CONFIG.isAdmin;
+                actionContainer.innerHTML = `
+                    <button type="button" class="btn btn-warning fw-bold px-3 shadow-sm d-flex align-items-center gap-1.5" onclick="instantFinishCityBuilding(${data.queue_id})">
+                        <i class="fa-solid fa-bolt text-danger"></i>
+                        <span>${isAdm ? '⚡ Finir Gratuit' : 'Terminer (2 Kobans)'}</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger px-3" onclick="cancelCityBuilding(${data.queue_id}, this)">
+                        <i class="fa-solid fa-ban me-1"></i> Annuler (-20%)
+                    </button>
+                `;
+            }
+        } else {
+            if (workBox) workBox.classList.add('d-none');
+            if (upgradeBox) upgradeBox.classList.remove('d-none');
+
+            // Coûts
+            const costContainer = document.getElementById('cityModalCostTags');
+            if (costContainer) {
+                costContainer.innerHTML = '';
+                if (data.is_max) {
+                    costContainer.innerHTML = '<span class="badge bg-success-lt fs-4 p-2"><i class="fa-solid fa-crown me-1 text-warning"></i>Apogée de l\'édifice atteinte</span>';
+                } else {
+                    const addTag = (icon, name, costVal, playerStock) => {
+                        if (costVal <= 0) return;
+                        const ok = playerStock >= costVal;
+                        const tag = document.createElement('span');
+                        tag.className = 'cost-chip ' + (ok ? 'affordable' : 'missing');
+                        tag.innerHTML = `<i class="${icon}"></i> ${name} : <strong>${costVal.toLocaleString()}</strong>`;
+                        costContainer.appendChild(tag);
+                    };
+
+                    addTag('fa-solid fa-tree text-success', 'Bois', data.cost.metal || 0, window.CITY_CONFIG.metal);
+                    addTag('fa-solid fa-mountain text-secondary', 'Pierre', data.cost.crystal || 0, window.CITY_CONFIG.crystal);
+                    addTag('fa-solid fa-wheat-awn text-warning', 'Riz', data.cost.deuterium || 0, window.CITY_CONFIG.deuterium);
+                }
+            }
+
+            // Durée
+            const durEl = document.getElementById('cityModalDuration');
+            if (durEl) {
+                durEl.textContent = data.is_max ? 'Apogée' : formatCityDuration(data.duration || 60);
+            }
+
+            // Boutons d'action dans le footer
+            if (actionContainer) {
+                if (data.is_max) {
+                    actionContainer.innerHTML = `
+                        <button type="button" class="btn btn-secondary disabled px-4" disabled>
+                            <i class="fa-solid fa-check me-1"></i> Apogée atteinte
+                        </button>
+                    `;
+                } else if (data.can_afford || window.CITY_CONFIG.isAdmin) {
+                    const isAdm = window.CITY_CONFIG.isAdmin;
+                    actionContainer.innerHTML = `
+                        <button type="button" class="btn btn-primary fw-bold px-4 shadow-sm pulse-btn" onclick="upgradeCitySlot('${data.code}', ${data.slot}, this)">
+                            <i class="fa-solid fa-arrow-up me-1"></i> ${isAdm ? '⚡ [Admin] Élévation Immédiate (Niv. ' + data.target_level + ')' : (data.level === 0 ? 'Construire l\'édifice (Niveau 1)' : 'Élever au Niveau ' + data.target_level)}
+                        </button>
+                    `;
+                } else {
+                    actionContainer.innerHTML = `
+                        <button type="button" class="btn btn-outline-secondary disabled px-3" disabled style="opacity:0.7;">
+                            <i class="fa-solid fa-lock me-1"></i> Ressources insuffisantes
+                        </button>
+                    `;
+                }
+            }
+        }
+
+        // Raccourci métier spécial (Dojo, Écuries, Académie...)
+        const featureBox = document.getElementById('cityModalFeatureBox');
+        if (featureBox) {
+            if (data.feature && data.feature.url) {
+                featureBox.classList.remove('d-none');
+                const fBtn = document.getElementById('cityModalFeatureBtn');
+                const fIcon = document.getElementById('cityModalFeatureIcon');
+                const fLabel = document.getElementById('cityModalFeatureLabel');
+                if (fBtn) fBtn.href = data.feature.url;
+                if (fIcon) fIcon.className = data.feature.icon || 'fa-solid fa-arrow-up-right-from-square';
+                if (fLabel) fLabel.textContent = data.feature.label || 'Accéder';
+            } else {
+                featureBox.classList.add('d-none');
+            }
+        }
+    }
+}
+
+function filterCityBuildModal(sector, btnEl) {
+    document.querySelectorAll('.city-build-filter').forEach(b => {
+        b.classList.remove('active', 'btn-secondary', 'btn-danger', 'btn-info', 'btn-success');
+        b.classList.add('btn-outline-secondary');
+    });
+    if (btnEl) {
+        btnEl.classList.remove('btn-outline-secondary', 'btn-outline-danger', 'btn-outline-info', 'btn-outline-success');
+        btnEl.classList.add('active', 'btn-secondary');
+    }
+    renderAvailableBuildingsList(sector);
+}
+
+function renderAvailableBuildingsList(sector) {
+    const container = document.getElementById('cityModalAvailableBuildingsList');
+    if (!container) return;
+
+    let html = '';
+    const buildings = window.AVAILABLE_BUILDINGS || {};
+    const keys = Object.keys(buildings);
+
+    if (keys.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-4 text-muted">
+                <i class="fa-solid fa-crown text-warning fs-1 d-block mb-2"></i>
+                <strong>Toutes les structures sont fondées !</strong>
+            </div>
+        `;
+        return;
+    }
+
+    keys.forEach(bCode => {
+        const item = buildings[bCode];
+        if (sector !== 'all' && item.sector !== sector) return;
+
+        const info = item.info;
+        const det = item.details;
+        const c = det.cost;
+        const durFormatted = formatCityDuration(det.duration);
+        const canAfford = item.can_afford || window.CITY_CONFIG.isAdmin;
+
+        html += `
+            <div class="p-3 rounded border d-flex justify-content-between align-items-center gap-3 flex-wrap" style="background:#f8fafc;">
+                <div class="d-flex align-items-center gap-2.5 flex-grow-1 min-w-0">
+                    <span style="font-size:1.6rem; min-width:32px; text-align:center;">${info.icon || '🏯'}</span>
+                    <div class="min-w-0">
+                        <strong class="text-dark d-block text-truncate" style="font-size:0.92rem;">${info.name}</strong>
+                        <p class="small text-muted m-0 text-truncate" style="font-size:0.75rem;">${info.description}</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <div class="d-flex gap-2 small font-monospace">
+                        <span style="color:${window.CITY_CONFIG.metal >= c.metal ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-tree me-1"></i>${Number(c.metal).toLocaleString()}</span>
+                        <span style="color:${window.CITY_CONFIG.crystal >= c.crystal ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-mountain me-1"></i>${Number(c.crystal).toLocaleString()}</span>
+                        <span style="color:${window.CITY_CONFIG.deuterium >= c.deuterium ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-wheat-awn me-1"></i>${Number(c.deuterium).toLocaleString()}</span>
+                        <span class="text-muted"><i class="fa-regular fa-clock me-1"></i>${durFormatted}</span>
+                    </div>
+
+                    <button type="button" class="btn btn-sm ${canAfford ? 'btn-primary' : 'btn-outline-secondary disabled'}" 
+                            onclick="confirmBuildOnSlot('${bCode}')" ${canAfford ? '' : 'disabled'}>
+                        <i class="fa-solid fa-hammer me-1"></i>Bâtir
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html || '<div class="text-center py-3 text-muted">Aucun édifice dans cette catégorie.</div>';
+}
+
+async function upgradeCitySlot(code, slot, btn) {
+    if (!code || !slot) return;
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Chantier en cours...';
+    }
 
     const formData = new FormData();
     formData.append('action', 'upgrade');
     formData.append('category', 'building');
     formData.append('target_id', code);
-    formData.append('slot', currentSelectedSlot);
+    formData.append('slot', slot);
 
     try {
         const res = await fetch('/api/build.php', { method: 'POST', body: formData });
         const data = await res.json();
         if (data.success) {
-            closeBuildModal();
             if (typeof showModalAlert === 'function') {
-                await showModalAlert(data.message || 'Fondation du bâtiment initiée avec succès !', 'success', 'Ordre de Chantier Transmis');
+                await showModalAlert(data.message || 'Travaux d\'élévation ordonnés avec succès !', 'success', 'Ordre de Chantier Transmis');
             }
             window.location.reload();
         } else {
-            btn.disabled = false;
-            btn.innerText = originalText;
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up me-1"></i>Réessayer';
+            }
             if (typeof showModalAlert === 'function') {
-                showModalAlert(data.error || 'Impossible de lancer ce chantier.', 'error');
+                showModalAlert(data.error || 'Impossible d\'élever cet édifice.', 'warning', 'Décret Impérial');
             } else {
                 alert(data.error);
             }
         }
     } catch (e) {
-        btn.disabled = false;
-        btn.innerText = originalText;
-        if (typeof showModalAlert === 'function') {
-            showModalAlert('Erreur de transmission avec les maîtres d\'œuvre.', 'error');
-        } else {
-            alert('Erreur réseau.');
-        }
+        if (btn) btn.disabled = false;
+        console.error('Erreur chantier:', e);
     }
 }
 
-// Fermeture au clic sur le fond de modale
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('freeSlotModal');
-    if (modal && e.target === modal) {
-        closeBuildModal();
-    }
-});
+async function confirmBuildOnSlot(code) {
+    const slot = currentCitySlotIndex;
+    const formData = new FormData();
+    formData.append('action', 'upgrade');
+    formData.append('category', 'building');
+    formData.append('target_id', code);
+    formData.append('slot', slot);
 
-// Fermeture par touche Echap
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeBuildModal();
+    try {
+        const res = await fetch('/api/build.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            if (typeof showModalAlert === 'function') {
+                await showModalAlert(data.message || 'Fondation du bâtiment initiée avec succès !', 'success', 'Ordre de Chantier Transmis');
+            }
+            window.location.reload();
+        } else {
+            if (typeof showModalAlert === 'function') {
+                showModalAlert(data.error || 'Impossible de lancer ce chantier.', 'warning', 'Ressources Insuffisantes');
+            } else {
+                alert(data.error);
+            }
+        }
+    } catch (e) {
+        console.error('Erreur fondation:', e);
+    }
+}
+
+async function instantFinishCityBuilding(queueId) {
+    if (!queueId) return;
+    try {
+        const formData = new FormData();
+        formData.append('action', 'instant_finish');
+        formData.append('queue_id', queueId);
+
+        const res = await fetch('/api/build.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            if (typeof showModalAlert === 'function') {
+                await showModalAlert(data.message || 'Chantier achevé instantanément avec honneur !', 'success', 'Édifice Complété');
+            }
+            window.location.reload();
+        } else {
+            if (typeof showModalAlert === 'function') {
+                showModalAlert(data.error || 'Impossible de finir instantanément ce chantier.', 'warning', 'Kobans Insuffisants');
+            }
+        }
+    } catch (e) {
+        console.error('Erreur instant finish:', e);
+    }
+}
+
+async function cancelCityBuilding(queueId, btn) {
+    if (!queueId) return;
+    if (typeof showModalConfirm === 'function') {
+        const ok = await showModalConfirm('Voulez-vous vraiment suspendre ces travaux ? 80% des matériaux investis vous seront restitués.', 'Interruption de Chantier');
+        if (!ok) return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'cancel');
+        formData.append('queue_id', queueId);
+
+        const res = await fetch('/api/build.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            if (typeof showModalAlert === 'function') {
+                showModalAlert(data.error || 'Impossible d\'annuler ce chantier.', 'error');
+            }
+        }
+    } catch (e) {
+        console.error('Erreur annulation:', e);
+    }
+}
+
+// Détection automatique des paramètres d'URL (?slot=X ou ?code=Y) pour ouvrir immédiatement la modale
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const slotParam = urlParams.get('slot');
+    const codeParam = urlParams.get('code');
+
+    if (slotParam) {
+        openBuildingSlotModal(parseInt(slotParam, 10));
+    } else if (codeParam) {
+        openBuildingSlotModalByCode(codeParam);
     }
 });
 
