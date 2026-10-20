@@ -5,10 +5,18 @@
 require_once __DIR__ . '/../core/BuildingEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
 require_once __DIR__ . '/../core/SlotPositionEngine.php';
+require_once __DIR__ . '/../core/BarracksEngine.php';
+require_once __DIR__ . '/../core/ShipyardEngine.php';
+require_once __DIR__ . '/../core/ResearchEngine.php';
+require_once __DIR__ . '/../core/AllianceEngine.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $buildingEngine = new BuildingEngine();
 $planetEngine = new PlanetEngine();
+$barracksEngine = new BarracksEngine();
+$shipyardEngine = new ShipyardEngine();
+$researchEngine = new ResearchEngine();
+$allianceEngine = new AllianceEngine();
 
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
 $fields = $planetEngine->getFields((int)$planet['id']);
@@ -22,6 +30,17 @@ $activeFeast = $planetEngine->getActiveFeast((int)$planet['id']);
 $pop = (int)($planet['population'] ?? 100);
 $popMax = (int)($planet['population_max'] ?? 100);
 $popBonus = min(25, (int)round($pop / 100));
+
+// Données tactiques pour les onglets métiers de la Cité Castrale
+$userFaction = $user['faction'] ?? 'terran';
+$availableUnits = $barracksEngine->getAvailableUnits((int)$planet['id'], $userFaction);
+$barracksQueue = $barracksEngine->getQueue((int)$planet['id']);
+$availableShips = $shipyardEngine->getAvailableShips((int)$planet['id'], $userFaction);
+$shipyardQueue = $shipyardEngine->getQueue((int)$planet['id']);
+$researches = $researchEngine->getResearches((int)($user['id'] ?? 0), (int)$planet['id']);
+$activeResearch = $researchEngine->getActiveQueue((int)($user['id'] ?? 0));
+$myAlliance = $allianceEngine->getUserAlliance((int)($user['id'] ?? 0));
+$allianceMembers = $myAlliance ? $allianceEngine->getAllianceMembers((int)$myAlliance['id']) : [];
 
 // Indexer la file active pour repérer les bâtiments en cours d'amélioration
 $activeBuildingQueue = [];
@@ -401,6 +420,18 @@ foreach ($citySlots as $s => $sd) {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
+.city-troop-card, .city-tech-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.9rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.city-troop-card:hover, .city-tech-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
 /* Scrollbar esthétique pour la modale à dimension fixe */
 #buildingSlotModal .modal-body::-webkit-scrollbar {
     width: 6px;
@@ -626,8 +657,8 @@ ob_start();
      Bannière HD, dégradé sombre, comparatifs, navigation entre slots
      ======================================================== -->
 <div class="modal fade" id="buildingSlotModal" tabindex="-1" aria-labelledby="cityModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 980px; width: 95vw; margin: 1.75rem auto;">
-        <div class="modal-content shadow-lg border-0 overflow-hidden d-flex flex-column" style="border-radius: 12px; height: 86vh; max-height: 820px; min-height: 600px;">
+    <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 1200px; width: 96vw; margin: 1.5rem auto;">
+        <div class="modal-content shadow-lg border-0 overflow-hidden d-flex flex-column" style="border-radius: 12px; height: 88vh; max-height: 880px; min-height: 620px;">
             <!-- Illustration d'en-tête (215px) avec overlay dégradé -->
             <div style="position: relative; width: 100%; height: 215px; flex-shrink: 0; overflow: hidden; background: #0f172a;">
                 <img id="cityModalBannerImg" src="/public/assets/buildings/building_tenshu.jpg" alt="Édifice de la Cité" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
@@ -675,16 +706,43 @@ ob_start();
                         <i class="fa-solid fa-arrow-up-right-dots text-danger me-1"></i>Évolution
                     </button>
                 </li>
+                <!-- Onglet Produits & Raffinage (Meunerie, Charpenterie, Tailleur, Forge) -->
                 <li class="nav-item d-none" id="city-tab-craft-li" role="presentation">
                     <button class="nav-link fw-bold text-dark py-2" id="city-tab-craft-btn" data-bs-toggle="tab" data-bs-target="#city-pane-craft" type="button" role="tab" aria-controls="city-pane-craft" aria-selected="false">
                         <i class="fa-solid fa-boxes-stacked text-success me-1"></i>Produits &amp; Ressources
                     </button>
                 </li>
+                <!-- Onglet Banquets & Fêtes (Tenshu) -->
                 <li class="nav-item d-none" id="city-tab-feast-li" role="presentation">
                     <button class="nav-link fw-bold text-dark py-2" id="city-tab-feast-btn" data-bs-toggle="tab" data-bs-target="#city-pane-feast" type="button" role="tab" aria-controls="city-pane-feast" aria-selected="false">
                         <i class="fa-solid fa-wine-bottle text-warning me-1"></i>Banquets &amp; Fêtes
                     </button>
                 </li>
+                <!-- Onglet Enrôlement & Troupes (Caserne / Dojo) -->
+                <li class="nav-item d-none" id="city-tab-troops-li" role="presentation">
+                    <button class="nav-link fw-bold text-dark py-2" id="city-tab-troops-btn" data-bs-toggle="tab" data-bs-target="#city-pane-troops" type="button" role="tab" aria-controls="city-pane-troops" aria-selected="false">
+                        <i class="fa-solid fa-user-ninja text-danger me-1"></i>Enrôlement &amp; Troupes
+                    </button>
+                </li>
+                <!-- Onglet Cavalerie & Chantiers Navals (Shipyard) -->
+                <li class="nav-item d-none" id="city-tab-ships-li" role="presentation">
+                    <button class="nav-link fw-bold text-dark py-2" id="city-tab-ships-btn" data-bs-toggle="tab" data-bs-target="#city-pane-ships" type="button" role="tab" aria-controls="city-pane-ships" aria-selected="false">
+                        <i class="fa-solid fa-horse text-warning me-1"></i>Cavalerie &amp; Flotte
+                    </button>
+                </li>
+                <!-- Onglet Évolution dans l'Académie (Research Lab) -->
+                <li class="nav-item d-none" id="city-tab-research-li" role="presentation">
+                    <button class="nav-link fw-bold text-dark py-2" id="city-tab-research-btn" data-bs-toggle="tab" data-bs-target="#city-pane-research" type="button" role="tab" aria-controls="city-pane-research" aria-selected="false">
+                        <i class="fa-solid fa-scroll text-info me-1"></i>Évolution Académie
+                    </button>
+                </li>
+                <!-- Onglet Affaires de Clan & Diplomatie (Embassy) -->
+                <li class="nav-item d-none" id="city-tab-alliance-li" role="presentation">
+                    <button class="nav-link fw-bold text-dark py-2" id="city-tab-alliance-btn" data-bs-toggle="tab" data-bs-target="#city-pane-alliance" type="button" role="tab" aria-controls="city-pane-alliance" aria-selected="false">
+                        <i class="fa-solid fa-torii-gate text-purple me-1"></i>Affaires de Clan
+                    </button>
+                </li>
+                <!-- Onglet Activité Spécifique (Marché, Muraille, Vigie, etc.) -->
                 <li class="nav-item d-none" id="city-tab-special-li" role="presentation">
                     <button class="nav-link fw-bold text-dark py-2" id="city-tab-special-btn" data-bs-toggle="tab" data-bs-target="#city-pane-special" type="button" role="tab" aria-controls="city-pane-special" aria-selected="false">
                         <i class="fa-solid fa-bolt text-primary me-1" id="city-tab-special-icon"></i><span id="city-tab-special-label">Activité</span>
@@ -765,7 +823,35 @@ ob_start();
                             </div>
                         </div>
 
-                        <!-- TAB 4 : ACTIVITÉ SPÉCIFIQUE (DOJO, ÉCURIES, ACADÉMIE, MARCHÉ, EMBASSY...) -->
+                        <!-- TAB 4 : ENRÔLEMENT DES TROUPES (BARRACKS / DOJO) -->
+                        <div class="tab-pane fade p-4" id="city-pane-troops" role="tabpanel">
+                            <div id="cityModalTroopsContent">
+                                <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- TAB 5 : CAVALERIE & FLOTTE (SHIPYARD / ÉCURIES) -->
+                        <div class="tab-pane fade p-4" id="city-pane-ships" role="tabpanel">
+                            <div id="cityModalShipsContent">
+                                <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- TAB 6 : ÉVOLUTION DANS L'ACADÉMIE (RESEARCH_LAB) -->
+                        <div class="tab-pane fade p-4" id="city-pane-research" role="tabpanel">
+                            <div id="cityModalResearchContent">
+                                <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- TAB 7 : AFFAIRES DE CLAN & DIPLOMATIE (EMBASSY) -->
+                        <div class="tab-pane fade p-4" id="city-pane-alliance" role="tabpanel">
+                            <div id="cityModalAllianceContent">
+                                <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
+
+                        <!-- TAB 8 : ACTIVITÉ SPÉCIFIQUE (MARKET, WALL, RADAR...) -->
                         <div class="tab-pane fade p-4" id="city-pane-special" role="tabpanel">
                             <div id="cityModalSpecialContent">
                                 <!-- Rempli dynamiquement -->
@@ -836,6 +922,14 @@ window.CITY_CONFIG = {
     prestige_army: <?= (int)($planet['prestige_army'] ?? 0) ?>,
     hqLevel: <?= (int)$hqLevel ?>,
     activeFeast: <?= json_encode($activeFeast, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
+    availableUnits: <?= json_encode($availableUnits, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
+    barracksQueue: <?= json_encode($barracksQueue, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
+    availableShips: <?= json_encode($availableShips, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
+    shipyardQueue: <?= json_encode($shipyardQueue, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
+    researches: <?= json_encode($researches, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
+    activeResearch: <?= json_encode($activeResearch, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
+    myAlliance: <?= json_encode($myAlliance, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
+    allianceMembers: <?= json_encode($allianceMembers, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>,
     isAdmin: <?= $isAdmin ? 'true' : 'false' ?>,
     canQueue: <?= $canQueueNewBuilding ? 'true' : 'false' ?>
 };
@@ -982,14 +1076,26 @@ function renderCitySlotModal() {
     // Visibilité conditionnelle des onglets selon le bâtiment
     const craftTabLi = document.getElementById('city-tab-craft-li');
     const feastTabLi = document.getElementById('city-tab-feast-li');
+    const troopsTabLi = document.getElementById('city-tab-troops-li');
+    const shipsTabLi = document.getElementById('city-tab-ships-li');
+    const researchTabLi = document.getElementById('city-tab-research-li');
+    const allianceTabLi = document.getElementById('city-tab-alliance-li');
     const specialTabLi = document.getElementById('city-tab-special-li');
 
     const isCraftBuilding = ['grain_mill', 'sawmill', 'stonemason', 'blacksmith'].includes(data.code) && data.level > 0;
     const isFeastBuilding = (data.code === 'hq' && data.level > 0);
-    const isSpecialBuilding = ['barracks', 'shipyard', 'research_lab', 'market', 'embassy', 'radar', 'wall', 'storage', 'tank', 'quantum_vault', 'teahouse', 'tournament_square'].includes(data.code) && data.level > 0;
+    const isTroopsBuilding = (data.code === 'barracks' && data.level > 0);
+    const isShipsBuilding = (data.code === 'shipyard' && data.level > 0);
+    const isResearchBuilding = (data.code === 'research_lab' && data.level > 0);
+    const isAllianceBuilding = (data.code === 'embassy' && data.level > 0);
+    const isSpecialBuilding = ['market', 'radar', 'wall', 'storage', 'tank', 'quantum_vault', 'teahouse', 'tournament_square'].includes(data.code) && data.level > 0;
 
     if (craftTabLi) craftTabLi.classList.toggle('d-none', !isCraftBuilding);
     if (feastTabLi) feastTabLi.classList.toggle('d-none', !isFeastBuilding);
+    if (troopsTabLi) troopsTabLi.classList.toggle('d-none', !isTroopsBuilding);
+    if (shipsTabLi) shipsTabLi.classList.toggle('d-none', !isShipsBuilding);
+    if (researchTabLi) researchTabLi.classList.toggle('d-none', !isResearchBuilding);
+    if (allianceTabLi) allianceTabLi.classList.toggle('d-none', !isAllianceBuilding);
     if (specialTabLi) specialTabLi.classList.toggle('d-none', !isSpecialBuilding);
 
     // Ajuster le libellé et l'icône de l'onglet spécial
@@ -1004,6 +1110,10 @@ function renderCitySlotModal() {
     // Rendu dynamique du contenu des onglets secondaires
     if (isCraftBuilding) renderCityCraftPane(data);
     if (isFeastBuilding) renderCityFeastPane(data);
+    if (isTroopsBuilding) renderCityTroopsPane(data);
+    if (isShipsBuilding) renderCityShipsPane(data);
+    if (isResearchBuilding) renderCityResearchPane(data);
+    if (isAllianceBuilding) renderCityAlliancePane(data);
     if (isSpecialBuilding) renderCitySpecialPane(data);
 
     // ==========================================
@@ -1842,6 +1952,603 @@ function renderCitySpecialPane(data) {
             </div>
         </div>
     `;
+}
+
+// ==========================================
+// 5. RENDU DE L'ONGLET ENRÔLEMENT DES TROUPES (BARRACKS / DOJO)
+// ==========================================
+function renderCityTroopsPane(data) {
+    const container = document.getElementById('cityModalTroopsContent');
+    if (!container) return;
+
+    const units = window.CITY_CONFIG.availableUnits || [];
+    const queue = window.CITY_CONFIG.barracksQueue || [];
+
+    let queueHtml = '';
+    if (queue.length > 0) {
+        queueHtml = `
+            <div class="p-3 mb-3 rounded border border-warning-subtle bg-warning-lt">
+                <strong class="d-block text-dark small mb-2"><i class="fa-solid fa-clock-rotate-left text-warning me-1"></i>Entraînement en cours au Dojo :</strong>
+                <div class="d-flex flex-column gap-1.5">
+                    ${queue.map(q => {
+                        const dateFin = new Date(q.finishes_at * 1000);
+                        return `
+                            <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded border small">
+                                <span><i class="fa-solid fa-user-ninja text-danger me-1"></i><strong>${q.unit_name || q.unit_code}</strong> &times; ${q.count}</span>
+                                <span class="badge bg-secondary font-monospace">Fin : ${dateFin.toLocaleTimeString()}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    const cardsHtml = units.map(u => {
+        const canAfford = (
+            window.CITY_CONFIG.metal >= u.cost_metal &&
+            window.CITY_CONFIG.crystal >= u.cost_crystal &&
+            window.CITY_CONFIG.deuterium >= u.cost_deuterium &&
+            window.CITY_CONFIG.rice_flour >= (u.rice_flour_cost || 0)
+        ) || window.CITY_CONFIG.isAdmin;
+
+        // Calcul du maximum possible
+        let maxAffordable = 0;
+        if (window.CITY_CONFIG.isAdmin) {
+            maxAffordable = 100;
+        } else {
+            const maxM = u.cost_metal > 0 ? Math.floor(window.CITY_CONFIG.metal / u.cost_metal) : 9999;
+            const maxC = u.cost_crystal > 0 ? Math.floor(window.CITY_CONFIG.crystal / u.cost_crystal) : 9999;
+            const maxD = u.cost_deuterium > 0 ? Math.floor(window.CITY_CONFIG.deuterium / u.cost_deuterium) : 9999;
+            const maxF = (u.rice_flour_cost && u.rice_flour_cost > 0) ? Math.floor(window.CITY_CONFIG.rice_flour / u.rice_flour_cost) : 9999;
+            maxAffordable = Math.max(0, Math.min(maxM, maxC, maxD, maxF));
+        }
+
+        return `
+            <div class="col-md-6 col-lg-4">
+                <div class="city-troop-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="m-0 fw-bold text-dark fs-6">${u.name}</h5>
+                                <span class="badge bg-secondary-lt text-secondary font-monospace small">Tier ${u.tier} &bull; ${u.stationed_count || 0} en garnison</span>
+                            </div>
+                            <span class="fs-4">${u.icon || '🥷'}</span>
+                        </div>
+                        <p class="small text-muted mb-2 text-truncate-2" style="font-size:0.75rem; line-height:1.3;">${u.description || ''}</p>
+
+                        <div class="d-flex justify-content-between small text-secondary p-1.5 rounded bg-light mb-2 font-monospace" style="font-size:0.75rem;">
+                            <span>⚔️ Atk: <strong>${u.attack_points}</strong></span>
+                            <span>🛡️ Déf: <strong>${u.defense_infantry}/${u.defense_cavalry}</strong></span>
+                            <span>⚡ Vit: <strong>${u.speed}</strong></span>
+                        </div>
+
+                        <!-- Coûts -->
+                        <div class="d-flex flex-wrap gap-1 mb-2 font-monospace" style="font-size:0.72rem;">
+                            <span style="color:${window.CITY_CONFIG.metal >= u.cost_metal ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-tree me-0.5"></i>${u.cost_metal}</span>
+                            <span style="color:${window.CITY_CONFIG.crystal >= u.cost_crystal ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-mountain me-0.5"></i>${u.cost_crystal}</span>
+                            <span style="color:${window.CITY_CONFIG.deuterium >= u.cost_deuterium ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-wheat-awn me-0.5"></i>${u.cost_deuterium}</span>
+                            ${u.rice_flour_cost > 0 ? `<span style="color:${window.CITY_CONFIG.rice_flour >= u.rice_flour_cost ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-bowl-rice me-0.5"></i>${u.rice_flour_cost}</span>` : ''}
+                            <span class="text-muted"><i class="fa-regular fa-clock me-0.5"></i>${formatCityDuration(u.effective_train_time)}</span>
+                        </div>
+                    </div>
+
+                    ${u.can_train ? `
+                        <div>
+                            <div class="input-group input-group-sm mb-1.5">
+                                <input type="number" class="form-control font-monospace" id="input-troop-${u.code}" value="1" min="1" max="${Math.max(1, maxAffordable)}">
+                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('input-troop-${u.code}').value = Math.max(1, ${maxAffordable})">Max (${maxAffordable})</button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-danger w-100 fw-bold" onclick="submitCityTrainUnits('${u.code}', 'input-troop-${u.code}', this)">
+                                <i class="fa-solid fa-user-plus me-1"></i>Enrôler au Dojo
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="alert alert-secondary py-1 px-2 small m-0 text-center">
+                            <i class="fa-solid fa-lock me-1"></i>Requis : Dojo Niveau ${u.required_barracks_level}
+                        </div>
+                    `}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="p-3 mb-3 rounded border bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="text-muted small text-uppercase fw-bold d-block">Terrains d'Exercice &amp; Recrutement du Fief :</span>
+                <div class="d-flex gap-3 mt-1 flex-wrap font-monospace small">
+                    <span><i class="fa-solid fa-tree text-success me-1"></i>Bois : <strong>${Number(window.CITY_CONFIG.metal).toLocaleString()}</strong></span>
+                    <span><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre : <strong>${Number(window.CITY_CONFIG.crystal).toLocaleString()}</strong></span>
+                    <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz : <strong>${Number(window.CITY_CONFIG.deuterium).toLocaleString()}</strong></span>
+                    <span><i class="fa-solid fa-bowl-rice text-danger me-1"></i>Farine : <strong>${Number(window.CITY_CONFIG.rice_flour).toLocaleString()}</strong></span>
+                </div>
+            </div>
+            <a href="?page=barracks" class="btn btn-sm btn-outline-danger fw-bold"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Vue Détaillée du Dojo</a>
+        </div>
+        ${queueHtml}
+        <div class="row g-3">
+            ${cardsHtml}
+        </div>
+    `;
+}
+
+// ==========================================
+// 6. RENDU DE L'ONGLET CAVALERIE & FLOTTE (SHIPYARD / ÉCURIES)
+// ==========================================
+function renderCityShipsPane(data) {
+    const container = document.getElementById('cityModalShipsContent');
+    if (!container) return;
+
+    const ships = window.CITY_CONFIG.availableShips || [];
+    const queue = window.CITY_CONFIG.shipyardQueue || [];
+
+    let queueHtml = '';
+    if (queue.length > 0) {
+        queueHtml = `
+            <div class="p-3 mb-3 rounded border border-warning-subtle bg-warning-lt">
+                <strong class="d-block text-dark small mb-2"><i class="fa-solid fa-clock-rotate-left text-warning me-1"></i>Mobilisation en cours aux Haras / Chantiers :</strong>
+                <div class="d-flex flex-column gap-1.5">
+                    ${queue.map(q => {
+                        const dateFin = new Date(q.finishes_at * 1000);
+                        return `
+                            <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded border small">
+                                <span><i class="fa-solid fa-horse text-warning me-1"></i><strong>${q.ship_name || q.ship_code}</strong> &times; ${q.count}</span>
+                                <span class="badge bg-secondary font-monospace">Fin : ${dateFin.toLocaleTimeString()}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    const cardsHtml = ships.map(s => {
+        const canAfford = (
+            window.CITY_CONFIG.metal >= s.metal_cost &&
+            window.CITY_CONFIG.crystal >= s.crystal_cost &&
+            window.CITY_CONFIG.deuterium >= s.deuterium_cost
+        ) || window.CITY_CONFIG.isAdmin;
+
+        let maxAffordable = 0;
+        if (window.CITY_CONFIG.isAdmin) {
+            maxAffordable = 100;
+        } else {
+            const maxM = s.metal_cost > 0 ? Math.floor(window.CITY_CONFIG.metal / s.metal_cost) : 9999;
+            const maxC = s.crystal_cost > 0 ? Math.floor(window.CITY_CONFIG.crystal / s.crystal_cost) : 9999;
+            const maxD = s.deuterium_cost > 0 ? Math.floor(window.CITY_CONFIG.deuterium / s.deuterium_cost) : 9999;
+            maxAffordable = Math.max(0, Math.min(maxM, maxC, maxD));
+        }
+
+        return `
+            <div class="col-md-6 col-lg-4">
+                <div class="city-troop-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="m-0 fw-bold text-dark fs-6">${s.name}</h5>
+                                <span class="badge bg-secondary-lt text-secondary font-monospace small">${s.stationed_count || 0} disponibles</span>
+                            </div>
+                            <span class="fs-4">${s.icon || '🐎'}</span>
+                        </div>
+                        <p class="small text-muted mb-2 text-truncate-2" style="font-size:0.75rem; line-height:1.3;">${s.description || ''}</p>
+
+                        <div class="d-flex justify-content-between small text-secondary p-1.5 rounded bg-light mb-2 font-monospace" style="font-size:0.75rem;">
+                            <span>⚔️ Atk: <strong>${s.attack_points}</strong></span>
+                            <span>🛡️ Déf: <strong>${s.defense_points}</strong></span>
+                            <span>⚡ Vit: <strong>${s.speed}</strong></span>
+                        </div>
+
+                        <!-- Coûts -->
+                        <div class="d-flex flex-wrap gap-1.5 mb-2 font-monospace" style="font-size:0.72rem;">
+                            <span style="color:${window.CITY_CONFIG.metal >= s.metal_cost ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-tree me-0.5"></i>${s.metal_cost}</span>
+                            <span style="color:${window.CITY_CONFIG.crystal >= s.crystal_cost ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-mountain me-0.5"></i>${s.crystal_cost}</span>
+                            <span style="color:${window.CITY_CONFIG.deuterium >= s.deuterium_cost ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-wheat-awn me-0.5"></i>${s.deuterium_cost}</span>
+                            <span class="text-muted"><i class="fa-regular fa-clock me-0.5"></i>${formatCityDuration(s.effective_build_time)}</span>
+                        </div>
+                    </div>
+
+                    ${s.can_build ? `
+                        <div>
+                            <div class="input-group input-group-sm mb-1.5">
+                                <input type="number" class="form-control font-monospace" id="input-ship-${s.code}" value="1" min="1" max="${Math.max(1, maxAffordable)}">
+                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('input-ship-${s.code}').value = Math.max(1, ${maxAffordable})">Max (${maxAffordable})</button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-warning text-dark w-100 fw-bold" onclick="submitCityBuildShips('${s.code}', 'input-ship-${s.code}', this)">
+                                <i class="fa-solid fa-horse me-1"></i>Mobiliser
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="alert alert-secondary py-1 px-2 small m-0 text-center">
+                            <i class="fa-solid fa-lock me-1"></i>Requis : Écuries Niveau 1
+                        </div>
+                    `}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="p-3 mb-3 rounded border bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="text-muted small text-uppercase fw-bold d-block">Haras de Guerre &amp; Flotte Navale :</span>
+                <div class="d-flex gap-3 mt-1 flex-wrap font-monospace small">
+                    <span><i class="fa-solid fa-tree text-success me-1"></i>Bois : <strong>${Number(window.CITY_CONFIG.metal).toLocaleString()}</strong></span>
+                    <span><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre : <strong>${Number(window.CITY_CONFIG.crystal).toLocaleString()}</strong></span>
+                    <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz : <strong>${Number(window.CITY_CONFIG.deuterium).toLocaleString()}</strong></span>
+                </div>
+            </div>
+            <a href="?page=shipyard" class="btn btn-sm btn-outline-warning text-dark fw-bold"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Vue Détaillée des Écuries</a>
+        </div>
+        ${queueHtml}
+        <div class="row g-3">
+            ${cardsHtml}
+        </div>
+    `;
+}
+
+// ==========================================
+// 7. RENDU DE L'ONGLET ÉVOLUTION DANS L'ACADÉMIE (RESEARCH_LAB)
+// ==========================================
+function renderCityResearchPane(data) {
+    const container = document.getElementById('cityModalResearchContent');
+    if (!container) return;
+
+    const researches = window.CITY_CONFIG.researches || [];
+    const activeResearch = window.CITY_CONFIG.activeResearch;
+
+    let activeHtml = '';
+    if (activeResearch) {
+        const finishesAt = parseInt(activeResearch.finishes_at, 10);
+        activeHtml = `
+            <div class="alert alert-info border border-info shadow-sm mb-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <strong class="d-block fs-6 text-dark"><i class="fa-solid fa-scroll text-info me-1"></i>Étude en cours : ${activeResearch.research_name || activeResearch.name || 'Technologie'}</strong>
+                        <span class="small text-muted">Évolution vers Niveau ${activeResearch.target_level}</span>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-info text-white font-monospace fs-5 px-3 py-1" id="cityModalResearchCountdown">--:--:--</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    const cardsHtml = researches.map(r => {
+        const canAfford = (
+            window.CITY_CONFIG.metal >= r.cost_metal &&
+            window.CITY_CONFIG.crystal >= r.cost_crystal &&
+            window.CITY_CONFIG.deuterium >= r.cost_deuterium
+        ) || window.CITY_CONFIG.isAdmin;
+
+        const isBusy = !!activeResearch;
+
+        return `
+            <div class="col-md-6">
+                <div class="city-tech-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="m-0 fw-bold text-dark fs-6">${r.name}</h5>
+                                <span class="badge bg-primary-lt text-primary font-monospace small">Niveau ${r.current_level} &rarr; Niveau ${r.next_level}</span>
+                            </div>
+                            <span class="fs-4">📜</span>
+                        </div>
+                        <p class="small text-secondary mb-2" style="font-size:0.8rem; line-height:1.4;">${r.description || ''}</p>
+
+                        <!-- Coûts -->
+                        <div class="d-flex flex-wrap gap-2 mb-3 font-monospace small">
+                            <span style="color:${window.CITY_CONFIG.metal >= r.cost_metal ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-tree me-1"></i>${Number(r.cost_metal).toLocaleString()}</span>
+                            <span style="color:${window.CITY_CONFIG.crystal >= r.cost_crystal ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-mountain me-1"></i>${Number(r.cost_crystal).toLocaleString()}</span>
+                            <span style="color:${window.CITY_CONFIG.deuterium >= r.cost_deuterium ? '#16a34a' : '#dc2626'};"><i class="fa-solid fa-wheat-awn me-1"></i>${Number(r.cost_deuterium).toLocaleString()}</span>
+                            <span class="text-muted"><i class="fa-regular fa-clock me-1"></i>${formatCityDuration(r.duration || 60)}</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        ${isBusy ? `
+                            <button type="button" class="btn btn-sm btn-outline-secondary w-100 disabled" disabled>
+                                <i class="fa-solid fa-hourglass-half me-1"></i>Académie Déjà Occupée
+                            </button>
+                        ` : (canAfford ? `
+                            <button type="button" class="btn btn-sm btn-info text-white w-100 fw-bold" onclick="submitCityStartResearch('${r.code}', this)">
+                                <i class="fa-solid fa-flask-vial me-1"></i>Lancer l'Étude (Niveau ${r.next_level})
+                            </button>
+                        ` : `
+                            <button type="button" class="btn btn-sm btn-outline-secondary w-100 disabled" disabled>
+                                <i class="fa-solid fa-lock me-1"></i>Ressources Insuffisantes
+                            </button>
+                        `)}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="p-3 mb-3 rounded border bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="text-muted small text-uppercase fw-bold d-block">Académie des Savoirs &amp; Parchemins Féodaux :</span>
+                <div class="d-flex gap-3 mt-1 flex-wrap font-monospace small">
+                    <span><i class="fa-solid fa-tree text-success me-1"></i>Bois : <strong>${Number(window.CITY_CONFIG.metal).toLocaleString()}</strong></span>
+                    <span><i class="fa-solid fa-mountain text-secondary me-1"></i>Pierre : <strong>${Number(window.CITY_CONFIG.crystal).toLocaleString()}</strong></span>
+                    <span><i class="fa-solid fa-wheat-awn text-warning me-1"></i>Riz : <strong>${Number(window.CITY_CONFIG.deuterium).toLocaleString()}</strong></span>
+                </div>
+            </div>
+            <a href="?page=research" class="btn btn-sm btn-outline-info fw-bold"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Vue Détaillée de l'Académie</a>
+        </div>
+        ${activeHtml}
+        <div class="row g-3">
+            ${cardsHtml}
+        </div>
+    `;
+}
+
+// ==========================================
+// 8. RENDU DE L'ONGLET AFFAIRES DE CLAN & DIPLOMATIE (EMBASSY)
+// ==========================================
+function renderCityAlliancePane(data) {
+    const container = document.getElementById('cityModalAllianceContent');
+    if (!container) return;
+
+    const alliance = window.CITY_CONFIG.myAlliance;
+    const members = window.CITY_CONFIG.allianceMembers || [];
+
+    if (alliance) {
+        container.innerHTML = `
+            <div class="p-3 mb-3 rounded border text-white" style="background: linear-gradient(135deg, #4c1d95, #6d28d9);">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <span class="badge bg-warning text-dark font-monospace fs-6 px-2.5 py-1 mb-1">[${alliance.tag}]</span>
+                        <h4 class="m-0 fw-bold text-white fs-4">${alliance.name}</h4>
+                        <p class="small text-white-50 m-0 mt-1">${alliance.description || 'Pacte féodal sous l\'autorité du Shogunat.'}</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-white text-purple fs-6 px-3 py-1.5 shadow-sm font-monospace">
+                            ${members.length} / ${data.level * 3} Membres
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header py-2.5 bg-light d-flex justify-content-between align-items-center">
+                    <strong class="text-dark small"><i class="fa-solid fa-users text-primary me-1"></i>Seigneurs &amp; Daimyōs Alliés du Clan :</strong>
+                    <a href="?page=alliance" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-gear me-1"></i>Gérer le Clan</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-vcenter table-sm card-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Daimyō</th>
+                                <th>Rang</th>
+                                <th>Coordonnées</th>
+                                <th>Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${members.map(m => `
+                                <tr>
+                                    <td><strong>${m.username || 'Seigneur'}</strong></td>
+                                    <td><span class="badge ${m.rank === 'Leader' ? 'bg-danger' : 'bg-secondary'}">${m.rank || 'Membre'}</span></td>
+                                    <td class="font-monospace text-muted">[${m.galaxy || 1}:${m.system || 1}:${m.position || 1}]</td>
+                                    <td class="font-monospace fw-bold text-primary">${Number(m.points || 0).toLocaleString()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            <div class="p-4 rounded border mb-3 text-center" style="background:#fdfbf7;">
+                <span class="display-6 d-block mb-2">⛩️</span>
+                <h4 class="fw-bold text-dark fs-5">Aucune Alliance Féodale Active</h4>
+                <p class="text-muted small mx-auto" style="max-width:550px;">
+                    Votre Pavillon Diplomatique vous confère le droit de sceller des pactes avec les Daimyōs voisins ou d'ériger votre propre ligue shogunale.
+                </p>
+
+                <div class="card text-start mx-auto p-3 mb-3 shadow-sm" style="max-width:550px;">
+                    <h5 class="fw-bold text-dark fs-6 mb-2"><i class="fa-solid fa-scroll text-danger me-1"></i>Fonder une Nouvelle Alliance Féodale :</h5>
+                    <div class="mb-2">
+                        <label class="form-label small text-muted mb-1">Nom de l'Alliance :</label>
+                        <input type="text" class="form-control form-control-sm" id="city-alliance-name" placeholder="ex: Clan Minamoto">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small text-muted mb-1">Tag de Clan (3 à 8 lettres) :</label>
+                        <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="city-alliance-tag" maxlength="8" placeholder="ex: MNM">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted mb-1">Devise Féodale :</label>
+                        <textarea class="form-control form-control-sm" id="city-alliance-desc" rows="2" placeholder="Décret de fidélité et pacte de non-agression..."></textarea>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-purple text-white fw-bold w-100" style="background:#7c3aed; border-color:#7c3aed;" onclick="submitCityCreateAlliance(this)">
+                        <i class="fa-solid fa-torii-gate me-1"></i>Fonder le Clan Féodal
+                    </button>
+                </div>
+
+                <div>
+                    <a href="?page=ranking&tab=alliances" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Consulter le Registre des Alliances Existantes
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// ==========================================
+// 9. SOUMISSION DES ACTIONS DE TROUPES, NAVIRES, RECHERCHE ET ALLIANCE
+// ==========================================
+async function submitCityTrainUnits(unitCode, inputId, btn) {
+    const input = document.getElementById(inputId);
+    const count = input ? parseInt(input.value, 10) : 0;
+    if (count <= 0) {
+        if (typeof showModalAlert === 'function') showModalAlert('Veuillez indiquer un nombre de recrues valide.', 'warning');
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Enrôlement...';
+    }
+
+    const formData = new FormData();
+    formData.append('unit_code', unitCode);
+    formData.append('count', count);
+
+    try {
+        const res = await fetch('/api/barracks.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            if (typeof showModalAlert === 'function') {
+                await showModalAlert(data.message || 'Régiment mobilisé avec succès !', 'success', 'Dojo Militaire');
+            }
+            window.location.reload();
+        } else {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus me-1"></i>Enrôler au Dojo';
+            }
+            if (typeof showModalAlert === 'function') {
+                showModalAlert(data.error || 'Impossible d\'enrôler ces troupes.', 'warning', 'Ressources Insuffisantes');
+            } else {
+                alert(data.error);
+            }
+        }
+    } catch (e) {
+        if (btn) btn.disabled = false;
+        console.error('Erreur barracks:', e);
+    }
+}
+
+async function submitCityBuildShips(shipCode, inputId, btn) {
+    const input = document.getElementById(inputId);
+    const count = input ? parseInt(input.value, 10) : 0;
+    if (count <= 0) {
+        if (typeof showModalAlert === 'function') showModalAlert('Veuillez indiquer un nombre valide.', 'warning');
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Mobilisation...';
+    }
+
+    const formData = new FormData();
+    formData.append('ship_code', shipCode);
+    formData.append('count', count);
+
+    try {
+        const res = await fetch('/api/shipyard.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            if (typeof showModalAlert === 'function') {
+                await showModalAlert(data.message || 'Escouade de cavalerie / flotte mise en chantier !', 'success', 'Haras Féodaux');
+            }
+            window.location.reload();
+        } else {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-horse me-1"></i>Mobiliser';
+            }
+            if (typeof showModalAlert === 'function') {
+                showModalAlert(data.error || 'Impossible de mobiliser cette unité.', 'warning');
+            } else {
+                alert(data.error);
+            }
+        }
+    } catch (e) {
+        if (btn) btn.disabled = false;
+        console.error('Erreur shipyard:', e);
+    }
+}
+
+async function submitCityStartResearch(code, btn) {
+    if (!code) return;
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Lancement de l\'Étude...';
+    }
+
+    const formData = new FormData();
+    formData.append('research_code', code);
+
+    try {
+        const res = await fetch('/api/research.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            if (typeof showModalAlert === 'function') {
+                await showModalAlert(data.message || 'Étude technologique initiée au sein de l\'Académie !', 'success', 'Académie des Savoirs');
+            }
+            window.location.reload();
+        } else {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-flask-vial me-1"></i>Réessayer';
+            }
+            if (typeof showModalAlert === 'function') {
+                showModalAlert(data.error || 'Impossible de lancer cette recherche.', 'warning');
+            } else {
+                alert(data.error);
+            }
+        }
+    } catch (e) {
+        if (btn) btn.disabled = false;
+        console.error('Erreur research:', e);
+    }
+}
+
+async function submitCityCreateAlliance(btn) {
+    const nameInput = document.getElementById('city-alliance-name');
+    const tagInput = document.getElementById('city-alliance-tag');
+    const descInput = document.getElementById('city-alliance-desc');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const tag = tagInput ? tagInput.value.trim().toUpperCase() : '';
+    const desc = descInput ? descInput.value.trim() : '';
+
+    if (!name || !tag) {
+        if (typeof showModalAlert === 'function') showModalAlert('Veuillez renseigner le nom et le tag du clan.', 'warning');
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Fondation du Clan...';
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'create');
+    formData.append('name', name);
+    formData.append('tag', tag);
+    formData.append('description', desc);
+
+    try {
+        const res = await fetch('/api/alliance.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            if (typeof showModalAlert === 'function') {
+                await showModalAlert(data.message || 'Votre Clan Féodal a été proclamé avec honneur !', 'success', 'Pavillon Diplomatique');
+            }
+            window.location.reload();
+        } else {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-torii-gate me-1"></i>Fonder le Clan Féodal';
+            }
+            if (typeof showModalAlert === 'function') {
+                showModalAlert(data.error || 'Impossible de fonder ce clan.', 'warning');
+            } else {
+                alert(data.error);
+            }
+        }
+    } catch (e) {
+        if (btn) btn.disabled = false;
+        console.error('Erreur alliance:', e);
+    }
 }
 
 // ==========================================
