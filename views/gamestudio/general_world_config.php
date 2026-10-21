@@ -1213,9 +1213,36 @@ unset($_SESSION['general_flash']);
                                                     </div>
 
                                                     <div class="pt-2.5 border-top d-flex justify-content-between align-items-center mt-auto gap-1">
-                                                        <span class="badge bg-light text-secondary border font-monospace py-1 px-1.5" style="font-size:0.7rem;">
-                                                            <?= htmlspecialchars($era['trigger_label']) ?>
-                                                        </span>
+                                                        <div>
+                                                            <span class="badge bg-light text-secondary border font-monospace py-1 px-1.5 d-block text-truncate" style="font-size:0.7rem; max-width: 170px;" title="<?= htmlspecialchars($era['trigger_label']) ?>">
+                                                                <?= htmlspecialchars($era['trigger_label']) ?>
+                                                            </span>
+                                                            <?php if ($eId === 2): ?>
+                                                                <div class="mt-1">
+                                                                    <span class="badge <?= ($activeProtectionsCount ?? 0) === 0 ? 'bg-success-lt text-success' : 'bg-warning-lt text-warning' ?> font-monospace" style="font-size:0.68rem;">
+                                                                        <i class="fa-solid fa-shield-halved me-1"></i><?= (int)($activeProtectionsCount ?? 0) ?> sous immunité
+                                                                    </span>
+                                                                </div>
+                                                            <?php elseif ($eId === 3): ?>
+                                                                <div class="mt-1">
+                                                                    <span class="badge bg-danger-lt text-danger font-monospace" style="font-size:0.68rem;">
+                                                                        <i class="fa-solid fa-hand-fist me-1"></i>Manuel Admin
+                                                                    </span>
+                                                                </div>
+                                                            <?php elseif ($eId === 4): ?>
+                                                                <div class="mt-1">
+                                                                    <span class="badge <?= !empty($isCastlesWarConcluded) ? 'bg-success-lt text-success' : 'bg-secondary-lt text-muted' ?> font-monospace" style="font-size:0.68rem;">
+                                                                        <i class="fa-solid fa-chess-rook me-1"></i><?= (int)($castlesHeldCount ?? 0) ?> / 12 Châteaux
+                                                                    </span>
+                                                                </div>
+                                                            <?php elseif ($eId === 5): ?>
+                                                                <div class="mt-1">
+                                                                    <span class="badge <?= !empty($isWorldEndDeclared) ? 'bg-danger text-white' : 'bg-warning-lt text-warning' ?> font-monospace" style="font-size:0.68rem;">
+                                                                        <i class="fa-solid fa-crown me-1"></i><?= !empty($isWorldEndDeclared) ? 'Fin du Jeu Déclarée' : 'Niv. ' . (int)($dojoCurrLevel ?? 0) . ' / 10' ?>
+                                                                    </span>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
                                                         <div class="d-flex align-items-center gap-1">
                                                             <button type="button" 
                                                                     class="btn btn-sm btn-outline-info py-1 px-2 fw-bold" 
@@ -1290,22 +1317,13 @@ unset($_SESSION['general_flash']);
                                             </div>
                                         </div>
 
-                                        <!-- Programmation Calendaire -->
-                                        <div class="row g-3 align-items-center mb-3">
-                                            <div class="col-md-7">
-                                                <label class="form-label fw-bold text-dark small mb-1">
-                                                    <i class="fa-solid fa-calendar-days text-primary me-1"></i>Déclenchement Automatique Planifié :
-                                                </label>
-                                                <div class="text-muted small">Jour de jeu où les donjons s'ouvrent spontanément si non déclenchés manuellement.</div>
-                                            </div>
-                                            <div class="col-md-5">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text bg-white font-monospace fw-bold">Jour J +</span>
-                                                    <input type="number" class="form-control text-center font-monospace fw-bold" 
-                                                           name="era_castles_auto_day" id="inputCastlesAutoDay" 
-                                                           min="1" max="100" value="<?= (int)($castlesAutoDay ?? 7) ?>">
-                                                    <span class="input-group-text bg-light text-muted">jours</span>
-                                                </div>
+                                        <!-- Déclenchement Exclusif Manuel (Souveraineté Maître du Jeu) -->
+                                        <input type="hidden" name="era_castles_auto_day" id="inputCastlesAutoDay" value="<?= (int)($castlesAutoDay ?? 7) ?>">
+                                        <div class="alert alert-warning py-2.5 px-3 mb-3 d-flex align-items-center gap-2.5 rounded-2 small">
+                                            <i class="fa-solid fa-hand-fist fs-3 text-danger flex-shrink-0"></i>
+                                            <div>
+                                                <strong class="text-dark d-block">Déclenchement Manuel Exclusif par l'Administrateur :</strong>
+                                                L'avènement de l'Ère III et l'ouverture des 12 Châteaux ne s'opèrent pas par calendrier fixe. C'est l'administrateur qui décide souverainement du moment propice via le bouton d'ordre shōgunal 1-clic ci-dessus.
                                             </div>
                                         </div>
 
@@ -1449,22 +1467,13 @@ unset($_SESSION['general_flash']);
                                             </div>
                                         </div>
 
-                                        <!-- Programmation Calendaire -->
-                                        <div class="row g-3 align-items-center mb-3">
-                                            <div class="col-md-7">
-                                                <label class="form-label fw-bold text-dark small mb-1">
-                                                    <i class="fa-solid fa-calendar-check text-danger me-1"></i>Déblocage Automatique Planifié :
-                                                </label>
-                                                <div class="text-muted small">Jour de jeu où la tuile [0:0] s'ouvre d'elle-même aux coalitions de l'Archipel.</div>
-                                            </div>
-                                            <div class="col-md-5">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text bg-white font-monospace fw-bold">Jour J +</span>
-                                                    <input type="number" class="form-control text-center font-monospace fw-bold" 
-                                                           name="era_dojo_auto_day" id="inputDojoAutoDay" 
-                                                           min="1" max="200" value="<?= (int)($dojoAutoDay ?? 21) ?>">
-                                                    <span class="input-group-text bg-light text-muted">jours</span>
-                                                </div>
+                                        <!-- Déclenchement Implicite par la Fin de la Guerre des 12 Châteaux -->
+                                        <input type="hidden" name="era_dojo_auto_day" id="inputDojoAutoDay" value="<?= (int)($dojoAutoDay ?? 21) ?>">
+                                        <div class="alert <?= !empty($isCastlesWarConcluded) ? 'alert-success' : 'alert-secondary' ?> py-2.5 px-3 mb-3 d-flex align-items-center gap-2.5 rounded-2 small">
+                                            <i class="fa-solid fa-chess-rook fs-3 <?= !empty($isCastlesWarConcluded) ? 'text-success' : 'text-primary' ?> flex-shrink-0"></i>
+                                            <div>
+                                                <strong class="text-dark d-block">Déclenchement Implicite à la Fin de la Guerre des Châteaux :</strong>
+                                                Le Dōjō Impérial se déverrouille automatiquement dès que les 12 forteresses déployées sont conquises par les Alliances (Actuel : <strong><?= (int)($castlesHeldCount ?? 0) ?> / 12 Châteaux sous Alliance</strong>). L'administrateur peut également forcer l'ouverture anticipée en 1 clic ci-dessus.
                                             </div>
                                         </div>
 
@@ -1589,6 +1598,20 @@ unset($_SESSION['general_flash']);
                             </div>
                         </div>
 
+                        <?php if (!empty($isWorldEndDeclared)): ?>
+                            <div class="alert alert-warning py-3 px-4 mb-4 border-warning shadow-sm rounded-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <i class="fa-solid fa-trophy fs-1 text-warning"></i>
+                                    <div>
+                                        <h4 class="fw-bold text-dark m-0">🏆 FIN DU JEU DÉCLARÉE — L'UNIFICATION DU SHŌGUNAT EST ACCOMPLIE !</h4>
+                                        <div class="text-muted small mt-1">
+                                            Le Dōjō Impérial [0 : 0] a été érigé au Niveau 10. L'Ère V est active et le monde a atteint son terme solennel. Le Shōgun et son Alliance victorieuse sont immortalisés au Panthéon.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
                         <!-- ── D. PARAMÈTRES GLOBAUX & DIRECTIVES DU CYCLE DE VIE DU SERVEUR ── -->
                         <div class="card border shadow-sm">
                             <div class="card-header bg-light py-3 px-4 d-flex justify-content-between align-items-center">
@@ -1607,7 +1630,7 @@ unset($_SESSION['general_flash']);
                                         <input type="datetime-local" class="form-control font-monospace" 
                                                name="server_start_date" id="inputServerStartDate" 
                                                value="<?= htmlspecialchars((string)($serverStartDate ?? date('Y-m-d\TH:i'))) ?>">
-                                        <div class="text-muted small mt-1">Sert de référence zéro (J+0) pour le calcul de l'âge et la cadence automatique.</div>
+                                        <div class="text-muted small mt-1">Sert de référence zéro (J+0) pour le calcul de l'âge de l'Archipel.</div>
                                     </div>
 
                                     <!-- Switch Progression Automatique -->
@@ -1615,10 +1638,10 @@ unset($_SESSION['general_flash']);
                                         <div class="form-check form-switch pt-2">
                                             <input class="form-check-input" type="checkbox" id="switchEraAutoProgression" name="era_auto_progression_enabled" value="1" <?= !empty($autoProgression) ? 'checked' : '' ?>>
                                             <label class="form-check-label fw-bold text-dark" for="switchEraAutoProgression">
-                                                Progression Automatique Calendaire
+                                                Progression Événementielle Automatique
                                             </label>
                                         </div>
-                                        <div class="text-muted small mt-1">Déclenche automatiquement les Ères selon l'âge du monde (J+<?= (int)($castlesAutoDay ?? 7) ?> pour Châteaux, J+<?= (int)($dojoAutoDay ?? 21) ?> pour Dōjō).</div>
+                                        <div class="text-muted small mt-1">Déclenche automatiquement les transitions d'ères selon les hauts faits (Fin d'immunité des joueurs ➔ Ère II, Fin de la guerre des châteaux ➔ Dōjō Ère IV, et Fin du Jeu déclarée au Niv. 10).</div>
                                     </div>
 
                                     <!-- Switch Broadcast Annonces -->
@@ -1629,7 +1652,7 @@ unset($_SESSION['general_flash']);
                                                 Dépêches Impériales LiveOps
                                             </label>
                                         </div>
-                                        <div class="text-muted small mt-1">Affiche une bannière d'alerte mondiale solennelle à tous les joueurs lors des transitions d'ère.</div>
+                                        <div class="text-muted small mt-1">Diffuse automatiquement la proclamation solennelle à tous les joueurs lors des passages d'Ère.</div>
                                     </div>
 
                                     <!-- Forçage Direct de l'Ère -->
@@ -1643,11 +1666,11 @@ unset($_SESSION['general_flash']);
                                             </div>
                                             <div class="d-flex align-items-center gap-2">
                                                 <select class="form-select font-monospace fw-bold" name="server_current_era" id="selectServerCurrentEra" style="width: auto;">
-                                                    <option value="1" <?= ($currentEra ?? 1) == 1 ? 'selected' : '' ?>>Ère I : L'Aube des Clans (J+0)</option>
-                                                    <option value="2" <?= ($currentEra ?? 1) == 2 ? 'selected' : '' ?>>Ère II : Expansion Territoriale (J+3)</option>
-                                                    <option value="3" <?= ($currentEra ?? 1) == 3 ? 'selected' : '' ?>>Ère III : La Guerre des 12 Châteaux</option>
-                                                    <option value="4" <?= ($currentEra ?? 1) == 4 ? 'selected' : '' ?>>Ère IV : Le Dōjō Impérial [0:0]</option>
-                                                    <option value="5" <?= ($currentEra ?? 1) == 5 ? 'selected' : '' ?>>Ère V : L'Unification Impériale</option>
+                                                    <option value="1" <?= ($currentEra ?? 1) == 1 ? 'selected' : '' ?>>Ère I : L'Aube des Clans (Sous Immunité)</option>
+                                                    <option value="2" <?= ($currentEra ?? 1) == 2 ? 'selected' : '' ?>>Ère II : Expansion Territoriale (Fin d'immunité)</option>
+                                                    <option value="3" <?= ($currentEra ?? 1) == 3 ? 'selected' : '' ?>>Ère III : La Guerre des 12 Châteaux (Manuel Admin)</option>
+                                                    <option value="4" <?= ($currentEra ?? 1) == 4 ? 'selected' : '' ?>>Ère IV : Le Dōjō Impérial [0:0] (Fin guerre châteaux)</option>
+                                                    <option value="5" <?= ($currentEra ?? 1) == 5 ? 'selected' : '' ?>>Ère V : L'Unification Impériale (Fin du Jeu Déclarée)</option>
                                                 </select>
                                                 <input type="hidden" name="world_era" id="inputForcedEra" value="<?= (int)($currentEra ?? 1) ?>">
                                                 <button type="submit" 

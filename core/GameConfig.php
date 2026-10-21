@@ -214,6 +214,32 @@ class GameConfig {
     }
 
     /**
+     * Vérifie si la fin du monde a été déclarée (Victoire ultime Ère V)
+     */
+    public static function isWorldEndDeclared(): bool {
+        return (bool)self::get('world_end_declared', false);
+    }
+
+    /**
+     * Récupère le timestamp de la fin du monde déclarée
+     */
+    public static function getWorldEndTimestamp(): ?int {
+        $ts = self::get('world_end_timestamp', null);
+        return $ts !== null ? (int)$ts : null;
+    }
+
+    /**
+     * Déclare ou annule la fin du monde
+     */
+    public static function setWorldEndDeclared(bool $declared = true): bool {
+        $res = self::set('world_end_declared', $declared ? 1 : 0);
+        if ($declared) {
+            self::set('world_end_timestamp', time());
+        }
+        return (bool)$res;
+    }
+
+    /**
      * Récupère le rayon du monde actuel
      */
     public static function getWorldRadius(): int {

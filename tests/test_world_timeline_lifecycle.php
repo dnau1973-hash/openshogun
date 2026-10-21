@@ -45,6 +45,7 @@ $sqlite->exec("CREATE TABLE users (
     username TEXT,
     alliance_id INTEGER DEFAULT NULL,
     is_bot INTEGER DEFAULT 0,
+    protection_until DATETIME DEFAULT NULL,
     created_at INTEGER DEFAULT 0
 )");
 
@@ -307,6 +308,7 @@ GameConfig::set('server_current_era', 1);
 GameConfig::set('server_start_timestamp', time());
 GameConfig::set('era_castles_unlocked', 0);
 GameConfig::set('era_dojo_unlocked', 0);
+GameConfig::set('era_auto_progression_enabled', 0); // Désactivé temporairement
 $gameStudio->broadcastEraTransition(1);
 
 $finalData = $gameStudio->getWorldLifecycleData();
@@ -314,6 +316,122 @@ assertTest((int)$finalData['currentEra'] === 1, "Le monde est strictement en Èr
 assertTest($finalData['eras'][1]['status'] === 'active', "L'Ère 1 est active");
 assertTest($finalData['eras'][2]['status'] === 'locked', "L'Ère 2 est verrouillée");
 assertTest((int)$finalData['activeBroadcast']['era'] === 1, "La proclamation est synchronisée avec l'Ère 1");
+
+echo "\n[TEST 15] RÈGLE 1 : Transition vers l'Ère II conditionnée par la fin d'immunité de chaque joueur...\n";
+// Réinitialisation de la table users
+$sqlite->exec("DELETE FROM users");
+// Ajout de 2 joueurs dont 1 a encore une protection active dans le futur
+$sqlite->exec("INSERT INTO users (id, username, is_bot, protection_until) VALUES 
+    (1, 'Daimyo_Oda', 0, datetime('now', '+3 days')),
+    (2, 'Daimyo_Takeda', 0, datetime('now', '-1 hour'))
+");
+
+// Activer l'auto-progression
+GameConfig::set('era_auto_progression_enabled', 1);
+GameConfig::set('server_current_era', 1);
+
+$cycleDataProtActive = $gameStudio->getWorldLifecycleData();
+assertTest((int)$cycleDataProtActive['activeProtectionsCount'] === 1, "Détection correcte : 1 joueur encore sous protection");
+assertTest((int)$cycleDataProtActive['currentEra'] === 1, "L'Ère reste en Ère 1 tant qu'au moins 1 joueur est protégé");
+assertTest($cycleDataProtActive['eras'][2]['status'] === 'locked', "L'Ère 2 demeure verrouillée");
+
+// Maintenant, fin de protection pour TOUS les joueurs
+$sqlite->exec("UPDATE users SET protection_until = datetime('now', '-1 minute')");
+
+$cycleDataProtExpired = $gameStudio->getWorldLifecycleData();
+assertTest((int)$cycleDataProtExpired['activeProtectionsCount'] === 0, "Détection : 0 joueur sous protection");
+assertTest((int)$cycleDataProtExpired['currentEra'] === 2, "Transition automatique vers l'Ère II déclenchée dès que l'immunité de chaque joueur a expiré");
+assertTest($cycleDataProtExpired['eras'][2]['status'] === 'active', "L'Ère 2 est désormais active");
+
+echo "\n[TEST 16] RÈGLE 2 : L'Ère III (Guerre des Châteaux) est STRICTEMENT manuelle (Admin Only)...\n";
+// Simuler un âge de serveur très avancé (J+30) et era_castles_auto_day = 10
+GameConfig::set('server_start_timestamp', time() - (30 * 86400));
+GameConfig::set('server_current_era', 2);
+GameConfig::set('era_castles_unlocked', 0);
+GameConfig::set('era_castles_auto_day', 10);
+
+$checkNoAutoWar = $gameStudio->getWorldLifecycleData();
+assertTest(GameConfig::isCastlesWarUnlocked() === false, "La guerre des châteaux NE se déverrouille PAS automatiquement malgré J+30");
+assertTest((int)$checkNoAutoWar['currentEra'] === 2, "Le serveur reste en Ère 2 malgré l'expiration théorique du calendrier");
+assertTest($checkNoAutoWar['eras'][3]['status'] === 'locked', "L'Ère 3 reste verrouillée sans déclenchement admin");
+
+// Déclenchement explicite par l'Administrateur
+$adminWarTrigger = $gameStudio->triggerCastlesWar(true);
+assertTest($adminWarTrigger['success'] === true, "L'administrateur déclenche manuellement la Guerre des 12 Châteaux");
+assertTest(GameConfig::isCastlesWarUnlocked() === true, "Guerre des châteaux déverrouillée suite à l'ordre direct");
+$afterAdminData = $gameStudio->getWorldLifecycleData();
+assertTest((int)$afterAdminData['currentEra'] === 3, "Le monde passe en Ère 3 suite à l'ordre shōgunal manuel");
+assertTest($afterAdminData['eras'][3]['status'] === 'active', "L'Ère 3 est active");
+
+echo "\n[TEST 17] RÈGLE 3 : Déclenchement implicite de l'Ère IV par la fin de la Guerre des 12 Châteaux...\n";
+// S'assurer que le dojo est verrouillé
+GameConfig::set('era_dojo_unlocked', 0);
+GameConfig::set('server_current_era', 3);
+
+// Nettoyage et initialisation d'une alliance conquérante
+$sqlite->exec("DELETE FROM alliances");
+$sqlite->exec("DELETE FROM planets");
+$sqlite->exec("INSERT INTO alliances (id, name, tag, leader_id) VALUES (1, 'Clan Oda Shogunate', 'ODA', 1)");
+$sqlite->exec("UPDATE users SET alliance_id = 1 WHERE id = 1");
+
+// Compléter authentic_castles pour avoir exactement 12 châteaux
+for ($cid = 4; $cid <= 12; $cid++) {
+    $sqlite->exec("INSERT OR REPLACE INTO authentic_castles (id, name, code, province, default_x, default_y, is_spawned) 
+                   VALUES ($cid, 'Château Forteresse $cid', 'castle_$cid', 'Province_$cid', $cid, -$cid, 1)");
+}
+// Mettre à jour les 3 premiers châteaux comme spawned
+$sqlite->exec("UPDATE authentic_castles SET is_spawned = 1");
+
+// Créer 12 planètes détenues par le joueur 1 (membre de l'alliance ODA) et les assigner aux 12 châteaux
+for ($pid = 1; $pid <= 12; $pid++) {
+    $sqlite->exec("INSERT INTO planets (id, name, user_id, coord_x, coord_y) VALUES ($pid, 'Fief $pid', 1, $pid, -$pid)");
+    $sqlite->exec("UPDATE authentic_castles SET planet_id = $pid WHERE id = $pid");
+}
+
+// Vérification de la transition implicite vers l'Ère IV
+$lifecycleCastlesEnd = $gameStudio->getWorldLifecycleData();
+assertTest($lifecycleCastlesEnd['isCastlesWarConcluded'] === true, "La guerre des châteaux est reconnue comme conclue (12/12 capturés)");
+assertTest(GameConfig::isImperialDojoUnlocked() === true, "Le Dōjō Impérial s'est déverrouillé implicitement à la fin de la guerre des 12 châteaux");
+assertTest((int)$lifecycleCastlesEnd['currentEra'] === 4, "Le monde a basculé automatiquement en Ère IV");
+assertTest($lifecycleCastlesEnd['eras'][4]['status'] === 'active', "L'Ère IV (Dōjō Impérial [0:0]) est active");
+assertTest($lifecycleCastlesEnd['eras'][3]['status'] === 'completed', "L'Ère III est marquée terminée");
+
+echo "\n[TEST 18] RÈGLE 4 : Achèvement du Dōjō Niveau 10 -> Ère V et Déclaration Officielle de Fin du Jeu...\n";
+// Le Dōjō est au niveau 0 initialement
+assertTest(GameConfig::isWorldEndDeclared() === false, "Fin du jeu non déclarée au départ");
+
+// Simuler l'achèvement du Dōjō au Niveau 10
+$sqlite->exec("UPDATE imperial_dojo SET current_level = 10 WHERE id = 1");
+
+$lifecycleDojoFinished = $gameStudio->getWorldLifecycleData();
+assertTest((int)$lifecycleDojoFinished['currentEra'] === 5, "Le monde bascule en Ère V dès que le Dōjō atteint le Niveau 10");
+assertTest($lifecycleDojoFinished['isWorldEndDeclared'] === true, "isWorldEndDeclared est vrai dans la télémétrie");
+assertTest(GameConfig::isWorldEndDeclared() === true, "GameConfig::isWorldEndDeclared() confirme la déclaration de fin du jeu");
+assertTest(GameConfig::getWorldEndTimestamp() > 0, "Horodatage officiel de fin du monde enregistré");
+assertTest($lifecycleDojoFinished['eras'][5]['status'] === 'active', "L'Ère V est active");
+assertTest($lifecycleDojoFinished['eras'][4]['status'] === 'completed', "L'Ère IV est marquée terminée");
+
+echo "\n[TEST 19] Rendu UI & Déclencheurs Télémétriques des 4 règles...\n";
+$viewPath = __DIR__ . '/../views/gamestudio/general_world_config.php';
+$viewContent = file_get_contents($viewPath);
+
+// 1. Déclencheurs télémétriques dans les métadonnées des Ères
+assertTest($lifecycleDojoFinished['eras'][2]['trigger_label'] === "Fin de l'immunité de chaque joueur", "Trigger label Ère II = Fin de l'immunité de chaque joueur");
+assertTest($lifecycleDojoFinished['eras'][3]['trigger_label'] === "Déclenchement Manuel Administrateur", "Trigger label Ère III = Déclenchement Manuel Administrateur");
+assertTest($lifecycleDojoFinished['eras'][4]['trigger_label'] === "Fin de la Guerre des 12 Châteaux", "Trigger label Ère IV = Fin de la Guerre des 12 Châteaux");
+assertTest($lifecycleDojoFinished['eras'][5]['trigger_label'] === "Niveau 10 du Dōjō Impérial Érigé", "Trigger label Ère V = Niveau 10 du Dōjō Impérial Érigé");
+
+// 2. Badges et encarts dédiés dans general_world_config.php
+assertTest(str_contains($viewContent, 'sous immunité'), "Compteur de joueurs sous immunité présent dans la frise Ère II");
+assertTest(str_contains($viewContent, 'Manuel Admin'), "Badge Manuel Admin présent dans la frise Ère III");
+assertTest(str_contains($viewContent, 'Ordre Shōgunal Direct'), "Console Ère III configurée en Ordre Shōgunal Direct");
+assertTest(str_contains($viewContent, "Déclenchement Manuel Exclusif par l'Administrateur"), "Encart d'exclusivité manuelle présent en Ère III");
+assertTest(str_contains($viewContent, "Déclenchement Implicite par la Fin de la Guerre des 12 Châteaux"), "Console Ère IV configurée sur le Déclenchement Implicite");
+assertTest(str_contains($viewContent, "Fin du Jeu Déclarée"), "Badge Fin du Jeu Déclarée présent dans la frise Ère V");
+assertTest(str_contains($viewContent, "FIN DU JEU DÉCLARÉE"), "Encart Fin du Jeu Déclarée présent dans la console Ère V");
+
+// Rétablissement propre de la dépêche impériale sur l'Ère I pour l'environnement de jeu
+$gameStudio->broadcastEraTransition(1);
 
 echo "\n========================================================================\n";
 echo " TOUS LES TESTS DU DÉROULEMENT DU JEU (ÈRE & ENDGAME) SONT 100% AU VERT !\n";

@@ -1051,97 +1051,43 @@ class GameStudioEngine {
         $dojoAutoDay = (int)GameConfig::get('era_dojo_auto_day', 21);
         $dojoUnlocked = GameConfig::isImperialDojoUnlocked();
         $broadcastAnnounce = (bool)GameConfig::get('era_broadcast_announcements', true);
+        $isWorldEndDeclared = GameConfig::isWorldEndDeclared();
 
-        // Si la progression automatique est active, vérification des seuils
+        // ── Télémétrie de l'Immunité Débutant des Joueurs (Règle Ère I -> II) ──
+        $activeProtectionsCount = 0;
+        $totalHumanPlayers = 0;
+        $latestProtectionEnd = null;
+        try {
+            $nowStr = date('Y-m-d H:i:s');
+            $stmtHuman = $this->db->query("SELECT COUNT(*) FROM users WHERE is_bot = 0");
+            $totalHumanPlayers = (int)($stmtHuman ? $stmtHuman->fetchColumn() : 0);
+
+            $stmtProt = $this->db->query("
+                SELECT COUNT(*) as cnt, MAX(protection_until) as max_end
+                FROM users
+                WHERE is_bot = 0 AND protection_until IS NOT NULL AND protection_until > '$nowStr'
+            ");
+            if ($stmtProt && ($rowP = $stmtProt->fetch(PDO::FETCH_ASSOC))) {
+                $activeProtectionsCount = (int)($rowP['cnt'] ?? 0);
+                $latestProtectionEnd = $rowP['max_end'] ?? null;
+            }
+        } catch (Throwable $e) {}
+
+        // Si la progression automatique est active, vérification des règles de transition
         if ($autoProgression) {
-            // Transition automatique vers l'Ère II (Fin d'immunité débutant J+3)
-            if ($currentEra < 2 && $serverAgeDays >= 3.0) {
+            // RÈGLE 1 : Transition vers l'Ère II déclenchée par la fin de l'immunité de chaque joueur
+            // (Aucun joueur humain ne possède encore de protection active)
+            if ($currentEra < 2 && $activeProtectionsCount === 0 && ($totalHumanPlayers > 0 || $serverAgeDays >= 0.05)) {
                 $currentEra = 2;
                 GameConfig::set('server_current_era', 2);
                 if ($broadcastAnnounce) {
                     $this->broadcastEraTransition(2);
                 }
             }
-            // Transition automatique vers l'Ère III (Guerre des 12 Châteaux)
-            if (!$castlesUnlocked && $serverAgeDays >= $castlesAutoDay) {
-                $this->triggerCastlesWar($broadcastAnnounce);
-                $castlesUnlocked = true;
-                if ($currentEra < 3) {
-                    $currentEra = 3;
-                    GameConfig::set('server_current_era', 3);
-                }
-            }
-            // Transition automatique vers l'Ère IV (Dōjō Impérial [0:0])
-            if (!$dojoUnlocked && $serverAgeDays >= $dojoAutoDay) {
-                $this->triggerImperialDojo($broadcastAnnounce);
-                $dojoUnlocked = true;
-                if ($currentEra < 4) {
-                    $currentEra = 4;
-                    GameConfig::set('server_current_era', 4);
-                }
-            }
-        }
 
-        // Définition des 5 Ères Féodales
-        $eras = [
-            1 => [
-                'id' => 1,
-                'name' => "L'Aube des Clans",
-                'subtitle' => 'Éclosion Rurale & Paix Débutante',
-                'badge' => 'bg-teal-lt text-teal',
-                'icon' => 'fa-seedling',
-                'trigger_label' => 'J+0 (Lancement du Monde)',
-                'trigger_day' => 0,
-                'description' => "Fondation des premiers fiefs ruraux, développement des parcelles de riz, bois, pierre et fer sous la bienveillance du Shōgun.",
-                'status' => ($currentEra > 1) ? 'completed' : (($currentEra === 1) ? 'active' : 'locked')
-            ],
-            2 => [
-                'id' => 2,
-                'name' => 'Expansion Territoriale',
-                'subtitle' => 'Conquête des Oasis & Alliances',
-                'badge' => 'bg-blue-lt text-blue',
-                'icon' => 'fa-compass',
-                'trigger_label' => 'J+3 (Fin de protection)',
-                'trigger_day' => 3,
-                'description' => "Fin de l'immunité débutant, soumission des bêtes sauvages dans les oasis, création des grandes coalitions et premiers raids.",
-                'status' => ($currentEra > 2) ? 'completed' : (($currentEra === 2) ? 'active' : 'locked')
-            ],
-            3 => [
-                'id' => 3,
-                'name' => 'La Guerre des 12 Châteaux',
-                'subtitle' => 'Éveil des Donjons & Reliques',
-                'badge' => 'bg-amber-lt text-amber',
-                'icon' => 'fa-chess-rook',
-                'trigger_label' => "J+{$castlesAutoDay} (Éveil des Donjons)",
-                'trigger_day' => $castlesAutoDay,
-                'description' => "Les portes des 12 Châteaux Authentiques s'ouvrent à 360°. Les alliances s'affrontent pour capturer les reliques nationales et asseoir leur suprématie.",
-                'status' => ($currentEra > 3) ? 'completed' : (($currentEra === 3) ? 'active' : 'locked'),
-                'is_unlocked' => $castlesUnlocked
-            ],
-            4 => [
-                'id' => 4,
-                'name' => 'Le Dōjō Impérial [0 : 0]',
-                'subtitle' => 'Sanctuaire Suprême & Sièges Titanesques',
-                'badge' => 'bg-purple-lt text-purple',
-                'icon' => 'fa-torii-gate',
-                'trigger_label' => "J+{$dojoAutoDay} (Ouverture de Tenchi no Seichi)",
-                'trigger_day' => $dojoAutoDay,
-                'description' => "La brume se dissipe sur la tuile centrale [0 : 0]. Les coalitions détenant au moins 2 châteaux acheminent des convois titanesques pour ériger les 10 niveaux du Sanctuaire.",
-                'status' => ($currentEra > 4) ? 'completed' : (($currentEra === 4) ? 'active' : 'locked'),
-                'is_unlocked' => $dojoUnlocked
-            ],
-            5 => [
-                'id' => 5,
-                'name' => "L'Unification Impériale",
-                'subtitle' => 'Proclamation du Nouveau Shōgun',
-                'badge' => 'bg-yellow-lt text-yellow',
-                'icon' => 'fa-crown',
-                'trigger_label' => 'Niveau 10 du Dōjō Érigé',
-                'trigger_day' => null,
-                'description' => "Victoire mondiale définitive. Le Daimyō victorieux est proclamé Shōgun suprême de tout l'Archipel, scellant l'unification sous une bannière immortelle.",
-                'status' => ($currentEra === 5) ? 'active' : 'locked'
-            ],
-        ];
+            // RÈGLE 2 : L'Ère III (Guerre des 12 Châteaux) est STRICTEMENT déclenchée manuellement
+            // par l'administrateur (aucune transition temporelle automatique).
+        }
 
         // ── Télémétrie des 12 Châteaux Authentiques ──
         $rawCastles = [];
@@ -1190,6 +1136,18 @@ class GameStudioEngine {
             unset($c);
         } catch (Throwable $e) {}
 
+        // RÈGLE 3 : Conclusion de la Guerre des 12 Châteaux & Déclenchement Implicite de l'Ère IV
+        // La guerre des châteaux se conclut dès que les forteresses déployées (>= 12) sont tenues par des alliances.
+        $isCastlesWarConcluded = ($castlesUnlocked && $castlesSpawnedCount >= 12 && $castlesHeldCount >= 12);
+        if ($autoProgression && $currentEra >= 3 && !$dojoUnlocked && $isCastlesWarConcluded) {
+            $this->triggerImperialDojo($broadcastAnnounce);
+            $dojoUnlocked = true;
+            if ($currentEra < 4) {
+                $currentEra = 4;
+                GameConfig::set('server_current_era', 4);
+            }
+        }
+
         // ── Télémétrie du Dōjō Impérial [0:0] ──
         $dojoState = [];
         $currLvl = 0;
@@ -1212,16 +1170,87 @@ class GameStudioEngine {
             $dojoMaxHp = max(1, (int)($dojoState['max_health_points'] ?? 5000000));
             $dojoHpPercent = min(100, (int)round(($dojoHp / $dojoMaxHp) * 100));
 
-            if ($currLvl >= 10 && $currentEra < 5) {
-                $currentEra = 5;
-                GameConfig::set('server_current_era', 5);
-                $eras[5]['status'] = 'active';
-                $eras[4]['status'] = 'completed';
-                if ($broadcastAnnounce) {
-                    $this->broadcastEraTransition(5);
+            // RÈGLE 4 : Dès que le Dōjō Impérial est érigé au Niveau 10,
+            // l'Ère V est déclenchée et la Fin du Jeu est officiellement déclarée.
+            if ($currLvl >= 10) {
+                if ($currentEra < 5) {
+                    $currentEra = 5;
+                    GameConfig::set('server_current_era', 5);
+                    if ($broadcastAnnounce) {
+                        $this->broadcastEraTransition(5);
+                    }
                 }
+                GameConfig::setWorldEndDeclared(true);
+                $isWorldEndDeclared = true;
             }
         } catch (Throwable $e) {}
+
+        // Définition des 5 Ères Féodales et de leurs déclencheurs
+        $eras = [
+            1 => [
+                'id' => 1,
+                'name' => "L'Aube des Clans",
+                'subtitle' => 'Éclosion Rurale & Paix Débutante',
+                'badge' => 'bg-teal-lt text-teal',
+                'icon' => 'fa-seedling',
+                'trigger_label' => 'J+0 (Lancement du Monde - Sous Immunité)',
+                'trigger_day' => 0,
+                'description' => "Fondation des premiers fiefs ruraux, développement des parcelles de riz, bois, pierre et fer sous la protection pacifique inviolable des Daimyōs.",
+                'status' => ($currentEra > 1) ? 'completed' : (($currentEra === 1) ? 'active' : 'locked')
+            ],
+            2 => [
+                'id' => 2,
+                'name' => 'Expansion Territoriale',
+                'subtitle' => 'Conquête des Oasis & Alliances',
+                'badge' => 'bg-blue-lt text-blue',
+                'icon' => 'fa-compass',
+                'trigger_label' => "Fin de l'immunité de chaque joueur",
+                'trigger_day' => null,
+                'description' => "Expiration de toutes les protections débutants. Levée du bouclier pacifique, soumission des bêtes sauvages des oasis, fondation des coalitions et premiers raids.",
+                'status' => ($currentEra > 2) ? 'completed' : (($currentEra === 2) ? 'active' : 'locked')
+            ],
+            3 => [
+                'id' => 3,
+                'name' => 'La Guerre des 12 Châteaux',
+                'subtitle' => 'Éveil des Donjons & Reliques',
+                'badge' => 'bg-amber-lt text-amber',
+                'icon' => 'fa-chess-rook',
+                'trigger_label' => "Déclenchement Manuel Administrateur",
+                'trigger_day' => null,
+                'description' => "Sur Ordre Shōgunal Direct de l'Administrateur, les portes des 12 Châteaux Authentiques s'ouvrent à 360° pour la conquête des reliques nationales.",
+                'status' => ($currentEra > 3) ? 'completed' : (($currentEra === 3) ? 'active' : 'locked'),
+                'is_unlocked' => $castlesUnlocked
+            ],
+            4 => [
+                'id' => 4,
+                'name' => 'Le Dōjō Impérial [0 : 0]',
+                'subtitle' => 'Sanctuaire Suprême & Sièges Titanesques',
+                'badge' => 'bg-purple-lt text-purple',
+                'icon' => 'fa-torii-gate',
+                'trigger_label' => "Fin de la Guerre des 12 Châteaux",
+                'trigger_day' => null,
+                'description' => "Déclenché dès que les 12 châteaux sont sous le contrôle des Alliances. La brume mystique de Tenchi no Seichi [0 : 0] se dissipe pour ériger les 10 niveaux du Dōjō Impérial.",
+                'status' => ($currentEra > 4) ? 'completed' : (($currentEra === 4) ? 'active' : 'locked'),
+                'is_unlocked' => $dojoUnlocked
+            ],
+            5 => [
+                'id' => 5,
+                'name' => "L'Unification Impériale",
+                'subtitle' => 'Proclamation du Shōgun & Fin du Monde',
+                'badge' => 'bg-yellow-lt text-yellow',
+                'icon' => 'fa-crown',
+                'trigger_label' => 'Niveau 10 du Dōjō Impérial Érigé',
+                'trigger_day' => null,
+                'description' => "Achèvement de la Merveille mondiale. Victoire suprême de l'Alliance suzeraine, Déclaration Officielle de la Fin du Jeu et couronnement du nouveau Shōgun immortel.",
+                'status' => ($currentEra === 5) ? 'active' : 'locked',
+                'is_world_end' => $isWorldEndDeclared
+            ],
+        ];
+
+        if ($currentEra === 5) {
+            $eras[5]['status'] = 'active';
+            $eras[4]['status'] = 'completed';
+        }
 
         $activeBroadcast = null;
         try {
@@ -1251,6 +1280,15 @@ class GameStudioEngine {
             'broadcastAnnounce'         => $broadcastAnnounce,
             'activeBroadcast'           => $activeBroadcast,
             'eras'                      => $eras,
+            // Immunité Joueurs (Ère 1 -> 2)
+            'activeProtectionsCount'    => $activeProtectionsCount,
+            'totalHumanPlayers'         => $totalHumanPlayers,
+            'latestProtectionEnd'       => $latestProtectionEnd,
+            // Fin de Guerre des Châteaux (Ère 3 -> 4)
+            'isCastlesWarConcluded'     => $isCastlesWarConcluded,
+            // Fin du Jeu Déclarée (Ère 5)
+            'isWorldEndDeclared'        => $isWorldEndDeclared,
+            'worldEndTimestamp'         => GameConfig::getWorldEndTimestamp(),
             // 12 Châteaux
             'castlesList'               => $rawCastles,
             'castlesCount'              => $castlesCount,

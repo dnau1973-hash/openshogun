@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/GameConfig.php';
 
 class ImperialDojoEngine {
     private ?PDO $db = null;
@@ -724,6 +725,10 @@ class ImperialDojoEngine {
                     $allianceId, $alliance['name'], $alliance['tag'],
                     $alliance['leader_id'], $alliance['leader_name'], $now
                 ]);
+
+                // Acter la fin officielle du jeu et la bascule en Ère 5
+                GameConfig::set('server_current_era', 5);
+                GameConfig::setWorldEndDeclared(true);
             }
         } catch (Throwable $e) {
             error_log("Victory trigger error: " . $e->getMessage());
