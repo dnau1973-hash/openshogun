@@ -1,3 +1,10 @@
 {
-    "is_active": false
+    "id": "bc_6ad867f5280a8",
+    "title": "👑 Triomphe Impérial : Avènement de l'Ère V — L'Unification du Shōgunat",
+    "message": "Le Sanctuaire Céleste du Dōjō Impérial [0:0] a atteint le Palier 10 Suprême ! Les cloches de la paix résonnent sur tout l'Archipel. Le Japon est réunifié sous la bannière éternelle du nouveau Shōgun !",
+    "type": "primary",
+    "icon": "fa-bullhorn text-info",
+    "is_active": true,
+    "created_at": "2026-10-21 07:21:25",
+    "expires_at": "2026-10-28 07:21:25"
 }

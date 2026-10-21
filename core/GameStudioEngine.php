@@ -1040,6 +1040,15 @@ class GameStudioEngine {
 
         // Si la progression automatique est active, vérification des seuils
         if ($autoProgression) {
+            // Transition automatique vers l'Ère II (Fin d'immunité débutant J+3)
+            if ($currentEra < 2 && $serverAgeDays >= 3.0) {
+                $currentEra = 2;
+                GameConfig::set('server_current_era', 2);
+                if ($broadcastAnnounce) {
+                    $this->broadcastEraTransition(2);
+                }
+            }
+            // Transition automatique vers l'Ère III (Guerre des 12 Châteaux)
             if (!$castlesUnlocked && $serverAgeDays >= $castlesAutoDay) {
                 $this->triggerCastlesWar($broadcastAnnounce);
                 $castlesUnlocked = true;
@@ -1048,6 +1057,7 @@ class GameStudioEngine {
                     GameConfig::set('server_current_era', 3);
                 }
             }
+            // Transition automatique vers l'Ère IV (Dōjō Impérial [0:0])
             if (!$dojoUnlocked && $serverAgeDays >= $dojoAutoDay) {
                 $this->triggerImperialDojo($broadcastAnnounce);
                 $dojoUnlocked = true;
@@ -1193,7 +1203,17 @@ class GameStudioEngine {
                 GameConfig::set('server_current_era', 5);
                 $eras[5]['status'] = 'active';
                 $eras[4]['status'] = 'completed';
+                if ($broadcastAnnounce) {
+                    $this->broadcastEraTransition(5);
+                }
             }
+        } catch (Throwable $e) {}
+
+        $activeBroadcast = null;
+        try {
+            require_once __DIR__ . '/LiveOpsEngine.php';
+            $liveOps = new LiveOpsEngine();
+            $activeBroadcast = $liveOps->getActiveBroadcast();
         } catch (Throwable $e) {}
 
         return [
@@ -1207,6 +1227,7 @@ class GameStudioEngine {
             'dojoAutoDay'               => $dojoAutoDay,
             'dojoUnlocked'              => $dojoUnlocked,
             'broadcastAnnounce'         => $broadcastAnnounce,
+            'activeBroadcast'           => $activeBroadcast,
             'eras'                      => $eras,
             // 12 Châteaux
             'castlesList'               => $rawCastles,
@@ -1237,6 +1258,7 @@ class GameStudioEngine {
         $dojoUnlocked = !empty($post['era_dojo_unlocked']);
         $broadcast = !empty($post['era_broadcast_announcements']);
         $era = max(1, min(5, (int)($post['server_current_era'] ?? 1)));
+        $prevEra = GameConfig::getServerCurrentEra();
 
         GameConfig::set('era_auto_progression_enabled', $autoProgression ? 1 : 0);
         GameConfig::set('era_castles_auto_day', $castlesAutoDay);
@@ -1245,6 +1267,10 @@ class GameStudioEngine {
         GameConfig::set('era_dojo_unlocked', $dojoUnlocked ? 1 : 0);
         GameConfig::set('era_broadcast_announcements', $broadcast ? 1 : 0);
         GameConfig::set('server_current_era', $era);
+
+        if ($era !== $prevEra && $broadcast) {
+            $this->broadcastEraTransition($era);
+        }
 
         if (!empty($post['server_start_date'])) {
             $ts = strtotime((string)$post['server_start_date']);
@@ -1274,17 +1300,7 @@ class GameStudioEngine {
         }
 
         if ($broadcast) {
-            try {
-                require_once __DIR__ . '/LiveOpsEngine.php';
-                $liveOps = new LiveOpsEngine();
-                $liveOps->setBroadcast(
-                    "🏯 Guerre des 12 Châteaux Ouverte !",
-                    "Les portes des 12 Forteresses Authentiques du Japon viennent de s'ouvrir sur l'Archipel ! Daimyōs, marchez sur les donjons ancestraux et emparez-vous des reliques sacrées !",
-                    "warning",
-                    1440,
-                    true
-                );
-            } catch (Throwable $e) {}
+            $this->broadcastEraTransition(3);
         }
 
         return [
@@ -1309,17 +1325,7 @@ class GameStudioEngine {
         }
 
         if ($broadcast) {
-            try {
-                require_once __DIR__ . '/LiveOpsEngine.php';
-                $liveOps = new LiveOpsEngine();
-                $liveOps->setBroadcast(
-                    "⛩️ Le Sanctuaire du Dōjō Impérial [0:0] est Accessible !",
-                    "La Terre Sacrée [0 : 0] (Tenchi no Seichi) est désormais ouverte ! Les Alliances détenant au moins 2 châteaux peuvent revendiquer le sanctuaire et acheminer des convois titanesques pour ériger la Merveille.",
-                    "danger",
-                    1440,
-                    true
-                );
-            } catch (Throwable $e) {}
+            $this->broadcastEraTransition(4);
         }
 
         return [
@@ -1343,6 +1349,10 @@ class GameStudioEngine {
             $this->triggerImperialDojo(false);
         }
 
+        if ($broadcast) {
+            $this->broadcastEraTransition($era);
+        }
+
         $eraNames = [
             1 => "Ère I : L'Aube des Clans",
             2 => "Ère II : Expansion Territoriale",
@@ -1352,25 +1362,60 @@ class GameStudioEngine {
         ];
         $eraTitle = $eraNames[$era] ?? "Ère {$era}";
 
-        if ($broadcast) {
-            try {
-                require_once __DIR__ . '/LiveOpsEngine.php';
-                $liveOps = new LiveOpsEngine();
-                $liveOps->setBroadcast(
-                    "📜 Décret Impérial : Avènement de la {$eraTitle}",
-                    "Le Shōgun décrète solennellement l'entrée du monde féodal dans l'{$eraTitle}. Préparez vos légions et vos cités !",
-                    "primary",
-                    720,
-                    true
-                );
-            } catch (Throwable $e) {}
-        }
-
         return [
             'success' => true,
             'era' => $era,
-            'message' => "Ère active du monde basculée sur : {$eraTitle}."
+            'message' => "Ère active du monde basculée sur : {$eraTitle}." . ($broadcast ? " Dépêche Impériale officielle diffusée à l'Archipel !" : "")
         ];
+    }
+
+    /**
+     * Diffuse une Dépêche Impériale solennelle (LiveOps Broadcast) à tous les joueurs lors du passage d'une Ère
+     */
+    public function broadcastEraTransition(int $era): bool {
+        $era = max(1, min(5, $era));
+        try {
+            require_once __DIR__ . '/LiveOpsEngine.php';
+            $liveOps = new LiveOpsEngine();
+
+            $dispatches = [
+                1 => [
+                    'title'   => "🌱 Décret Impérial : Avènement de l'Ère I — L'Aube des Clans",
+                    'message' => "Par décret du Shōgun, l'Archipel s'éveille ! Les daimyōs fondent leurs premiers fiefs sous la protection impériale. Développez vos parcelles de riz, de bois, de pierre et de fer dans la concorde et la paix débutante.",
+                    'type'    => 'success',
+                    'duration'=> 1440
+                ],
+                2 => [
+                    'title'   => "🧭 Proclamation Impériale : Avènement de l'Ère II — L'Expansion Territoriale",
+                    'message' => "La paix débutante est levée ! Le Shōgun ouvre la grande conquête féodale. Que les daimyōs soumettent les bêtes sauvages des oasis, forgent de puissantes alliances et étendent leurs frontières à travers tout l'Archipel.",
+                    'type'    => 'warning',
+                    'duration'=> 1440
+                ],
+                3 => [
+                    'title'   => "🏯 Dépêche Impériale : Avènement de l'Ère III — La Guerre des 12 Châteaux",
+                    'message' => "Les portes des 12 Forteresses Authentiques du Japon viennent de s'ouvrir sur l'Archipel ! Daimyōs et Alliances, marchez sur les donjons sacrés et emparez-vous de leurs Reliques séculaires !",
+                    'type'    => 'warning',
+                    'duration'=> 2880
+                ],
+                4 => [
+                    'title'   => "⛩️ Proclamation Shōgunale : Avènement de l'Ère IV — Le Dōjō Impérial [0:0]",
+                    'message' => "La brume mystique se dissipe sur la Terre Sacrée [0 : 0] (Tenchi no Seichi) ! Les Alliances détenant au moins 2 châteaux sont appelées à revendiquer le sanctuaire suprême et acheminer des convois titanesques pour ériger la Merveille.",
+                    'type'    => 'danger',
+                    'duration'=> 4320
+                ],
+                5 => [
+                    'title'   => "👑 Triomphe Impérial : Avènement de l'Ère V — L'Unification du Shōgunat",
+                    'message' => "Le Sanctuaire Céleste du Dōjō Impérial [0:0] a atteint le Palier 10 Suprême ! Les cloches de la paix résonnent sur tout l'Archipel. Le Japon est réunifié sous la bannière éternelle du nouveau Shōgun !",
+                    'type'    => 'primary',
+                    'duration'=> 10080
+                ],
+            ];
+
+            $d = $dispatches[$era] ?? $dispatches[1];
+            return $liveOps->setBroadcast($d['title'], $d['message'], $d['type'], $d['duration'], true);
+        } catch (Throwable $e) {
+            return false;
+        }
     }
 }
 

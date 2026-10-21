@@ -142,6 +142,7 @@ VALUES
 (3, 'Château de Hikone', 'hikone', 'Omi', 'Armure du Démon Rouge', 'Attaque d''infanterie', 20, 5, -18, 0)");
 
 echo "[TEST 1] Vérification de l'initialisation et des méthodes de GameConfig pour les Ères...\n";
+GameConfig::set('server_start_timestamp', time()); // Serveur tout juste ouvert (J+0)
 assertTest(GameConfig::getServerCurrentEra() === 1, "Ère initiale par défaut = 1");
 assertTest(GameConfig::isCastlesWarUnlocked() === false, "Guerre des 12 Châteaux verrouillée par défaut");
 assertTest(GameConfig::isImperialDojoUnlocked() === false, "Dōjō Impérial verrouillé par défaut");
@@ -218,6 +219,8 @@ $viewContent = file_get_contents($viewPath);
 assertTest(str_contains($viewContent, '7. Déroulement du Jeu &amp; Ères'), "Lien d'onglet 7 présent dans la barre de navigation");
 assertTest(str_contains($viewContent, 'id="section-world-timeline-config"'), "Conteneur ancre de l'onglet 7 présent");
 assertTest(str_contains($viewContent, 'Chronologie &amp; Paliers Historiques de l\'Archipel'), "Titre de la Frise Chronologique présent");
+assertTest(str_contains($viewContent, 'card-body p-4 p-md-5'), "Padding généreux (p-4 p-md-5) présent sur le bloc Chronologie");
+assertTest(str_contains($viewContent, 'value="broadcast_era_decree"'), "Bouton de diffusion de la dépêche impériale présent");
 assertTest(str_contains($viewContent, 'Guerre des 12 Châteaux Authentiques (Ère III)'), "Console Guerre des 12 Châteaux présente");
 assertTest(str_contains($viewContent, 'value="trigger_castles_war"'), "Bouton d'action trigger_castles_war présent");
 assertTest(str_contains($viewContent, 'Radar Opérationnel des 12 Châteaux Authentiques'), "Radar des 12 Châteaux présent");
@@ -236,8 +239,20 @@ assertTest(str_contains($controllerContent, "saveEraSettings(\$_POST)"), "saveEr
 assertTest(str_contains($controllerContent, "'trigger_castles_war'"), "Action trigger_castles_war gérée");
 assertTest(str_contains($controllerContent, "'trigger_imperial_dojo'"), "Action trigger_imperial_dojo gérée");
 assertTest(str_contains($controllerContent, "'set_world_era'"), "Action set_world_era gérée");
+assertTest(str_contains($controllerContent, "'broadcast_era_decree'"), "Action broadcast_era_decree gérée");
 
 echo "\n[TEST 10] Vérification des endpoints d'API dans api/admin.php...\n";
+$apiContent = file_get_contents(__DIR__ . '/../api/admin.php');
+assertTest(str_contains($apiContent, "case 'trigger_castles_war':"), "Endpoint API trigger_castles_war présent");
+assertTest(str_contains($apiContent, "case 'trigger_imperial_dojo':"), "Endpoint API trigger_imperial_dojo présent");
+assertTest(str_contains($apiContent, "case 'set_world_era':"), "Endpoint API set_world_era présent");
+assertTest(str_contains($apiContent, "case 'get_world_timeline':"), "Endpoint API get_world_timeline présent");
+
+echo "\n[TEST 11] Vérification de la diffusion des Dépêches Impériales à chaque passage d'Ère...\n";
+for ($eraTest = 1; $eraTest <= 5; $eraTest++) {
+    $bcOk = $gameStudio->broadcastEraTransition($eraTest);
+    assertTest($bcOk === true, "Diffusion de la dépêche impériale pour l'Ère {$eraTest} réussie");
+}
 $apiContent = file_get_contents(__DIR__ . '/../api/admin.php');
 assertTest(str_contains($apiContent, "case 'trigger_castles_war':"), "Endpoint API trigger_castles_war présent");
 assertTest(str_contains($apiContent, "case 'trigger_imperial_dojo':"), "Endpoint API trigger_imperial_dojo présent");

@@ -1011,18 +1011,48 @@ unset($_SESSION['general_flash']);
 
                         <!-- ── A. FRISE CHRONOLOGIQUE DES 5 ÈRES MONDIALES ── -->
                         <div class="card border shadow-sm mb-4 bg-light">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                                    <h5 class="fw-bold text-dark m-0 d-flex align-items-center gap-2">
-                                        <i class="fa-solid fa-timeline text-primary"></i>Chronologie &amp; Paliers Historiques de l'Archipel
-                                    </h5>
-                                    <div class="small text-muted">
-                                        Ouverture du serveur : <strong class="text-dark"><?= date('d/m/Y H:i', (int)($startTimestamp ?? time())) ?></strong>
+                            <div class="card-body p-4 p-md-5">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 pb-3 border-bottom">
+                                    <div>
+                                        <h4 class="fw-bold text-dark m-0 d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-timeline text-primary fs-3"></i>Chronologie &amp; Paliers Historiques de l'Archipel
+                                        </h4>
+                                        <div class="text-muted small mt-1">
+                                            Cadencez l'histoire vivante d'OpenShogun à travers 5 Ères successives. Chaque passage d'Ère diffuse automatiquement une Dépêche Impériale solennelle.
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="badge bg-white text-secondary border font-monospace px-3 py-2 fs-6 shadow-sm">
+                                            <i class="fa-solid fa-calendar-check text-primary me-1.5"></i>Ouverture : <strong class="text-dark"><?= date('d/m/Y H:i', (int)($startTimestamp ?? time())) ?></strong>
+                                        </span>
+                                        <button type="submit" 
+                                                formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                                name="action" value="broadcast_era_decree" 
+                                                class="btn btn-sm btn-outline-warning shadow-sm d-flex align-items-center gap-1.5 px-3 py-1.5 fw-bold"
+                                                title="Diffuser ou réémettre la dépêche impériale officielle de l'Ère active à tous les joueurs">
+                                            <i class="fa-solid fa-bullhorn text-warning"></i>
+                                            <span>Diffuser Dépêche Impériale (Ère <?= (int)($currentEra ?? 1) ?>)</span>
+                                        </button>
                                     </div>
                                 </div>
 
-                                <!-- Stepper 5 Ères -->
-                                <div class="row g-2">
+                                <?php if (!empty($activeBroadcast) && !empty($activeBroadcast['is_active'])): ?>
+                                    <div class="alert alert-info py-2.5 px-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2 shadow-sm rounded-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-bullhorn fs-3 text-info"></i>
+                                            <div>
+                                                <strong class="text-dark d-block"><?= htmlspecialchars($activeBroadcast['title'] ?? 'Dépêche Impériale') ?></strong>
+                                                <span class="text-muted small"><?= htmlspecialchars($activeBroadcast['message'] ?? '') ?></span>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-info text-white font-monospace">
+                                            <i class="fa-solid fa-clock me-1"></i>En Ligne jusqu'au <?= !empty($activeBroadcast['expires_at']) ? date('d/m H:i', strtotime($activeBroadcast['expires_at'])) : '' ?>
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- Stepper 5 Ères avec Padding Généreux -->
+                                <div class="row g-3 g-xl-4">
                                     <?php if (!empty($eras)): foreach ($eras as $eId => $era): 
                                         $isCompleted = ($era['status'] === 'completed');
                                         $isActive = ($era['status'] === 'active');
@@ -1031,38 +1061,38 @@ unset($_SESSION['general_flash']);
                                         $cardBg = $isActive ? 'bg-white' : ($isCompleted ? 'bg-white' : 'bg-light');
                                     ?>
                                         <div class="col-lg col-md-4 col-sm-6">
-                                            <div class="card h-100 <?= $borderClass ?> <?= $cardBg ?> p-2.5 position-relative">
-                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <span class="badge <?= $era['badge'] ?> px-2 py-1">
+                                            <div class="card h-100 <?= $borderClass ?> <?= $cardBg ?> p-3.5 p-xl-4 rounded-3 shadow-sm position-relative d-flex flex-column">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <span class="badge <?= $era['badge'] ?> px-2.5 py-1.5 fs-6 fw-bold">
                                                         <i class="fa-solid <?= $era['icon'] ?> me-1"></i>Ère <?= $eId ?>
                                                     </span>
                                                     <?php if ($isActive): ?>
-                                                        <span class="badge bg-warning text-dark fw-bold">
+                                                        <span class="badge bg-warning text-dark fw-bold px-2 py-1 fs-6">
                                                             <i class="fa-solid fa-play me-1"></i>En Cours
                                                         </span>
                                                     <?php elseif ($isCompleted): ?>
-                                                        <span class="badge bg-success-lt text-success fw-bold">
+                                                        <span class="badge bg-success-lt text-success fw-bold px-2 py-1 fs-6">
                                                             <i class="fa-solid fa-check me-1"></i>Achevée
                                                         </span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-secondary-lt text-muted">
-                                                            <i class="fa-solid fa-lock me-1"></i>Verrouillée
+                                                        <span class="badge bg-secondary-lt text-muted px-2 py-1 fs-6">
+                                                            <i class="fa-solid fa-lock me-1"></i>À Venir
                                                         </span>
                                                     <?php endif; ?>
                                                 </div>
 
-                                                <h6 class="fw-bold mb-1 text-dark" style="font-size:0.875rem;">
+                                                <h5 class="fw-bold mb-1 text-dark" style="font-size:1rem;">
                                                     <?= htmlspecialchars($era['name']) ?>
-                                                </h6>
-                                                <div class="text-primary small fw-semibold mb-1" style="font-size:0.75rem;">
+                                                </h5>
+                                                <div class="text-primary small fw-semibold mb-2" style="font-size:0.8rem;">
                                                     <?= htmlspecialchars($era['subtitle']) ?>
                                                 </div>
-                                                <div class="text-muted small mb-2 flex-grow-1" style="font-size:0.75rem; line-height:1.3;">
+                                                <div class="text-muted small mb-3 flex-grow-1" style="font-size:0.8125rem; line-height:1.5;">
                                                     <?= htmlspecialchars($era['description']) ?>
                                                 </div>
 
-                                                <div class="pt-2 border-top d-flex justify-content-between align-items-center mt-auto">
-                                                    <span class="badge bg-light text-secondary border font-monospace" style="font-size:0.7rem;">
+                                                <div class="pt-3 border-top d-flex justify-content-between align-items-center mt-auto">
+                                                    <span class="badge bg-light text-secondary border font-monospace py-1.5 px-2" style="font-size:0.75rem;">
                                                         <?= htmlspecialchars($era['trigger_label']) ?>
                                                     </span>
                                                     <?php if (!$isActive): ?>
@@ -1070,9 +1100,9 @@ unset($_SESSION['general_flash']);
                                                                 formaction="?page=gamestudio&tab=general&subtab=world_config" 
                                                                 name="action" value="set_world_era" 
                                                                 onclick="document.getElementById('inputForcedEra').value = '<?= $eId ?>';"
-                                                                class="btn btn-xs btn-outline-secondary py-0.5 px-1.5"
+                                                                class="btn btn-sm btn-outline-secondary py-1 px-2.5 fw-bold"
                                                                 title="Forcer le passage à cette Ère">
-                                                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                                            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i>Activer
                                                         </button>
                                                     <?php endif; ?>
                                                 </div>
