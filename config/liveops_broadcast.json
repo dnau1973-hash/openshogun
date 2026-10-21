@@ -1,20 +1,20 @@
 {
-    "id": "bc_6ad8731ab82dc",
-    "title": "⛩️ Proclamation Shōgunale : Avènement de l'Ère IV — Le Dōjō Impérial [0:0]",
-    "message": "La brume mystique se dissipe sur la Terre Sacrée [0 : 0] (Tenchi no Seichi) ! Les Alliances détenant au moins 2 châteaux sont appelées à revendiquer le sanctuaire suprême et acheminer des convois titanesques pour ériger la Merveille.",
-    "type": "danger",
-    "icon": "fa-triangle-exclamation text-danger",
-    "image": "\/public\/assets\/map\/tile_imperial_dojo.jpg",
-    "badge": "Ère IV • Dōjō Impérial [0 : 0]",
-    "action_url": "?page=imperial_dojo",
-    "action_label": "Rejoindre le Sanctuaire [0:0] &rarr;",
+    "id": "bc_6ad8777ca80fa",
+    "title": "🌱 Décret Impérial : Avènement de l'Ère I — L'Aube des Clans",
+    "message": "Par décret du Shōgun, l'Archipel s'éveille ! Les daimyōs fondent leurs premiers fiefs sous la protection impériale. Développez vos parcelles de riz, de bois, de pierre et de fer dans la concorde et la paix débutante.",
+    "type": "success",
+    "icon": "fa-circle-check text-success",
+    "image": "\/public\/assets\/shogun_rural_terroir_panorama.jpg",
+    "badge": "Ère I • L'Aube des Clans",
+    "action_url": "?page=resources",
+    "action_label": "Bâtir mon Fief Rural &rarr;",
     "impact_points": [
-        "Ouverture de la tuile centrale [0 : 0] : convois titanesques et armes de siège autorisés.",
-        "Chantier des 10 Niveaux de la Merveille accessible aux alliances éligibles.",
-        "Attaques de siège massives au bélier et à la catapulte pour raser le Dōjō adverse."
+        "Immunité débutant garantie sous la bienveillance impériale du Shōgun.",
+        "Essor des 18 parcelles économiques (Forêt, Carrière, Rizières, Fonderies).",
+        "Entraînement des premiers fantassins et archers de garnison au Dojo."
     ],
     "is_active": true,
-    "created_at": "2026-10-21 08:08:58",
-    "expires_at": "2026-10-24 08:08:58",
-    "era": 4
+    "created_at": "2026-10-21 08:27:40",
+    "expires_at": "2026-10-22 08:27:40",
+    "era": 1
 }

@@ -237,23 +237,6 @@ $navItems = [
                 $bcImpactPoints = is_array($activeBroadcastHeader['impact_points'] ?? null) ? $activeBroadcastHeader['impact_points'] : [];
                 $bcId = htmlspecialchars($activeBroadcastHeader['id'] ?? 'bc_default');
                 ?>
-                <div class="alert alert-<?= $bcType ?> alert-dismissible mb-0 rounded-0 border-0 border-bottom d-flex align-items-center justify-content-between px-3 py-2 shadow-sm d-print-none flex-wrap gap-2" role="alert" style="z-index: 1060; font-size: 0.9rem;">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="fs-3"><i class="fa-solid <?= $bcIcon ?>"></i></span>
-                        <div>
-                            <strong><?= $bcTitle ?> :</strong>
-                            <span><?= $bcMsg ?></span>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <button type="button" class="btn btn-sm btn-light text-dark fw-bold px-3 py-1 shadow-sm d-flex align-items-center gap-1.5" onclick="openImperialProclamationModal()">
-                            <i class="fa-solid fa-scroll text-warning"></i>
-                            <span>Lire la Proclamation</span>
-                        </button>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding:0.75rem; position:static;"></button>
-                    </div>
-                </div>
-
                 <!-- ========================================================
                      MODALE OFFICIELLE : PROCLAMATION & DÉCRET IMPÉRIAL
                      (Modèle Haute Définition avec Illustration Supérieure Style Pêcheur / Mineur / Héros)

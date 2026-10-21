@@ -94,7 +94,7 @@ class GameConfig {
     public static function getServerStartTimestamp(): int {
         $ts = (int)self::get('server_start_timestamp', 0);
         if ($ts <= 0) {
-            $ts = time() - (86400 * 3);
+            $ts = time();
         }
         return $ts;
     }

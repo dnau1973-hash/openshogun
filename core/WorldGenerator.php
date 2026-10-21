@@ -330,7 +330,8 @@ class WorldGenerator {
             }
         }
 
-        // 2. Initialiser / Vérifier les constantes de jeu
+        // 2. Initialiser / Vérifier les constantes de jeu et réinitialiser la chronologie à l'Ère 1
+        $nowTs = time();
         $defaultSettings = [
             'game_speed' => '5',
             'resource_speed' => '5',
@@ -338,7 +339,11 @@ class WorldGenerator {
             'bots_enabled' => '1',
             'bot_colonize_enabled' => '1',
             'bot_aggressiveness' => 'moderate',
-            'bot_max_planets' => '3'
+            'bot_max_planets' => '3',
+            'server_current_era' => '1',
+            'server_start_timestamp' => (string)$nowTs,
+            'era_castles_unlocked' => '0',
+            'era_dojo_unlocked' => '0'
         ];
         $sqlSet = ($driverName === 'sqlite')
             ? "INSERT INTO game_settings (setting_key, setting_value, setting_type, updated_at)
@@ -588,6 +593,13 @@ class WorldGenerator {
         $usersPreservedMsg = $preserveHumanUsers 
             ? "{$preservedUsersCount} compte(s) joueur(s) humain(s) ont été conservés avec un nouveau fief capital."
             : "Tous les anciens comptes joueurs ont été purgés (remise à blanc totale).";
+
+        // Émettre la Proclamation de l'Ère I pour le nouveau monde
+        try {
+            require_once __DIR__ . '/GameStudioEngine.php';
+            $gse = new GameStudioEngine($this->db);
+            $gse->broadcastEraTransition(1);
+        } catch (Throwable $eBc) {}
 
         return [
             'success' => true,

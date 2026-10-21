@@ -291,6 +291,24 @@ assertTest((int)$lifecycleSync['activeBroadcast']['era'] === 4, "La proclamation
 assertTest(str_contains($lifecycleSync['activeBroadcast']['title'], 'Ère IV'), "Le titre de la proclamation reflète fidèlement l'Ère IV");
 assertTest(str_contains($lifecycleSync['activeBroadcast']['badge'], 'Ère IV'), "Le badge reflète l'Ère IV • Dōjō Impérial");
 
+echo "\n[TEST 14] Vérification du reset vers l'Ère 1 et suppression du bandeau dans l'en-tête...\n";
+// 1. Absence du bandeau de proclamation dans l'en-tête, préservation exclusive de la modale
+assertTest(!str_contains($headerContent, 'alert alert-<?= $bcType ?>'), "Le bandeau alert en haut de l'en-tête a bien été supprimé");
+assertTest(str_contains($headerContent, 'id="modalImperialProclamation"'), "La modale de proclamation est conservée et autonome");
+
+// 2. Bascule stricte vers l'Ère 1 au reset
+GameConfig::set('server_current_era', 1);
+GameConfig::set('server_start_timestamp', time());
+GameConfig::set('era_castles_unlocked', 0);
+GameConfig::set('era_dojo_unlocked', 0);
+$gameStudio->broadcastEraTransition(1);
+
+$finalData = $gameStudio->getWorldLifecycleData();
+assertTest((int)$finalData['currentEra'] === 1, "Le monde est strictement en Ère 1 (L'Aube des Clans)");
+assertTest($finalData['eras'][1]['status'] === 'active', "L'Ère 1 est active");
+assertTest($finalData['eras'][2]['status'] === 'locked', "L'Ère 2 est verrouillée");
+assertTest((int)$finalData['activeBroadcast']['era'] === 1, "La proclamation est synchronisée avec l'Ère 1");
+
 echo "\n========================================================================\n";
 echo " TOUS LES TESTS DU DÉROULEMENT DU JEU (ÈRE & ENDGAME) SONT 100% AU VERT !\n";
 echo "========================================================================\n";

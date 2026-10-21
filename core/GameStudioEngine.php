@@ -1019,9 +1019,12 @@ class GameStudioEngine {
         $worldGen = new WorldGenerator($this->db);
         $res = $worldGen->resetUniverse($adminPassword, $neutralCount, $deployBots, $preserveHumanUsers);
 
-        // Post-reset : Synchroniser immédiatement la proclamation impériale avec l'Ère active du monde
-        $currentEra = GameConfig::getServerCurrentEra();
-        $this->broadcastEraTransition($currentEra);
+        // Post-reset : Passage obligatoire à l'Ère 1 (Jour 0) et émission de la proclamation de l'Ère I
+        GameConfig::set('server_current_era', 1);
+        GameConfig::set('server_start_timestamp', time());
+        GameConfig::set('era_castles_unlocked', 0);
+        GameConfig::set('era_dojo_unlocked', 0);
+        $this->broadcastEraTransition(1);
 
         return $res;
     }

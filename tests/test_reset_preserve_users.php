@@ -230,7 +230,13 @@ if (!$res['success']) {
     echo "[FAIL] Erreur lors du reset: " . ($res['message'] ?? 'Erreur inconnue') . "\n";
     exit(1);
 }
-echo "[OK] Reset exécuté avec succès !\n\n";
+echo "[OK] Reset exécuté avec succès !\n";
+
+if (GameConfig::getServerCurrentEra() !== 1) {
+    echo "[FAIL] L'univers devrait être à l'Ère 1 après le reset (trouvé: " . GameConfig::getServerCurrentEra() . ")\n";
+    exit(1);
+}
+echo "[OK] L'univers a bien basculé à l'Ère 1 (Jour 0) après le reset\n\n";
 
 // 5. Vérifier que les comptes joueurs humains sont TOUJOURS présents
 echo "3. Vérification de la persistance des comptes joueurs humains :\n";
