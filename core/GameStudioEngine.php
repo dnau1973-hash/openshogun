@@ -906,9 +906,14 @@ class GameStudioEngine {
         $botsEnabled         = !empty($params['bots_enabled']);
         $botColonizeEnabled  = !empty($params['bot_colonize_enabled']);
         $botSpawnEnabled     = !empty($params['bot_spawn_enabled']);
-        $botAggressiveness   = in_array($params['bot_aggressiveness'] ?? '', ['passive', 'moderate', 'aggressive'], true)
-            ? (string)$params['bot_aggressiveness']
-            : 'moderate';
+        $rawAggro            = strtolower((string)($params['bot_aggressiveness'] ?? 'moderate'));
+        if (in_array($rawAggro, ['passive', 'peaceful'], true)) {
+            $botAggressiveness = 'passive';
+        } elseif ($rawAggro === 'aggressive') {
+            $botAggressiveness = 'aggressive';
+        } else {
+            $botAggressiveness = 'moderate';
+        }
         $botMaxPlanets       = max(1, min(10, (int)($params['bot_max_planets'] ?? 3)));
         $botSpawnIntervalMin = max(5, min(120, (int)($params['bot_spawn_interval_min'] ?? 15)));
         $botSpawnMaxVillages = max(5, min(200, (int)($params['bot_spawn_max_villages'] ?? 50)));
@@ -920,6 +925,19 @@ class GameStudioEngine {
         GameConfig::set('bot_max_planets', $botMaxPlanets);
         GameConfig::set('bot_spawn_interval_min', $botSpawnIntervalMin);
         GameConfig::set('bot_spawn_max_villages', $botSpawnMaxVillages);
+
+        // Si passage en mode Passif ou désactivation des bots : rappel immédiat de tous les raids PNJ en vol
+        if ($botAggressiveness === 'passive' || !$botsEnabled) {
+            $db = Database::getConnection();
+            $db->query("
+                UPDATE fleet_missions fm
+                JOIN users u ON fm.user_id = u.id
+                SET fm.status = 'returning'
+                WHERE u.is_bot = 1 
+                  AND fm.status = 'en_route' 
+                  AND fm.mission_type IN ('raid', 'attack', 'spy', 'occupy')
+            ");
+        }
 
         return [
             'success' => true,

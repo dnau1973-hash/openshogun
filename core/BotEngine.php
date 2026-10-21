@@ -19,6 +19,17 @@ class BotEngine {
     }
 
     /**
+     * Détermine si le tempérament militaire des clans IA est en mode Passif / Défense pure
+     */
+    public static function isPassiveMode(?string $aggressiveness = null): bool {
+        if (!GameConfig::get('bots_enabled', true)) {
+            return true;
+        }
+        $val = strtolower($aggressiveness ?? (string)GameConfig::get('bot_aggressiveness', 'moderate'));
+        return in_array($val, ['passive', 'peaceful'], true);
+    }
+
+    /**
      * Récupère la liste de tous les bots enregistrés
      */
     public function getBots(): array {
@@ -221,6 +232,19 @@ class BotEngine {
         $autoColonize = GameConfig::get('bot_colonize_enabled', true);
         $maxPlanets = (int)GameConfig::get('bot_max_planets', 3);
         $aggressiveness = (string)GameConfig::get('bot_aggressiveness', 'aggressive');
+        $isPassive = self::isPassiveMode($aggressiveness);
+
+        // Si le profil est Passif : rappel immédiat de tout raid ou espionnage résiduel en vol initié par un PNJ
+        if ($isPassive) {
+            $this->db->query("
+                UPDATE fleet_missions fm
+                JOIN users u ON fm.user_id = u.id
+                SET fm.status = 'returning'
+                WHERE u.is_bot = 1 
+                  AND fm.status = 'en_route' 
+                  AND fm.mission_type IN ('raid', 'attack', 'spy', 'occupy')
+            ");
+        }
 
         // Récupérer toutes les cibles potentielles sur la carte (joueurs et rivaux)
         // Les nouveaux seigneurs sous immunité débutant sont exclus de toute agression
@@ -311,16 +335,18 @@ class BotEngine {
                 ")->execute([$planetId, $chosenUnit, $recruitCount]);
                 $report['troops_trained'] += $recruitCount;
 
-                // 4. Infiltration Shinobi & Espionnage (Reconnaissance)
-                $spyRes = $this->launchBotEspionage($bot, $planet, $allTargets, $aggressiveness);
-                if ($spyRes) {
-                    $report['spies_dispatched'][] = $spyRes;
-                }
+                // 4. Infiltration Shinobi & Espionnage (Reconnaissance - suspendue si passif)
+                if (!$isPassive) {
+                    $spyRes = $this->launchBotEspionage($bot, $planet, $allTargets, $aggressiveness);
+                    if ($spyRes) {
+                        $report['spies_dispatched'][] = $spyRes;
+                    }
 
-                // 5. Raids et Incursions Militaires
-                $raidRes = $this->launchBotRaid($bot, $planet, $allTargets, $aggressiveness);
-                if ($raidRes) {
-                    $report['raids_dispatched'][] = $raidRes;
+                    // 5. Raids et Incursions Militaires (suspendues si passif)
+                    $raidRes = $this->launchBotRaid($bot, $planet, $allTargets, $aggressiveness);
+                    if ($raidRes) {
+                        $report['raids_dispatched'][] = $raidRes;
+                    }
                 }
             }
 
@@ -361,7 +387,7 @@ class BotEngine {
      * Lance une mission d'infiltration et d'espionnage Shinobi par un bot
      */
     private function launchBotEspionage(array $bot, array $botPlanet, array $candidateTargets, string $aggressiveness): ?array {
-        if ($aggressiveness === 'peaceful') return null;
+        if (self::isPassiveMode($aggressiveness)) return null;
 
         $chance = ($aggressiveness === 'aggressive') ? 45 : 20;
         if (rand(1, 100) > $chance) return null;
@@ -471,7 +497,7 @@ class BotEngine {
      * Lance un raid ou une expédition militaire par un bot
      */
     private function launchBotRaid(array $bot, array $botPlanet, array $candidateTargets, string $aggressiveness): ?array {
-        if ($aggressiveness === 'peaceful') return null;
+        if (self::isPassiveMode($aggressiveness)) return null;
 
         $chance = ($aggressiveness === 'aggressive') ? 35 : 15;
         if (rand(1, 100) > $chance) return null;

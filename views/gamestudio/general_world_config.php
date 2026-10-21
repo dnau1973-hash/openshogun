@@ -815,11 +815,11 @@ unset($_SESSION['general_flash']);
                                 <div class="p-3 border rounded bg-white h-100">
                                     <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-2">
                                         <span>Agressivité Militaire :</span>
-                                        <span class="badge bg-warning-lt font-monospace text-uppercase" id="badge-val-bot-aggressiveness"><?= strtoupper($botAggressiveness) ?></span>
+                                        <span class="badge <?= in_array($botAggressiveness, ['passive', 'peaceful'], true) ? 'bg-success-lt' : ($botAggressiveness === 'aggressive' ? 'bg-danger-lt' : 'bg-warning-lt') ?> font-monospace text-uppercase" id="badge-val-bot-aggressiveness"><?= in_array($botAggressiveness, ['passive', 'peaceful'], true) ? 'PASSIF' : strtoupper($botAggressiveness) ?></span>
                                     </label>
                                     <div class="d-flex flex-column gap-2">
                                         <label class="form-check m-0 cursor-pointer">
-                                            <input class="form-check-input" type="radio" name="bot_aggressiveness" value="passive" <?= $botAggressiveness === 'passive' ? 'checked' : '' ?> onchange="updateAggressivenessBadge(this.value)">
+                                            <input class="form-check-input" type="radio" name="bot_aggressiveness" value="passive" <?= in_array($botAggressiveness, ['passive', 'peaceful'], true) ? 'checked' : '' ?> onchange="updateAggressivenessBadge(this.value)">
                                             <span class="form-check-label small"><strong>Passif :</strong> Défense pure, aucun raid</span>
                                         </label>
                                         <label class="form-check m-0 cursor-pointer">
@@ -1488,10 +1488,16 @@ document.addEventListener('DOMContentLoaded', function() {
     window.updateAggressivenessBadge = function(val) {
         const badge = document.getElementById('badge-val-bot-aggressiveness');
         if (badge) {
-            badge.innerText = val.toUpperCase();
-            if (val === 'passive') badge.className = 'badge bg-success-lt font-monospace text-uppercase';
-            else if (val === 'moderate') badge.className = 'badge bg-warning-lt font-monospace text-uppercase';
-            else badge.className = 'badge bg-danger-lt font-monospace text-uppercase';
+            if (val === 'passive' || val === 'peaceful') {
+                badge.innerText = 'PASSIF';
+                badge.className = 'badge bg-success-lt font-monospace text-uppercase';
+            } else if (val === 'moderate') {
+                badge.innerText = 'MODÉRÉ';
+                badge.className = 'badge bg-warning-lt font-monospace text-uppercase';
+            } else {
+                badge.innerText = 'BELLIQUEUX';
+                badge.className = 'badge bg-danger-lt font-monospace text-uppercase';
+            }
         }
     };
 

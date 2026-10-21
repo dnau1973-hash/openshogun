@@ -163,7 +163,7 @@ $aggressiveness = $settings['bot_aggressiveness'] ?? 'moderate';
                 <span class="text-secondary small">Calibre instantanément les paramètres généraux et d'éclosion</span>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <button type="button" class="btn <?= $aggressiveness === 'peaceful' ? 'btn-success shadow-sm' : 'btn-outline-secondary' ?> btn-sm bot-preset-btn fw-bold" onclick="applyElevateBotPreset('peaceful', this)">
+                <button type="button" class="btn <?= in_array($aggressiveness, ['peaceful', 'passive'], true) ? 'btn-success shadow-sm' : 'btn-outline-secondary' ?> btn-sm bot-preset-btn fw-bold" onclick="applyElevateBotPreset('peaceful', this)">
                     <i class="fa-solid fa-shield text-success me-1"></i>Bonsaï Défensif (Agricole &amp; Shinto)
                 </button>
                 <button type="button" class="btn <?= $aggressiveness === 'moderate' ? 'btn-indigo shadow-sm' : 'btn-outline-secondary' ?> btn-sm bot-preset-btn fw-bold" onclick="applyElevateBotPreset('moderate', this)">
@@ -213,7 +213,7 @@ $aggressiveness = $settings['bot_aggressiveness'] ?? 'moderate';
                         <i class="fa-solid fa-shield-halved text-danger me-1"></i>Profil d'Agressivité
                     </label>
                     <select name="bot_aggressiveness" class="form-select" id="bot_aggressiveness">
-                        <option value="peaceful" <?= ($aggressiveness === 'peaceful') ? 'selected' : '' ?>>Pacifique (Mines &amp; Défense)</option>
+                        <option value="passive" <?= in_array($aggressiveness, ['peaceful', 'passive'], true) ? 'selected' : '' ?>>Passif / Pacifique (Mines &amp; Défense)</option>
                         <option value="moderate" <?= ($aggressiveness === 'moderate') ? 'selected' : '' ?>>Modéré (Équilibré)</option>
                         <option value="aggressive" <?= ($aggressiveness === 'aggressive') ? 'selected' : '' ?>>Belliqueux (Armées &amp; Raids)</option>
                     </select>
@@ -847,7 +847,7 @@ function applyElevateBotPreset(preset, btn) {
         if (botsEnabled) botsEnabled.value = '1';
         if (colonizeEnabled) colonizeEnabled.value = '0';
         if (maxPlanets) maxPlanets.value = '1';
-        if (aggressiveness) aggressiveness.value = 'peaceful';
+        if (aggressiveness) aggressiveness.value = 'passive';
         if (spawnEnabled) spawnEnabled.value = '1';
         if (spawnInterval) spawnInterval.value = '60';
         if (spawnMax) spawnMax.value = '20';

@@ -57,9 +57,14 @@ try {
             $botsEnabled = !empty($_POST['bots_enabled']) && ($_POST['bots_enabled'] === '1' || $_POST['bots_enabled'] === 'true');
             $botColonize = !empty($_POST['bot_colonize_enabled']) && ($_POST['bot_colonize_enabled'] === '1' || $_POST['bot_colonize_enabled'] === 'true');
             $botMaxPlanets = max(1, min(10, (int)($_POST['bot_max_planets'] ?? 3)));
-            $botAggressiveness = in_array($_POST['bot_aggressiveness'] ?? '', ['peaceful', 'moderate', 'aggressive']) 
-                ? $_POST['bot_aggressiveness'] 
-                : 'moderate';
+            $rawAggro = strtolower((string)($_POST['bot_aggressiveness'] ?? 'moderate'));
+            if (in_array($rawAggro, ['passive', 'peaceful'], true)) {
+                $botAggressiveness = 'passive';
+            } elseif ($rawAggro === 'aggressive') {
+                $botAggressiveness = 'aggressive';
+            } else {
+                $botAggressiveness = 'moderate';
+            }
 
             $botSpawnEnabled = !empty($_POST['bot_spawn_enabled']) && ($_POST['bot_spawn_enabled'] === '1' || $_POST['bot_spawn_enabled'] === 'true');
             $botSpawnIntervalMin = max(1, min(1440, (int)($_POST['bot_spawn_interval_min'] ?? 15)));
@@ -72,6 +77,19 @@ try {
             GameConfig::set('bot_spawn_enabled', $botSpawnEnabled);
             GameConfig::set('bot_spawn_interval_min', $botSpawnIntervalMin);
             GameConfig::set('bot_spawn_max_villages', $botSpawnMaxVillages);
+
+            // Si passage en mode Passif ou désactivation des bots : rappel immédiat des raids PNJ
+            if ($botAggressiveness === 'passive' || !$botsEnabled) {
+                $dbAdmin = Database::getConnection();
+                $dbAdmin->query("
+                    UPDATE fleet_missions fm
+                    JOIN users u ON fm.user_id = u.id
+                    SET fm.status = 'returning'
+                    WHERE u.is_bot = 1 
+                      AND fm.status = 'en_route' 
+                      AND fm.mission_type IN ('raid', 'attack', 'spy', 'occupy')
+                ");
+            }
 
             if ($isDesigner && isset($_POST['game_speed'])) {
                 $gameSpeed = max(1, min(100, (int)($_POST['game_speed'] ?? 5)));

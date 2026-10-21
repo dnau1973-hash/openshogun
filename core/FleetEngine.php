@@ -201,6 +201,16 @@ class FleetEngine {
             return;
         }
 
+        // 🛡️ Neutralité Féodale Absolue : Si l'attaquant est un Bot PNJ et que le tempérament IA est sur Passif (ou bots inactifs),
+        // aucune incursion ne peut être exécutée contre un seigneur humain : repli pacifique immédiat sans affrontement ni pillage.
+        require_once __DIR__ . '/BotEngine.php';
+        if (!empty($attackerUser['is_bot']) && !empty($defenderUser) && empty($defenderUser['is_bot']) && in_array($missionType, $hostileMissions, true)) {
+            if (BotEngine::isPassiveMode()) {
+                $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
+                return;
+            }
+        }
+
         if ($missionType === 'attack' || $missionType === 'raid') {
             $combatResult = $this->combatEngine->resolveBattle($mission, $targetPlanet, $attackerUser, $defenderUser);
             $survivors = $combatResult['survivors'];
