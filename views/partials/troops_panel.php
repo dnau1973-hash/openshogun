@@ -631,11 +631,11 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
 <div class="modal fade" id="modalGarrisonUnitDetail" tabindex="-1" aria-labelledby="garrisonUnitModalTitle" aria-hidden="true" style="z-index: 1060;">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
         <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 14px;">
-            <!-- Illustration d'en-tête (215px) avec overlay dégradé sombre (Style Pêcheur/Mineur/Héros) -->
-            <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
-                <img id="garrisonUnitModalImage" src="/public/assets/tiles/tile_barracks.png" alt="Unité Féodale" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%;">
-                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
-                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+            <!-- Illustration d'en-tête (215px) avec overlay dégradé sombre et parallaxe cinématique -->
+            <div class="depth-parallax-scene" style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
+                <img id="garrisonUnitModalImage" class="depth-parallax-img" src="/public/assets/tiles/tile_barracks.png" alt="Unité Féodale" style="object-fit: cover; object-position: center 25%;">
+                <div class="depth-parallax-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
+                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white depth-parallax-foreground">
                     <div style="max-width: 72%;">
                         <span id="garrisonUnitModalBadge" class="badge bg-danger text-white fw-bold px-2 py-1 mb-1 shadow-sm" style="font-size:0.75rem;">
                             Rôle Martiale
@@ -650,7 +650,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                         </span>
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 12px; right: 12px; z-index: 10;" onclick="closeGarrisonUnitModal()"></button>
+                <button type="button" class="btn-close btn-close-white depth-parallax-foreground" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 12px; right: 12px; z-index: 10;" onclick="closeGarrisonUnitModal()"></button>
             </div>
 
             <!-- Corps de la modale -->

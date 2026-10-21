@@ -201,15 +201,15 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
             </div>
 
             <div class="modal-body p-3 p-md-4">
-                <!-- Illustration Historique Sengoku (Format 16:9) -->
+                <!-- Illustration Historique Sengoku (Format 16:9 avec parallaxe cinématique) -->
                 <?php if (!empty($activeEvent['image_url'])): ?>
-                    <div class="weekly-chronicle-illustration-card mb-4 position-relative rounded overflow-hidden shadow-lg border border-warning" style="box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);">
+                    <div class="weekly-chronicle-illustration-card mb-4 position-relative rounded overflow-hidden shadow-lg border border-warning depth-parallax-scene" style="box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); max-height: 420px; aspect-ratio: 16/9;">
                         <img src="<?= htmlspecialchars($activeEvent['image_url']) ?>" 
                              alt="<?= htmlspecialchars($activeEvent['title']) ?>" 
-                             class="w-100 object-fit-cover d-block" 
-                             style="max-height: 420px; width: 100%; aspect-ratio: 16/9; object-fit: cover; object-position: center; border-radius: 8px;"
+                             class="w-100 object-fit-cover d-block depth-parallax-img" 
+                             style="width: 100%; height: 100%; object-fit: cover; object-position: center;"
                              onerror="this.onerror=null; this.src='/public/assets/buildings/hq.jpg';">
-                        <div class="position-absolute bottom-0 start-0 end-0 p-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.92) 100%);">
+                        <div class="position-absolute bottom-0 start-0 end-0 p-3 d-flex justify-content-between align-items-center flex-wrap gap-2 depth-parallax-foreground" style="background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.92) 100%); z-index: 5;">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="badge bg-warning text-dark font-monospace fw-bold">
                                     <i class="fa-solid fa-paintbrush me-1"></i>Illustration Historique

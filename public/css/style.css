@@ -3180,4 +3180,83 @@
     color: #c2252b;
 }
 
+/* ========================================================
+   EFFET DE PARALLAXE PROFONDEUR 2.5D & RESPIRATION CINÉMATIQUE
+   Sans assujettissement au scroll de page (Modales & Carrousel)
+   ======================================================== */
+.depth-parallax-scene {
+    position: relative;
+    overflow: hidden !important;
+    perspective: 1200px;
+    transform-style: preserve-3d;
+}
+
+.depth-parallax-img {
+    width: 110% !important;
+    height: 110% !important;
+    max-width: 110% !important;
+    margin-top: -5% !important;
+    margin-left: -5% !important;
+    object-fit: cover;
+    pointer-events: none;
+    will-change: transform;
+    transform-origin: center center;
+    transform: translate3d(0, 0, 0) scale(1.04);
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.carousel-item .depth-parallax-img {
+    position: absolute !important;
+    top: -5% !important;
+    left: -5% !important;
+    margin: 0 !important;
+}
+
+@keyframes cinematicBreathing {
+    0% {
+        transform: scale(1.04) translate3d(0, 0, 0);
+    }
+    33% {
+        transform: scale(1.08) translate3d(-1%, -0.8%, 0);
+    }
+    66% {
+        transform: scale(1.06) translate3d(1%, 0.9%, 0);
+    }
+    100% {
+        transform: scale(1.04) translate3d(0, 0, 0);
+    }
+}
+
+.depth-parallax-scene:not(.is-interacting) .depth-parallax-img.has-cinematic-breathing {
+    animation: cinematicBreathing 18s ease-in-out infinite;
+}
+
+.depth-parallax-scene.is-interacting .depth-parallax-img {
+    animation: none !important;
+}
+
+.depth-parallax-foreground {
+    will-change: transform;
+    transform: translate3d(0, 0, 15px);
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.depth-parallax-overlay {
+    pointer-events: none;
+    z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .depth-parallax-img {
+        animation: none !important;
+        transform: none !important;
+        transition: none !important;
+    }
+    .depth-parallax-foreground {
+        transform: none !important;
+        transition: none !important;
+    }
+}
+
+
 

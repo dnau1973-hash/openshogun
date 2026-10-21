@@ -722,13 +722,13 @@ ob_start();
 <div class="modal fade" id="buildingSlotModal" tabindex="-1" aria-labelledby="cityModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 1200px; width: 96vw; margin: 1.5rem auto;">
         <div class="modal-content shadow-lg border-0 overflow-hidden d-flex flex-column" style="border-radius: 12px; height: 88vh; max-height: 880px; min-height: 620px;">
-            <!-- Illustration d'en-tête (215px) avec overlay dégradé -->
-            <div style="position: relative; width: 100%; height: 215px; flex-shrink: 0; overflow: hidden; background: #0f172a;">
-                <img id="cityModalBannerImg" src="/public/assets/buildings/building_tenshu.jpg" alt="Édifice de la Cité" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
-                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
+            <!-- Illustration d'en-tête (215px) avec overlay dégradé et parallaxe cinématique -->
+            <div class="depth-parallax-scene" style="position: relative; width: 100%; height: 215px; flex-shrink: 0; overflow: hidden; background: #0f172a;">
+                <img id="cityModalBannerImg" class="depth-parallax-img" src="/public/assets/buildings/building_tenshu.jpg" alt="Édifice de la Cité" style="object-fit: cover; object-position: center;">
+                <div class="depth-parallax-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
                 <!-- Navigation inter-slots (précédent / suivant) en haut à gauche -->
-                <div style="position: absolute; top: 12px; left: 16px; z-index: 10;" class="d-flex align-items-center gap-1">
+                <div style="position: absolute; top: 12px; left: 16px; z-index: 10;" class="d-flex align-items-center gap-1 depth-parallax-foreground">
                     <button type="button" class="btn btn-sm btn-dark bg-opacity-75 text-white border-0 py-1 px-2.5 shadow-sm" onclick="navigateCitySlotModal(-1)" title="Emplacement Précédent">
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
@@ -741,10 +741,10 @@ ob_start();
                 </div>
 
                 <!-- Bouton fermer blanc -->
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+                <button type="button" class="btn-close btn-close-white depth-parallax-foreground" data-bs-dismiss="modal" aria-label="Fermer" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
 
                 <!-- Infos d'en-tête en bas de la bannière -->
-                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white depth-parallax-foreground">
                     <div style="max-width: 72%;">
                         <span id="cityModalSectorBadge" class="badge bg-danger text-white fw-bold px-2 py-1 mb-1 shadow-sm" style="font-size:0.75rem;">
                             🏯 COMMANDEMENT

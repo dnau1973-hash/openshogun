@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initResourceTickers();
     initCountdownTimers();
     initTooltips();
+    initDepthParallax();
 });
 
 // Initialisation globale des infobulles Tabler / Bootstrap Tooltips
@@ -718,5 +719,210 @@ async function instantFinishBuild(queueId) {
     }
 }
 window.instantFinishBuild = instantFinishBuild;
+
+// ========================================================
+// SYSTÈME DE PARALLAXE 2.5D & RESPIRATION CINÉMATIQUE (HORS SCROLL)
+// Modales Féodales & Carrousel Castral
+// ========================================================
+function initDepthParallax() {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    function bindScene(scene) {
+        if (!scene || scene.dataset.depthParallaxInitialized === 'true') return;
+        scene.dataset.depthParallaxInitialized = 'true';
+
+        const img = scene.querySelector('.depth-parallax-img');
+        if (!img) return;
+
+        img.classList.add('has-cinematic-breathing');
+        const foregroundEls = scene.querySelectorAll('.depth-parallax-foreground');
+
+        let rect = null;
+        let targetX = 0;
+        let targetY = 0;
+        let currentX = 0;
+        let currentY = 0;
+        let isHovered = false;
+        let rafId = null;
+
+        function updateBounds() {
+            rect = scene.getBoundingClientRect();
+        }
+
+        function onMouseMove(e) {
+            if (!rect) updateBounds();
+            if (!rect || rect.width === 0 || rect.height === 0) return;
+
+            // Coordonnées normalisées relatives au centre du conteneur (-0.5 à +0.5)
+            const normX = Math.max(-0.5, Math.min(0.5, (e.clientX - rect.left) / rect.width - 0.5));
+            const normY = Math.max(-0.5, Math.min(0.5, (e.clientY - rect.top) / rect.height - 0.5));
+
+            targetX = normX;
+            targetY = normY;
+
+            if (!isHovered) {
+                isHovered = true;
+                scene.classList.add('is-interacting');
+                startRenderLoop();
+            }
+        }
+
+        function onTouchMove(e) {
+            if (!e.touches || !e.touches[0]) return;
+            if (!rect) updateBounds();
+            if (!rect || rect.width === 0 || rect.height === 0) return;
+
+            const touch = e.touches[0];
+            const normX = Math.max(-0.5, Math.min(0.5, (touch.clientX - rect.left) / rect.width - 0.5));
+            const normY = Math.max(-0.5, Math.min(0.5, (touch.clientY - rect.top) / rect.height - 0.5));
+
+            targetX = normX;
+            targetY = normY;
+
+            if (!isHovered) {
+                isHovered = true;
+                scene.classList.add('is-interacting');
+                startRenderLoop();
+            }
+        }
+
+        function onMouseEnter() {
+            updateBounds();
+            isHovered = true;
+            scene.classList.add('is-interacting');
+            startRenderLoop();
+        }
+
+        function onMouseLeave() {
+            isHovered = false;
+            targetX = 0;
+            targetY = 0;
+        }
+
+        function startRenderLoop() {
+            if (rafId) return;
+            rafId = requestAnimationFrame(render);
+        }
+
+        function render() {
+            // Amortissement inertiel fluide (lerp)
+            currentX += (targetX - currentX) * 0.12;
+            currentY += (targetY - currentY) * 0.12;
+
+            // Décalage opposé du décor (effet fenêtre 3D)
+            const transX = -(currentX * 28).toFixed(2);
+            const transY = -(currentY * 20).toFixed(2);
+            const rotY = (currentX * 4).toFixed(2);
+            const rotX = -(currentY * 3).toFixed(2);
+
+            img.style.transform = `scale(1.08) translate3d(${transX}px, ${transY}px, 0) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+
+            // Micro-déplacement direct des éléments d'avant-plan (badges, textes)
+            if (foregroundEls && foregroundEls.length) {
+                const fgX = (currentX * 8).toFixed(2);
+                const fgY = (currentY * 6).toFixed(2);
+                foregroundEls.forEach(fg => {
+                    fg.style.transform = `translate3d(${fgX}px, ${fgY}px, 20px)`;
+                });
+            }
+
+            // Retour au repos et réactivation de la respiration cinématique CSS
+            if (!isHovered && Math.abs(currentX) < 0.005 && Math.abs(currentY) < 0.005) {
+                currentX = 0;
+                currentY = 0;
+                img.style.transform = '';
+                if (foregroundEls && foregroundEls.length) {
+                    foregroundEls.forEach(fg => {
+                        fg.style.transform = '';
+                    });
+                }
+                scene.classList.remove('is-interacting');
+                rafId = null;
+                return;
+            }
+
+            rafId = requestAnimationFrame(render);
+        }
+
+        scene.addEventListener('mouseenter', onMouseEnter, { passive: true });
+        scene.addEventListener('mousemove', onMouseMove, { passive: true });
+        scene.addEventListener('mouseleave', onMouseLeave, { passive: true });
+        scene.addEventListener('touchstart', onMouseEnter, { passive: true });
+        scene.addEventListener('touchmove', onTouchMove, { passive: true });
+        scene.addEventListener('touchend', onMouseLeave, { passive: true });
+        window.addEventListener('resize', updateBounds, { passive: true });
+    }
+
+    // Lier toutes les scènes déjà présentes dans le DOM
+    document.querySelectorAll('.depth-parallax-scene').forEach(bindScene);
+
+    // Observer l'apparition de nouvelles scènes (ex: modales dynamiques ou contenu inséré par AJAX)
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (node.classList && node.classList.contains('depth-parallax-scene')) {
+                        bindScene(node);
+                    }
+                    if (node.querySelectorAll) {
+                        node.querySelectorAll('.depth-parallax-scene').forEach(bindScene);
+                    }
+                }
+            });
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Réinitialisation lors de l'ouverture de modales Bootstrap
+    document.addEventListener('shown.bs.modal', e => {
+        if (!e.target) return;
+        const modalScenes = e.target.querySelectorAll('.depth-parallax-scene');
+        modalScenes.forEach(scene => {
+            bindScene(scene);
+            const img = scene.querySelector('.depth-parallax-img');
+            if (img) {
+                img.style.transform = '';
+            }
+        });
+    });
+
+    // Support du carrousel Bootstrap : réinitialiser lors du slide
+    document.addEventListener('slid.bs.carousel', e => {
+        if (!e.target) return;
+        const activeItem = e.target.querySelector('.carousel-item.active .depth-parallax-scene');
+        if (activeItem) {
+            bindScene(activeItem);
+            const img = activeItem.querySelector('.depth-parallax-img');
+            if (img) {
+                img.style.transform = '';
+            }
+        }
+    });
+
+    // Support optionnel du Gyroscope mobile (inclinaison du smartphone)
+    if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission !== 'function') {
+        window.addEventListener('deviceorientation', e => {
+            const gamma = e.gamma; // -90 à +90 (gauche / droite)
+            const beta = e.beta;   // -180 à +180 (avant / arrière)
+            if (gamma === null || beta === null) return;
+
+            const normX = Math.max(-0.5, Math.min(0.5, gamma / 60));
+            const normY = Math.max(-0.5, Math.min(0.5, (beta - 45) / 60));
+
+            const visibleScenes = document.querySelectorAll('.modal.show .depth-parallax-scene, .carousel-item.active .depth-parallax-scene');
+            visibleScenes.forEach(scene => {
+                const img = scene.querySelector('.depth-parallax-img');
+                if (img && !scene.classList.contains('is-interacting')) {
+                    const transX = -(normX * 20).toFixed(2);
+                    const transY = -(normY * 15).toFixed(2);
+                    img.style.transform = `scale(1.08) translate3d(${transX}px, ${transY}px, 0)`;
+                }
+            });
+        }, { passive: true });
+    }
+}
+window.initDepthParallax = initDepthParallax;
+
 
 

@@ -341,11 +341,11 @@ ob_start();
 <div class="modal fade" id="plotUpgradeModal" tabindex="-1" aria-labelledby="modalPlotTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 12px;">
-            <!-- Illustration d'en-tête (215px) avec overlay dégradé -->
-            <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
-                <img id="modalPlotBannerImg" src="/public/assets/resources/terroir_wood.jpg" alt="Terroir Féodal" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
-                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
-                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+            <!-- Illustration d'en-tête (215px) avec overlay dégradé et parallaxe cinématique -->
+            <div class="depth-parallax-scene" style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
+                <img id="modalPlotBannerImg" class="depth-parallax-img" src="/public/assets/resources/terroir_wood.jpg" alt="Terroir Féodal" style="object-fit: cover; object-position: center;">
+                <div class="depth-parallax-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
+                <div style="position: absolute; bottom: 12px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white depth-parallax-foreground">
                     <div style="max-width: 72%;">
                         <span id="modalPlotCategoryBadge" class="badge bg-primary text-white fw-bold px-2 py-1 mb-1 shadow-sm" style="font-size:0.75rem;">
                             🌾 TERROIR &bull; FORET
@@ -361,7 +361,7 @@ ob_start();
                         </span>
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+                <button type="button" class="btn-close btn-close-white depth-parallax-foreground" data-bs-dismiss="modal" aria-label="Fermer" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
             </div>
 
             <!-- Corps de la modale -->
