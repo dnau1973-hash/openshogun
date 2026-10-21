@@ -476,35 +476,64 @@ class GalaxyEngine {
         // Injection de la Terre Sacrée [0 : 0] / Le Dōjō Impérial (Tenchi no Seichi)
         if ($minX <= 0 && $maxX >= 0 && $minY <= 0 && $maxY >= 0) {
             try {
-                require_once __DIR__ . '/ImperialDojoEngine.php';
-                $dojoEngine = new ImperialDojoEngine($this->db);
-                $dojoState = $dojoEngine->getDojoState();
+                require_once __DIR__ . '/GameConfig.php';
+                $isDojoUnlocked = GameConfig::isImperialDojoUnlocked();
                 $kZero = '0:0';
-                $dojoData = [
-                    'is_imperial_dojo' => 1,
-                    'planet_id' => null,
-                    'planet_name' => 'Dōjō Impérial (Tenchi no Seichi)',
-                    'coord_x' => 0,
-                    'coord_y' => 0,
-                    'planet_type' => 'imperial_dojo',
-                    'user_id' => null,
-                    'username' => !empty($dojoState['alliance_name']) ? ('Garde [' . $dojoState['alliance_tag'] . ']') : 'Garde Impériale de Kyōto',
-                    'faction' => 'Imperial',
-                    'points' => 100000 + ((int)$dojoState['current_level'] * 25000),
-                    'alliance_tag' => !empty($dojoState['alliance_tag']) ? $dojoState['alliance_tag'] : 'TENCHI',
-                    'terrain_type' => 'imperial_dojo',
-                    'terrain_name' => 'Dōjō Impérial (Niv. ' . $dojoState['current_level'] . ')',
-                    'terrain_img' => '/public/assets/map/tile_imperial_dojo.jpg?v=1',
-                    'dojo_level' => (int)$dojoState['current_level'],
-                    'dojo_target_level' => (int)$dojoState['target_level'],
-                    'dojo_status' => $dojoState['status'],
-                    'dojo_hp' => (int)$dojoState['health_points'],
-                    'dojo_max_hp' => (int)$dojoState['max_health_points'],
-                    'dojo_alliance_name' => $dojoState['alliance_name'] ?? null,
-                    'dojo_alliance_tag' => $dojoState['alliance_tag'] ?? null,
-                    'dojo_progress_percent' => (int)$dojoState['progress_percent']
-                ];
-                $gridMap[$kZero] = array_merge($gridMap[$kZero] ?? [], $dojoData);
+
+                if ($isDojoUnlocked) {
+                    require_once __DIR__ . '/ImperialDojoEngine.php';
+                    $dojoEngine = new ImperialDojoEngine($this->db);
+                    $dojoState = $dojoEngine->getDojoState();
+                    $dojoData = [
+                        'is_imperial_dojo' => 1,
+                        'dojo_unlocked' => 1,
+                        'planet_id' => null,
+                        'planet_name' => 'Dōjō Impérial (Tenchi no Seichi)',
+                        'coord_x' => 0,
+                        'coord_y' => 0,
+                        'planet_type' => 'imperial_dojo',
+                        'user_id' => null,
+                        'username' => !empty($dojoState['alliance_name']) ? ('Garde [' . $dojoState['alliance_tag'] . ']') : 'Garde Impériale de Kyōto',
+                        'faction' => 'Imperial',
+                        'points' => 100000 + ((int)$dojoState['current_level'] * 25000),
+                        'alliance_tag' => !empty($dojoState['alliance_tag']) ? $dojoState['alliance_tag'] : 'TENCHI',
+                        'terrain_type' => 'imperial_dojo',
+                        'terrain_name' => 'Dōjō Impérial (Niv. ' . $dojoState['current_level'] . ')',
+                        'terrain_img' => '/public/assets/map/tile_imperial_dojo.jpg?v=1',
+                        'dojo_level' => (int)$dojoState['current_level'],
+                        'dojo_target_level' => (int)$dojoState['target_level'],
+                        'dojo_status' => $dojoState['status'],
+                        'dojo_hp' => (int)$dojoState['health_points'],
+                        'dojo_max_hp' => (int)$dojoState['max_health_points'],
+                        'dojo_alliance_name' => $dojoState['alliance_name'] ?? null,
+                        'dojo_alliance_tag' => $dojoState['alliance_tag'] ?? null,
+                        'dojo_progress_percent' => (int)$dojoState['progress_percent'],
+                        'is_annexable' => 0
+                    ];
+                    $gridMap[$kZero] = array_merge($gridMap[$kZero] ?? [], $dojoData);
+                } else {
+                    // Dōjō NON activé : Terre Sacrée Scellée non-annexable, brumes ancestrales
+                    $sealedData = [
+                        'is_imperial_dojo' => 0,
+                        'dojo_unlocked' => 0,
+                        'is_sealed_dojo' => 1,
+                        'planet_id' => null,
+                        'planet_name' => 'Terre Sacrée Inviolable [0 : 0]',
+                        'coord_x' => 0,
+                        'coord_y' => 0,
+                        'planet_type' => 'sacred_ground',
+                        'user_id' => null,
+                        'username' => 'Brumes Impériales',
+                        'faction' => 'Imperial',
+                        'points' => 0,
+                        'alliance_tag' => null,
+                        'terrain_type' => 'sacred_ground',
+                        'terrain_name' => 'Terre Sacrée Scellée [0 : 0]',
+                        'terrain_img' => '/public/assets/map/tile_mountain.jpg?v=2',
+                        'is_annexable' => 0
+                    ];
+                    $gridMap[$kZero] = array_merge($gridMap[$kZero] ?? [], $sealedData);
+                }
             } catch (Throwable $e) {
                 // Fallback silencieux
             }

@@ -38,6 +38,14 @@ if (!$targetPlanetId && !$targetOasisId && isset($_POST['target_x'], $_POST['tar
 
         if (!$targetPlanetId && !$targetOasisId) {
             if ((int)$_POST['target_x'] === 0 && (int)$_POST['target_y'] === 0) {
+                require_once __DIR__ . '/../core/GameConfig.php';
+                $mission = $_POST['mission'] ?? '';
+                if ($mission === 'colonize' || $mission === 'occupy') {
+                    throw new Exception("La Terre Sacrée [0 : 0] (Tenchi no Seichi) est un sanctuaire impérial inviolable. Aucun joueur ne peut l'annexer.");
+                }
+                if (!GameConfig::isImperialDojoUnlocked()) {
+                    throw new Exception("La Terre Sacrée [0 : 0] est protégée par les brumes ancestrales. Le Dōjō Impérial n'étant pas encore activé, aucun mouvement militaire ne peut y pénétrer.");
+                }
                 require_once __DIR__ . '/../core/ImperialDojoEngine.php';
                 $dojoEng = new ImperialDojoEngine($db);
                 $dojoEng->ensureDojoTile();

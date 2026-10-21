@@ -6,6 +6,7 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/../core/GameConfig.php';
 require_once __DIR__ . '/../core/ImperialDojoEngine.php';
 require_once __DIR__ . '/../core/AllianceEngine.php';
 
@@ -13,6 +14,15 @@ $auth = new Auth();
 if (!Auth::check()) {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Veuillez vous connecter pour accéder au sanctuaire impérial.']);
+    exit;
+}
+
+if (!GameConfig::isImperialDojoUnlocked()) {
+    echo json_encode([
+        'success'  => false,
+        'unlocked' => false,
+        'error'    => "Le Dōjō Impérial [0 : 0] est scellé par les brumes impériales. Il ne s'éveillera qu'à l'avènement de l'Ère IV."
+    ]);
     exit;
 }
 

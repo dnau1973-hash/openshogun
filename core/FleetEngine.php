@@ -1052,7 +1052,26 @@ class FleetEngine {
             }
         }
 
-        // 2a-ter. Contrôles spécifiques au Dōjō Impérial en [0 : 0]
+        // 2a-ter. Contrôles stricts pour la Terre Sacrée [0 : 0] (Tenchi no Seichi & Dōjō Impérial)
+        if ($destX === 0 && $destY === 0) {
+            require_once __DIR__ . '/GameConfig.php';
+
+            // Règle 1 : Aucun joueur ne peut annexer ni coloniser la tuile [0 : 0]
+            if ($missionType === 'colonize' || $missionType === 'occupy') {
+                throw new Exception("La Terre Sacrée [0 : 0] (Tenchi no Seichi) est un sanctuaire impérial inviolable. Aucun joueur ne peut l'annexer ni y fonder de fief personnel.");
+            }
+
+            // Règle 2 : Le Dōjō doit obligatoirement être activé pour toute mission vers [0 : 0]
+            if (!GameConfig::isImperialDojoUnlocked()) {
+                throw new Exception("La Terre Sacrée [0 : 0] est protégée par les brumes impériales de Kyōto. Le Dōjō Impérial n'étant pas encore éveillé (déblocage en Ère IV), aucun mouvement militaire ne peut y pénétrer.");
+            }
+
+            // Règle 3 : Missions autorisées exclusivement vers le Dōjō Impérial actif
+            if (!in_array($missionType, ['dojo_reinforce', 'dojo_siege', 'transport'])) {
+                throw new Exception("Le Dōjō Impérial [0 : 0] ne supporte que les ordres de Garnison Fédérale (Renfort) ou de Siège Destructeur.");
+            }
+        }
+
         if ($missionType === 'dojo_reinforce') {
             if ($destX !== 0 || $destY !== 0) {
                 throw new Exception("L'ordre de garnison fédérale ne peut être dépêché que sur la Terre Sacrée [0 : 0].");

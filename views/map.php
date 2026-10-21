@@ -425,6 +425,53 @@ window.selectPlanetTile = function(data) {
 
     // ── Terre Sacrée [0 : 0] / Le Dōjō Impérial ──────────────────────────────
     if (data.is_imperial_dojo || (parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0)) {
+        const isDojoUnlocked = !!(data.dojo_unlocked || data.is_imperial_dojo);
+
+        if (!isDojoUnlocked) {
+            // Dōjō NON ACTIVÉ : Terre Sacrée Scellée non-annexable
+            title.innerHTML = `<i class="fa-solid fa-torii-gate text-secondary me-1"></i> <span class="text-secondary">Terre Sacrée Inviolable [0 : 0] &bull; Tenchi no Seichi</span> <span class="badge bg-secondary font-monospace">[0 : 0]</span>`;
+            body.innerHTML = `
+                <div style="background:#f8fafc; border:2px solid #cbd5e1; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #94a3b8; flex-shrink:0; background:#e2e8f0; display:flex; align-items:center; justify-content:center;">
+                            <i class="fa-solid fa-mountain text-secondary fs-1"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight:800; color:#1e293b; font-size:1.15rem;">
+                                Terre Sacrée Inviolable de Kyōto
+                            </div>
+                            <div class="small text-secondary mt-0.5">
+                                Sanctuaire Impérial scellé &bull; Enveloppé dans les brumes ancestrales
+                            </div>
+                            <div class="mt-1">
+                                <span class="badge bg-secondary-lt text-secondary"><i class="fa-solid fa-lock me-1"></i>Dōjō Non Éveillé (Ères I à III)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-secondary py-2.5 px-3 mb-3 small d-flex align-items-center gap-2 rounded-2">
+                        <i class="fa-solid fa-ban text-danger fs-3 flex-shrink-0"></i>
+                        <div>
+                            <strong class="d-block text-dark">Sanctuaire Impérial &bull; Non Annexable :</strong>
+                            Aucun seigneur féodal ne peut coloniser, annexer ou attaquer le centre du monde [0 : 0]. Le Dōjō Impérial n'apparaîtra qu'à l'avènement de l'Ère IV, une fois la Guerre des 12 Châteaux remportée.
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-white rounded border small">
+                        <span class="text-secondary">Statut Foncier :</span>
+                        <strong class="text-danger"><i class="fa-solid fa-ban me-1"></i>Sanctuaire Impérial Inviolable &bull; Non Annexable</strong>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
+                </div>
+            `;
+            openMapModal();
+            return;
+        }
+
+        // Dōjō ACTIVÉ (Ère IV+)
         const dojoLvl = parseInt(data.dojo_level, 10) || 0;
         const targetLvl = parseInt(data.dojo_target_level, 10) || 1;
         const hp = parseInt(data.dojo_hp, 10) || 0;
@@ -461,6 +508,15 @@ window.selectPlanetTile = function(data) {
                             Le Sanctuaire Suprême de Kyōto &bull; Point culminant de la fin du monde
                         </div>
                         <div class="mt-1">${statusBadge}</div>
+                    </div>
+                </div>
+
+                <!-- Règle de non-annexion individuelle formelle -->
+                <div class="alert alert-warning py-2 px-3 mb-3 small d-flex align-items-center gap-2 rounded-2">
+                    <i class="fa-solid fa-ban text-danger fs-3 flex-shrink-0"></i>
+                    <div>
+                        <strong class="text-dark d-block">Sanctuaire Impérial &bull; Non Annexable par un Daimyō :</strong>
+                        Cette merveille mondiale ne peut être annexée par aucun joueur individuel. Le contrôle s'opère collectivement par les Alliances via les 10 Paliers de construction.
                     </div>
                 </div>
 
@@ -867,11 +923,15 @@ window.selectPlanetTile = function(data) {
                                 <i class="fa-solid fa-pickaxe me-1"></i>Dépêcher des Mineurs (Expédition Minière) &rarr;
                             </a>
                         `
-                    ) : `
+                    ) : ((parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0) ? `
+                        <button type="button" class="btn btn-secondary font-weight-bold" disabled>
+                            <i class="fa-solid fa-ban me-1"></i>Sanctuaire Non Annexable
+                        </button>
+                    ` : `
                         <a href="?page=fleet&target_id=${data.planet_id || ''}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
                             <i class="fa-solid fa-chess-rook me-1"></i>Fonder un Fief ici avec un Pionnier &rarr;
                         </a>
-                    `)}
+                    `))}
                 </div>
             </div>
         `;

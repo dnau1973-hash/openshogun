@@ -147,17 +147,20 @@ if (isset($_GET['target_x']) && isset($_GET['target_y'])) {
             $preselectedTarget = (int)$foundOasisId;
             $preselectedMission = $_GET['mission'] ?? 'occupy';
         } elseif ($targetX === 0 && $targetY === 0) {
-            // Emplacement central sacré : Dōjō Impérial
-            require_once __DIR__ . '/../core/ImperialDojoEngine.php';
-            $dojoEng = new ImperialDojoEngine($db);
-            $dojoEng->ensureDojoTile();
-            $stmtFindP0 = $db->prepare("SELECT id FROM planets WHERE coord_x = 0 AND coord_y = 0 LIMIT 1");
-            $stmtFindP0->execute();
-            $createdPlanetId = (int)$stmtFindP0->fetchColumn();
+            require_once __DIR__ . '/../core/GameConfig.php';
+            if (GameConfig::isImperialDojoUnlocked()) {
+                // Emplacement central sacré : Dōjō Impérial
+                require_once __DIR__ . '/../core/ImperialDojoEngine.php';
+                $dojoEng = new ImperialDojoEngine($db);
+                $dojoEng->ensureDojoTile();
+                $stmtFindP0 = $db->prepare("SELECT id FROM planets WHERE coord_x = 0 AND coord_y = 0 LIMIT 1");
+                $stmtFindP0->execute();
+                $createdPlanetId = (int)$stmtFindP0->fetchColumn();
 
-            $preselectedTargetType = 'planet';
-            $preselectedTarget = $createdPlanetId;
-            $preselectedMission = $_GET['mission'] ?? 'dojo_siege';
+                $preselectedTargetType = 'planet';
+                $preselectedTarget = $createdPlanetId;
+                $preselectedMission = $_GET['mission'] ?? 'dojo_siege';
+            }
         } else {
             // Emplacement vierge : vérifier le type de paysage
             require_once __DIR__ . '/../core/GalaxyEngine.php';

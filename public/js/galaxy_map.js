@@ -289,10 +289,14 @@ class GalaxyMapController {
                 const isCurrent = (x === this.playerX && y === this.playerY);
                 const isCenter = (x === this.centerX && y === this.centerY);
 
+                const isDojoActive = (planet && planet.is_imperial_dojo && planet.dojo_unlocked);
+                const isDojoSealed = ((planet && planet.is_sealed_dojo) || (x === 0 && y === 0 && !isDojoActive));
+
                 let tileClass = 'galaxy-tile';
                 if (isCurrent) tileClass += ' current-planet';
                 if (isCenter) tileClass += ' tile-center';
-                if (planet && (planet.is_imperial_dojo || (x === 0 && y === 0))) tileClass += ' imperial-dojo-tile';
+                if (isDojoActive) tileClass += ' imperial-dojo-tile';
+                else if (isDojoSealed) tileClass += ' sacred-ground-tile';
                 else if (planet && planet.is_authentic_castle) tileClass += ' authentic-castle-tile';
                 else if (planet && planet.is_oasis) tileClass += (planet.is_occupied ? ' oasis-tile oasis-occupied' : ' oasis-tile oasis-wild');
                 else if (planet && planet.user_id) tileClass += ' village-tile';
@@ -305,7 +309,7 @@ class GalaxyMapController {
 
                 let contentHtml = '';
                 if (planet) {
-                    if (planet.is_imperial_dojo || (x === 0 && y === 0)) {
+                    if (isDojoActive) {
                         const dojoLvl = parseInt(planet.dojo_level, 10) || 0;
                         const isFrozen = (planet.dojo_status === 'frozen');
                         const isComplete = (planet.dojo_status === 'completed' || dojoLvl >= 10);
@@ -325,6 +329,11 @@ class GalaxyMapController {
                         contentHtml = `
                             <span class="tile-authentic-badge" style="${badgeBg} border-color:#fde047; color:#fff; font-weight:800; font-size:0.65rem; letter-spacing:0.5px;">⛩️ ${badgeTxt}</span>
                             <span class="tile-owner castle-label" style="color:#fef08a; font-weight:bold; text-shadow:0 1px 3px rgba(0,0,0,0.9);">${escapeHtml(planet.dojo_alliance_tag ? '[' + planet.dojo_alliance_tag + ']' : 'DŌJŌ IMPÉRIAL')}</span>
+                        `;
+                    } else if (isDojoSealed) {
+                        contentHtml = `
+                            <span class="tile-authentic-badge" style="background:rgba(51,65,85,0.92); border-color:#94a3b8; color:#f1f5f9; font-weight:700; font-size:0.63rem; letter-spacing:0.5px;">⛩️ SCELLÉ</span>
+                            <span class="tile-owner castle-label" style="color:#e2e8f0; font-weight:600; text-shadow:0 1px 3px rgba(0,0,0,0.9);">TERRE SACRÉE</span>
                         `;
                     } else if (planet.is_authentic_castle) {
                         contentHtml = `

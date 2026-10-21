@@ -6,12 +6,44 @@
  */
 
 require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/../core/GameConfig.php';
 require_once __DIR__ . '/../core/ImperialDojoEngine.php';
 require_once __DIR__ . '/../core/AllianceEngine.php';
 
 $auth = new Auth();
 $user = $auth->getCurrentUser();
 $planet = $auth->getCurrentPlanet();
+
+$isDojoUnlocked = GameConfig::isImperialDojoUnlocked();
+if (!$isDojoUnlocked) {
+    ?>
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body text-center py-5 px-4">
+            <div class="avatar avatar-xl bg-secondary-lt text-secondary rounded-circle mx-auto mb-3">
+                <i class="fa-solid fa-torii-gate fs-1"></i>
+            </div>
+            <h2 class="fw-bold text-dark mb-2">Sanctuaire Impérial de Kyōto Scellé</h2>
+            <div class="badge bg-secondary-lt text-secondary mb-3 font-monospace">[0 : 0] Tenchi no Seichi &bull; En attente de l'Ère IV</div>
+            <p class="text-secondary mx-auto" style="max-width: 620px;">
+                Les brumes sacrées de Tenchi no Seichi masquent le cœur du monde. Le <strong>Dōjō Impérial</strong> ne s'éveillera qu'à l'avènement de l'<strong>Ère IV</strong>, dès la conclusion de la <em>Guerre des 12 Châteaux</em> par les Alliances suzeraines.
+            </p>
+            <div class="alert alert-warning py-2.5 px-3 mx-auto text-start small rounded-2 mb-4" style="max-width: 580px;">
+                <i class="fa-solid fa-ban text-danger me-2 fs-4 align-middle"></i>
+                <strong>Terre Sacrée Non Annexable :</strong> Aucun seigneur féodal ne peut coloniser, annexer ou revendiquer personnellement ce sanctuaire central.
+            </div>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="/?page=map&x=0&y=0" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-map-location-dot me-1"></i>Voir sur la Carte
+                </a>
+                <a href="/?page=resources" class="btn btn-primary">
+                    <i class="fa-solid fa-wheat-awn me-1"></i>Retourner à mon Fief
+                </a>
+            </div>
+        </div>
+    </div>
+    <?php
+    return;
+}
 
 $dojoEngine = new ImperialDojoEngine();
 $dojo = $dojoEngine->getDojoState();

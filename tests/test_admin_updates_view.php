@@ -76,3 +76,4 @@ assertTest(isset($remoteCheck['behind_by']), "Nombre de commits de retard behind
 echo "\n========================================================================\n";
 echo " TOUS LES TESTS DE L'INTERFACE SOBRE ET ERGONOMIQUE SONT 100% AU VERT !\n";
 echo "========================================================================\n";
+
