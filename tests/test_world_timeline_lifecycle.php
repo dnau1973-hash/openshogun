@@ -231,7 +231,7 @@ assertTest(str_contains($viewContent, 'name="era_auto_progression_enabled"'), "S
 assertTest(str_contains($viewContent, 'name="era_castles_auto_day"'), "Champ de jour auto pour châteaux présent");
 assertTest(str_contains($viewContent, 'name="era_dojo_auto_day"'), "Champ de jour auto pour dojo présent");
 assertTest(str_contains($viewContent, 'id="selectServerCurrentEra"'), "Sélecteur de forçage de l'Ère active présent");
-assertTest(str_contains($viewContent, 'onglets 1 à 7 sont enregistrées'), "Mention des onglets 1 à 7 dans le footer présente");
+assertTest(str_contains($viewContent, 'onglets 1 à 8 sont enregistrées'), "Mention des onglets 1 à 8 dans le footer présente");
 
 echo "\n[TEST 9] Vérification du contrôleur POST dans views/gamestudio.php...\n";
 $controllerContent = file_get_contents(__DIR__ . '/../views/gamestudio.php');

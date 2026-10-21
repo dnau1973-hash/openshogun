@@ -108,6 +108,11 @@ class FleetEngine {
         }
 
         if ($mission['mission_type'] === 'dojo_siege') {
+            require_once __DIR__ . '/GameConfig.php';
+            if (GameConfig::isImperialTruceActive()) {
+                $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
+                return;
+            }
             $this->resolveDojoSiegeArrival($mission);
             return;
         }
@@ -118,6 +123,13 @@ class FleetEngine {
             $oasisEngine = new OasisEngine();
             $targetOasis = $oasisEngine->getOasisById($targetOasisId);
             if (!$targetOasis) {
+                $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
+                return;
+            }
+
+            // Trêve Impériale en vigueur sur oasis occupée par un autre seigneur : repli pacifique
+            require_once __DIR__ . '/GameConfig.php';
+            if (!empty($targetOasis['owner_planet_id']) && GameConfig::isImperialTruceActive()) {
                 $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
                 return;
             }
@@ -194,6 +206,13 @@ class FleetEngine {
 
         $missionType = $mission['mission_type'];
         $hostileMissions = ['attack', 'raid', 'spy', 'occupy'];
+
+        // 🕊️ Trêve Impériale en vigueur : Cessez-le-feu immédiat, repli pacifique des troupes sans combat ni pillage
+        require_once __DIR__ . '/GameConfig.php';
+        if (GameConfig::isImperialTruceActive() && in_array($missionType, $hostileMissions, true)) {
+            $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
+            return;
+        }
 
         // Protection Débutant : Si le fief défenseur est sous immunité féodale et que la mission est hostile, repli pacifique immédiat
         if ($targetPlanet['user_id'] && in_array($missionType, $hostileMissions) && Auth::isUserProtected((int)$targetPlanet['user_id'])) {
@@ -935,6 +954,16 @@ class FleetEngine {
         ?int $targetOasisId = null,
         bool $hasHero = false
     ): array {
+        // 0. Contrôle prioritaire de la Trêve Impériale Sacrée (Noël, Nouvel An ou Décret d'Exception)
+        require_once __DIR__ . '/GameConfig.php';
+        $imperialTruce = GameConfig::getImperialTruceStatus();
+        if ($imperialTruce['active'] && in_array($missionType, ['attack', 'raid', 'occupy', 'spy', 'dojo_siege'], true)) {
+            $tName = $imperialTruce['name'] ?? 'Trêve Impériale';
+            $tPeriod = !empty($imperialTruce['period']) ? " ({$imperialTruce['period']})" : "";
+            $tDesc = $imperialTruce['description'] ?? 'Toutes les armes doivent rester déposées.';
+            throw new Exception("🕊️ {$tName}{$tPeriod} en vigueur ! {$tDesc} Tout assaut, raid ou espionnage est strictement suspendu par la Cour Impériale durant cette période de concorde sacrée.");
+        }
+
         $this->planetEngine->updatePlanet($sourcePlanetId);
 
         // 1. Vérifier la possession de la planète source

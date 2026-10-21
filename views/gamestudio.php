@@ -119,6 +119,9 @@ if ($currentTab === 'dashboard') {
             // 7. Déroulement du Jeu & Chronologie des Ères (Progression & Endgame)
             $gameStudioEngine->saveEraSettings($_POST);
 
+            // 8. Trêves Impériales Sacrées (Noël, Nouvel An & Décret d'Exception)
+            $gameStudioEngine->saveTruceSettings($_POST);
+
             $_SESSION['general_flash'] = [
                 'type' => 'success',
                 'msg'  => "Ensemble des paramètres de la configuration du monde enregistré avec succès !" . (!empty($warnings) ? ' ' . implode(' ', $warnings) : '')
@@ -289,6 +292,25 @@ if ($currentTab === 'dashboard') {
                 'msg'  => $res['message'] ?? 'Ère active du monde mise à jour.'
             ];
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
+            exit;
+
+        } elseif ($_POST['action'] === 'save_world_truce_settings') {
+            $res = $gameStudioEngine->saveTruceSettings($_POST);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Paramètres des Trêves Impériales enregistrés.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-truce-config');
+            exit;
+
+        } elseif ($_POST['action'] === 'broadcast_truce_decree') {
+            $truceType = (string)($_POST['truce_type'] ?? 'christmas');
+            $res = $gameStudioEngine->broadcastTruceDecree($truceType);
+            $_SESSION['general_flash'] = [
+                'type' => $res ? 'success' : 'danger',
+                'msg'  => $res ? "Proclamation Impériale solennelle de Trêve diffusée avec succès à tout l'Archipel !" : "Échec de diffusion de la proclamation."
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-truce-config');
             exit;
         }
     }

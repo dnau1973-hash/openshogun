@@ -687,7 +687,12 @@ class GameStudioEngine {
             'botsList'               => $botsList,
             'botsCount'              => count($botsList),
             // Régénération & Préservation des Joueurs Humains (Item 6)
-            'preserveHumanUsers'     => (bool)GameConfig::get('preserve_human_users_on_reset', true)
+            'preserveHumanUsers'     => (bool)GameConfig::get('preserve_human_users_on_reset', true),
+            // Trêves Impériales Sacrées (Item 8)
+            'truceChristmasEnabled'  => (bool)GameConfig::get('truce_christmas_enabled', true),
+            'truceNewYearEnabled'    => (bool)GameConfig::get('truce_newyear_enabled', true),
+            'truceCustomEnabled'     => (bool)GameConfig::get('truce_custom_enabled', false),
+            'currentTruceStatus'     => GameConfig::getImperialTruceStatus()
         ];
 
         // ── Déroulement du Jeu & Chronologie des Ères Féodales (Item 7) ──
@@ -1405,7 +1410,7 @@ class GameStudioEngine {
                     'image'   => '/public/assets/ere/era_1_aube_des_clans.jpg',
                     'badge'   => 'Ère I • L\'Aube des Clans',
                     'action_url'   => '?page=resources',
-                    'action_label' => 'Bâtir mon Fief Rural &rarr;',
+                    'action_label' => 'Bâtir mon Fief Rural',
                     'impact_points'=> [
                         'Trêve Sacrée du Débutant : Protection impériale absolue contre tout assaut ou raid ennemi.',
                         'Développement des 18 Parcelles Féodales : Déploiement intensif des forêts de bois, carrières de pierre, rizières abondantes et fonderies de fer.',
@@ -1422,7 +1427,7 @@ class GameStudioEngine {
                     'image'   => '/public/assets/ere/era_2_expansion_territoriale.jpg',
                     'badge'   => 'Ère II • Expansion Territoriale',
                     'action_url'   => '?page=map',
-                    'action_label' => 'Explorer la Carte des Provinces &rarr;',
+                    'action_label' => 'Explorer la Carte des Provinces',
                     'impact_points'=> [
                         'Levée de la Trêve Impériale : Les hostilités sont officiellement ouvertes ; vos villages peuvent désormais lancer et subir des assauts et pillages.',
                         'Conquête des Oasis Sauvages : Terrassez la faune féroce pour assujettir les oasis et octroyer à vos fiefs des bonus économiques massifs (+25% à +50%).',
@@ -1439,7 +1444,7 @@ class GameStudioEngine {
                     'image'   => '/public/assets/ere/era_3_guerre_12_chateaux.jpg',
                     'badge'   => 'Ère III • Guerre des 12 Châteaux',
                     'action_url'   => '?page=castle&code=himeji',
-                    'action_label' => 'Marcher sur les Forteresses &rarr;',
+                    'action_label' => 'Marcher sur les Forteresses',
                     'impact_points'=> [
                         'Éveil des 12 Châteaux Authentiques : Les 12 donjons historiques apparaissent sur la carte à 360°, ouverts aux sièges et conquêtes d\'alliances.',
                         'Pouvoir des Reliques Ancestrales : La capture d\'un donjon octroie de puissants bonus passifs permanents partagés par tous les membres de l\'alliance.',
@@ -1456,7 +1461,7 @@ class GameStudioEngine {
                     'image'   => '/public/assets/ere/era_4_dojo_imperial.jpg',
                     'badge'   => 'Ère IV • Dōjō Impérial [0 : 0]',
                     'action_url'   => '?page=imperial_dojo',
-                    'action_label' => 'Rejoindre le Sanctuaire [0:0] &rarr;',
+                    'action_label' => 'Rejoindre le Sanctuaire [0:0]',
                     'impact_points'=> [
                         'Ouverture de la Tuile [0 : 0] : Accès débloqué à la Terre Sacrée pour les convois titanesques de ressources et les armées d\'assaut lourd.',
                         'Chantier des 10 Paliers de la Merveille : Érection progressive du Dōjō Impérial nécessitant une coordination logistique exceptionnelle de toute votre coalition.',
@@ -1473,7 +1478,7 @@ class GameStudioEngine {
                     'image'   => '/public/assets/ere/era_5_unification_shogunat.jpg',
                     'badge'   => 'Ère V • Shōgunat Immortel',
                     'action_url'   => '?page=ranking',
-                    'action_label' => 'Consulter le Panthéon du Monde &rarr;',
+                    'action_label' => 'Consulter le Panthéon du Monde',
                     'impact_points'=> [
                         'Victoire Mondiale Définitive : L\'achèvement du Palier 10 du Dōjō Impérial met un terme à la course féodale et couronne l\'Alliance triomphante.',
                         'Intronisation du Shōgun Suprême : Le chef de clan victorieux reçoit le titre honorifique ultime et siège au sommet de la hiérarchie impériale.',
@@ -1494,6 +1499,71 @@ class GameStudioEngine {
                 'impact_points' => $d['impact_points']
             ];
             return $liveOps->setBroadcast($d['title'], $d['message'], $d['type'], $d['duration'], true, $extra);
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Enregistre les interrupteurs à bascule des Trêves Impériales (Item 8)
+     */
+    public function saveTruceSettings(array $params): array {
+        $christmas = !empty($params['truce_christmas_enabled']);
+        $newYear   = !empty($params['truce_newyear_enabled']);
+        $custom    = !empty($params['truce_custom_enabled']);
+
+        GameConfig::set('truce_christmas_enabled', $christmas ? 1 : 0);
+        GameConfig::set('truce_newyear_enabled', $newYear ? 1 : 0);
+        GameConfig::set('truce_custom_enabled', $custom ? 1 : 0);
+
+        return [
+            'success' => true,
+            'message' => "Paramètres des Trêves Impériales enregistrés avec succès : Trêve de Noël (24-26 Déc) : " . ($christmas ? 'Activée' : 'Désactivée') . ", Trêve du Nouvel An (31 Déc - 2 Jan) : " . ($newYear ? 'Activée' : 'Désactivée') . ", Trêve d'Exception Directe : " . ($custom ? 'EN VIGUEUR' : 'Inactive') . "."
+        ];
+    }
+
+    /**
+     * Diffuse une proclamation impériale solennelle annonçant la Trêve Sacrée
+     */
+    public function broadcastTruceDecree(string $truceType = 'christmas'): bool {
+        try {
+            require_once __DIR__ . '/LiveOpsEngine.php';
+            $liveOps = new LiveOpsEngine($this->db);
+
+            if ($truceType === 'newyear') {
+                $title = "🎊 Proclamation Impériale : Avènement de la Trêve du Nouvel An";
+                $subtitle = "Chronique de la Paix Céleste & du Renouveau des Saisons";
+                $msg = "Par décret solennel du Shōgun et de la Cour Céleste, l'Archipel célèbre le passage à la nouvelle année dans la sérénité ! Du 31 décembre au 2 janvier inclus (3 jours), toutes les armes sont déposées et tout assaut est suspendu. Que les daimyōs consacrent ce temps sacré à la prospérité de leurs provinces et à la concorde fraternelle.";
+                $badge = "Trêve Sacrée • Nouvel An (3 Jours)";
+                $image = '/public/assets/ere/era_5_unification_shogunat.jpg';
+            } elseif ($truceType === 'custom') {
+                $title = "🕊️ Décret Shōgunal Extraordinaire : Trêve Impériale d'Exception";
+                $subtitle = "Arrêt Immédiat des Hostilités & Cessez-le-Feu Universel";
+                $msg = "Sous l'autorité suprême de la Chambre Céleste, un cessez-le-feu immédiat et inconditionnel est proclamé sur l'ensemble du territoire d'OpenShogun ! Toutes les incursions militaires, raids et manœuvres d'espionnage sont gelés jusqu'à nouvel ordre impérial. Que la paix règne sur chaque fief.";
+                $badge = "Trêve d'Exception • En Direct";
+                $image = '/public/assets/ere/era_1_aube_des_clans.jpg';
+            } else {
+                $title = "🕊️ Décret Impérial : Avènement de la Trêve Sacrée de Noël";
+                $subtitle = "Chronique de la Nativité, de la Paix & de la Bienveillance Féodale";
+                $msg = "Par décret du Shōgun, la paix sacrée des fêtes de fin d'année s'étend sur l'Archipel ! Du 24 au 26 décembre inclus (3 jours : veille, jour de fête et lendemain), les feux des forges éclairent la concorde et le sang ne saurait couler. Tout assaut, raid ou espionnage est strictement interdit par la Cour Céleste.";
+                $badge = "Trêve Sacrée • Fêtes de Noël (3 Jours)";
+                $image = '/public/assets/ere/era_1_aube_des_clans.jpg';
+            }
+
+            $extra = [
+                'image'         => $image,
+                'badge'         => $badge,
+                'subtitle'      => $subtitle,
+                'action_url'    => '?page=resources',
+                'action_label'  => 'Consulter mon Fief',
+                'impact_points' => [
+                    'Suspension Totale des Assauts : Impossibilité de lancer des attaques, raids ou missions d\'espionnage.',
+                    'Protection Garantie des Domaines : Les armées arrivant à destination rebroussent chemin pacifiquement sans combat.',
+                    'Économie Féodale Active : Vos rizières, mines, carrières et chantiers continuent de produire normalement.',
+                    'Durée Sacrée de 3 Jours : Un jour avant la fête, le jour saint et un jour après pour festoyer en quiétude.'
+                ]
+            ];
+            return $liveOps->setBroadcast($title, $msg, 'info', 4320, true, $extra);
         } catch (Throwable $e) {
             return false;
         }

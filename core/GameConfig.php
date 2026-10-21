@@ -73,7 +73,7 @@ class GameConfig {
                     'beginner_protection_days' => 7,
                     'preserve_human_users_on_reset' => true,
                     // Déroulement du Jeu & Chronologie des Ères (Progression & Endgame)
-                    'server_start_timestamp' => time() - (86400 * 3),
+                    'server_start_timestamp' => time(),
                     'server_current_era' => 1,
                     'era_auto_progression_enabled' => true,
                     'era_castles_auto_day' => 7,
@@ -81,11 +81,95 @@ class GameConfig {
                     'era_dojo_auto_day' => 21,
                     'era_dojo_unlocked' => false,
                     'era_broadcast_announcements' => true,
-                    'era_victory_alliance_id' => 0
+                    'era_victory_alliance_id' => 0,
+                    // Trêves Impériales Sacrées (Noël, Nouvel An & Décrets d'Urgence)
+                    'truce_christmas_enabled' => true,
+                    'truce_newyear_enabled' => true,
+                    'truce_custom_enabled' => false
                 ];
             }
         }
         return self::$cache;
+    }
+
+    /**
+     * Vérifie le statut d'une Trêve Impériale pour un horodatage donné (ou l'instant présent)
+     * - Trêve Sacrée de Noël : 3 jours (24, 25 et 26 décembre)
+     * - Trêve Sacrée du Nouvel An : 3 jours (31 décembre, 1er et 2 janvier)
+     * - Trêve d'Exception : activation manuelle immédiate par les administrateurs
+     */
+    public static function getImperialTruceStatus(?int $timestamp = null): array {
+        $ts = $timestamp ?? time();
+
+        // 1. Trêve Impériale d'Exception (manuelle en direct)
+        if ((bool)self::get('truce_custom_enabled', false)) {
+            return [
+                'active'      => true,
+                'type'        => 'custom',
+                'name'        => 'Trêve Impériale d\'Exception',
+                'period'      => 'Décret Shōgunal en Direct',
+                'description' => "Par décret d'exception de la Cour Impériale, toutes les hostilités et incursions sont immédiatement suspendues à travers l'Archipel.",
+                'ends_at'     => null
+            ];
+        }
+
+        // 2. Trêve Sacrée de Noël (24, 25, 26 décembre — 3 jours)
+        if ((bool)self::get('truce_christmas_enabled', true)) {
+            $year = (int)date('Y', $ts);
+            $startChristmas = strtotime("{$year}-12-24 00:00:00");
+            $endChristmas   = strtotime("{$year}-12-26 23:59:59");
+            if ($ts >= $startChristmas && $ts <= $endChristmas) {
+                return [
+                    'active'      => true,
+                    'type'        => 'christmas',
+                    'name'        => 'Trêve Sacrée de Noël',
+                    'period'      => '24 au 26 Décembre',
+                    'description' => "Paix et concorde sur l'Archipel : les armes se taisent pour la Nativité et les fêtes de fin d'année.",
+                    'ends_at'     => $endChristmas
+                ];
+            }
+        }
+
+        // 3. Trêve Sacrée du Nouvel An (31 décembre, 1er janvier, 2 janvier — 3 jours)
+        if ((bool)self::get('truce_newyear_enabled', true)) {
+            $year = (int)date('Y', $ts);
+            $month = (int)date('n', $ts);
+
+            if ($month === 12) {
+                $startNY = strtotime("{$year}-12-31 00:00:00");
+                $endNY   = strtotime(($year + 1) . "-01-02 23:59:59");
+            } else {
+                $startNY = strtotime(($year - 1) . "-12-31 00:00:00");
+                $endNY   = strtotime("{$year}-01-02 23:59:59");
+            }
+
+            if ($ts >= $startNY && $ts <= $endNY) {
+                return [
+                    'active'      => true,
+                    'type'        => 'newyear',
+                    'name'        => 'Trêve Sacrée du Nouvel An',
+                    'period'      => '31 Décembre au 2 Janvier',
+                    'description' => "L'Archipel célèbre le passage à la nouvelle année dans la sérénité et l'harmonie impériale.",
+                    'ends_at'     => $endNY
+                ];
+            }
+        }
+
+        return [
+            'active'      => false,
+            'type'        => null,
+            'name'        => null,
+            'period'      => null,
+            'description' => null,
+            'ends_at'     => null
+        ];
+    }
+
+    /**
+     * Raccourci booléen : vérifie si une Trêve Impériale quelconque est active
+     */
+    public static function isImperialTruceActive(?int $timestamp = null): bool {
+        return (bool)(self::getImperialTruceStatus($timestamp)['active'] ?? false);
     }
 
     /**

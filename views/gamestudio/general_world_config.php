@@ -112,6 +112,11 @@ unset($_SESSION['general_flash']);
                         <i class="fa-solid fa-crown text-warning me-1.5"></i>7. Déroulement du Jeu &amp; Ères
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-bold text-dark py-2.5 px-3" data-bs-toggle="tab" href="#section-world-truce-config">
+                        <i class="fa-solid fa-dove text-teal me-1.5"></i>8. Trêves Impériales &amp; Fêtes
+                    </a>
+                </li>
             </ul>
 
             <div class="tab-content">
@@ -1660,13 +1665,233 @@ unset($_SESSION['general_flash']);
                         </div>
                     </div>
                 </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- ONGLET 8 : TRÊVES IMPÉRIALES SACRÉES (NOËL & NOUVEL AN)        -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <div class="tab-pane fade" id="section-world-truce-config" role="tabpanel">
+                    <div class="p-4 p-md-5">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 pb-2 border-bottom">
+                            <div>
+                                <h4 class="text-dark fw-bold m-0 d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-dove text-teal"></i>8. Trêves Impériales Sacrées (Noël &amp; Nouvel An)
+                                </h4>
+                                <div class="text-muted small mt-1">
+                                    Cessez-le-feu féodal pour les fêtes de fin d'année : gel automatique des hostilités sur 3 jours (1 jour avant, jour de fête, 1 jour après) et déclencheur d'urgence.
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="submit" 
+                                        formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                        name="action" value="save_world_truce_settings" 
+                                        class="btn btn-teal px-3 shadow-sm d-flex align-items-center gap-2 fw-bold text-white">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span>Enregistrer les Trêves</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ── A. CARTE DE STATUT EN DIRECT DE LA TRÊVE ── -->
+                        <?php 
+                        $truceStatus = $currentTruceStatus ?? GameConfig::getImperialTruceStatus();
+                        $isTruceActive = !empty($truceStatus['active']);
+                        ?>
+                        <div class="card border <?= $isTruceActive ? 'border-success' : 'border-secondary' ?> mb-4 shadow-sm overflow-hidden">
+                            <div class="card-header <?= $isTruceActive ? 'bg-success text-white' : 'bg-light text-dark' ?> py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-2.5">
+                                    <i class="fa-solid <?= $isTruceActive ? 'fa-dove fs-3' : 'fa-shield-halved fs-3 text-secondary' ?>"></i>
+                                    <div>
+                                        <div class="fw-bold fs-5 mb-0">
+                                            <?= $isTruceActive ? '🕊️ Trêve Impériale en Vigueur : ' . htmlspecialchars($truceStatus['name']) : '⚔️ Temps de Guerre Régulier (Aucune Trêve Active)' ?>
+                                        </div>
+                                        <small class="<?= $isTruceActive ? 'text-white-50' : 'text-muted' ?>">
+                                            <?= $isTruceActive ? 'Période sacrée : ' . htmlspecialchars($truceStatus['period'] ?? '') . ' — Cessez-le-feu féodal pan-archipel' : 'Les assauts, raids et guerres de clans se déroulent selon les règles ordinaires du Sengoku.' ?>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div>
+                                    <?php if ($isTruceActive): ?>
+                                        <span class="badge bg-white text-success fw-bold px-3 py-1.5 fs-6 shadow-sm">
+                                            <i class="fa-solid fa-peace me-1"></i>PAIX EN VIGUEUR
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary text-white fw-bold px-3 py-1.5 fs-6">
+                                            <i class="fa-solid fa-swords me-1"></i>HORS TRÊVE
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="card-body p-4 bg-white">
+                                <div class="row align-items-center g-3">
+                                    <div class="col-md-8">
+                                        <p class="text-secondary m-0" style="line-height: 1.6;">
+                                            <?= $isTruceActive ? htmlspecialchars($truceStatus['description'] ?? '') : "Pendant toute la durée d'une trêve impériale, aucun seigneur ne peut lancer d'attaque, de raid, de siège ou de reconnaissance d'espionnage. Les armées hostiles arrivant à destination rebroussent chemin pacifiquement sans combat ni pillage." ?>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4 text-md-end">
+                                        <div class="d-flex flex-column align-items-md-end gap-1 text-muted small">
+                                            <span><strong>Règle Féodale :</strong> 3 jours complets (J-1, Jour J, J+1)</span>
+                                            <span><strong>Économie :</strong> Rizières, mines et chantiers actifs</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── B. INTERRUPTEURS À BASCULE (SWITCHES DES TRÊVES) ── -->
+                        <div class="row g-4 mb-4">
+                            <!-- 1. Trêve de Noël -->
+                            <div class="col-xl-4 col-md-6">
+                                <div class="card h-100 border rounded-3 shadow-sm p-4 bg-white d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="badge bg-danger-lt text-danger fw-bold px-2.5 py-1.5 fs-6">
+                                            <i class="fa-solid fa-candy-cane me-1"></i>Fêtes de Noël
+                                        </span>
+                                        <div class="form-check form-switch m-0">
+                                            <input class="form-check-input" type="checkbox" name="truce_christmas_enabled" id="switchTruceChristmas" value="1" <?= !empty($truceChristmasEnabled) ? 'checked' : '' ?> style="transform: scale(1.3); cursor: pointer;">
+                                        </div>
+                                    </div>
+
+                                    <h5 class="fw-bold text-dark mb-1 d-flex align-items-center gap-1.5">
+                                        <i class="fa-solid fa-tree text-success"></i>Trêve Sacrée de Noël
+                                    </h5>
+                                    <div class="text-primary small fw-semibold mb-2">24, 25 &amp; 26 Décembre (3 Jours)</div>
+                                    <p class="text-muted small flex-grow-1 mb-3" style="line-height: 1.5;">
+                                        Gèle automatiquement toute hostilité militaire du <strong>24 décembre 00h00 au 26 décembre 23h59</strong> (veille, jour de Noël et lendemain). Permet aux joueurs de célébrer les fêtes en toute sérénité.
+                                    </p>
+
+                                    <div class="pt-3 border-top mt-auto d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-light text-secondary border font-monospace py-1 px-2">3 Jours Pleins</span>
+                                        <button type="submit" 
+                                                formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                                name="action" value="broadcast_truce_decree" 
+                                                onclick="document.getElementById('inputTruceType').value = 'christmas';"
+                                                class="btn btn-sm btn-outline-danger py-1 px-2.5 fw-bold"
+                                                title="Diffuser la proclamation officielle de Noël">
+                                            <i class="fa-solid fa-bullhorn me-1"></i>Proclamer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Trêve du Nouvel An -->
+                            <div class="col-xl-4 col-md-6">
+                                <div class="card h-100 border rounded-3 shadow-sm p-4 bg-white d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="badge bg-indigo-lt text-indigo fw-bold px-2.5 py-1.5 fs-6">
+                                            <i class="fa-solid fa-champagne-glasses me-1"></i>Nouvel An
+                                        </span>
+                                        <div class="form-check form-switch m-0">
+                                            <input class="form-check-input" type="checkbox" name="truce_newyear_enabled" id="switchTruceNewYear" value="1" <?= !empty($truceNewYearEnabled) ? 'checked' : '' ?> style="transform: scale(1.3); cursor: pointer;">
+                                        </div>
+                                    </div>
+
+                                    <h5 class="fw-bold text-dark mb-1 d-flex align-items-center gap-1.5">
+                                        <i class="fa-solid fa-sparkles text-warning"></i>Trêve Sacrée du Nouvel An
+                                    </h5>
+                                    <div class="text-primary small fw-semibold mb-2">31 Décembre, 1er &amp; 2 Janvier (3 Jours)</div>
+                                    <p class="text-muted small flex-grow-1 mb-3" style="line-height: 1.5;">
+                                        Gèle automatiquement les combats du <strong>31 décembre 00h00 au 2 janvier 23h59</strong> (réveillon, Jour de l'An et lendemain). Assure une transition pacifique et festive vers le nouveau cycle annuel.
+                                    </p>
+
+                                    <div class="pt-3 border-top mt-auto d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-light text-secondary border font-monospace py-1 px-2">3 Jours Pleins</span>
+                                        <button type="submit" 
+                                                formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                                name="action" value="broadcast_truce_decree" 
+                                                onclick="document.getElementById('inputTruceType').value = 'newyear';"
+                                                class="btn btn-sm btn-outline-indigo py-1 px-2.5 fw-bold"
+                                                title="Diffuser la proclamation officielle du Nouvel An">
+                                            <i class="fa-solid fa-bullhorn me-1"></i>Proclamer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Trêve d'Exception en Direct -->
+                            <div class="col-xl-4 col-md-12">
+                                <div class="card h-100 border border-teal-lt rounded-3 shadow-sm p-4 bg-white d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="badge bg-teal-lt text-teal fw-bold px-2.5 py-1.5 fs-6">
+                                            <i class="fa-solid fa-bolt me-1"></i>Décret Shōgunal Direct
+                                        </span>
+                                        <div class="form-check form-switch m-0">
+                                            <input class="form-check-input" type="checkbox" name="truce_custom_enabled" id="switchTruceCustom" value="1" <?= !empty($truceCustomEnabled) ? 'checked' : '' ?> style="transform: scale(1.3); cursor: pointer;">
+                                        </div>
+                                    </div>
+
+                                    <h5 class="fw-bold text-dark mb-1 d-flex align-items-center gap-1.5">
+                                        <i class="fa-solid fa-peace text-teal"></i>Trêve d'Exception Forcée
+                                    </h5>
+                                    <div class="text-teal small fw-semibold mb-2">Activation Immédiate en Direct (Temps Réel)</div>
+                                    <p class="text-muted small flex-grow-1 mb-3" style="line-height: 1.5;">
+                                        Active <strong>instantanément</strong> une trêve générale sur tout l'Archipel sans attendre les dates des fêtes. Idéal pour des cérémonies, des maintenances à chaud, des tournois spéciaux ou des tests.
+                                    </p>
+
+                                    <div class="pt-3 border-top mt-auto d-flex justify-content-between align-items-center">
+                                        <span class="badge <?= !empty($truceCustomEnabled) ? 'bg-success text-white' : 'bg-light text-secondary border' ?> font-monospace py-1 px-2">
+                                            <?= !empty($truceCustomEnabled) ? 'EN DIRECT' : 'Désactivée' ?>
+                                        </span>
+                                        <button type="submit" 
+                                                formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                                name="action" value="broadcast_truce_decree" 
+                                                onclick="document.getElementById('inputTruceType').value = 'custom';"
+                                                class="btn btn-sm btn-outline-teal py-1 px-2.5 fw-bold"
+                                                title="Diffuser la proclamation solennelle d'exception">
+                                            <i class="fa-solid fa-bullhorn me-1"></i>Proclamer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Champ caché pour le type de proclamation de trêve -->
+                        <input type="hidden" name="truce_type" id="inputTruceType" value="christmas">
+
+                        <!-- ── C. RAPPELS STRATÉGIQUES SUR LE FONCTIONNEMENT DES TRÊVES ── -->
+                        <div class="card bg-light border-0 rounded-3 p-4">
+                            <h5 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-scroll text-warning"></i>Directives Féodales lors d'une Trêve Impériale
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="d-flex gap-2">
+                                        <i class="fa-solid fa-ban text-danger mt-1"></i>
+                                        <div class="small">
+                                            <strong class="text-dark d-block">Hostilités Militaires Interdites</strong>
+                                            <span class="text-secondary">Les missions d'attaque, raid, espionnage et sièges de donjons/dōjō sont impossibles à lancer.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex gap-2">
+                                        <i class="fa-solid fa-rotate-left text-primary mt-1"></i>
+                                        <div class="small">
+                                            <strong class="text-dark d-block">Repli Pacifique Garanti</strong>
+                                            <span class="text-secondary">Toute armée hostile en vol qui atteint sa cible pendant la trêve rebrousse chemin sans combattre ni piller.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex gap-2">
+                                        <i class="fa-solid fa-wheat-awn text-success mt-1"></i>
+                                        <div class="small">
+                                            <strong class="text-dark d-block">Prospérité Civile Maintenue</strong>
+                                            <span class="text-secondary">La production rurale de riz, bois, pierre et fer, le commerce et les expéditions de pêche continuent librement.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Pied de Carte Commun : Sauvegarde Globale Unique -->
             <div class="card-footer bg-light d-flex justify-content-between align-items-center flex-wrap gap-2 py-3 px-4 border-top">
                 <div class="text-muted small d-flex align-items-center gap-1.5">
                     <i class="fa-solid fa-circle-info text-primary"></i>
-                    <span>Toutes les modifications apportées aux onglets 1 à 7 sont enregistrées <strong>simultanément</strong>.</span>
+                    <span>Toutes les modifications apportées aux onglets 1 à 8 sont enregistrées <strong>simultanément</strong>.</span>
                 </div>
                 <button type="submit" class="btn btn-primary px-4 shadow-sm d-flex align-items-center gap-2">
                     <i class="fa-solid fa-floppy-disk"></i>
@@ -2469,7 +2694,7 @@ document.addEventListener('DOMContentLoaded', function() {
             subtitle: "Chronique Sacrée du Renouveau & de l'Éclosion Rurale",
             message: "Par décret suprême de la Cour Impériale et du Shōgunat, les brumes ancestrales qui voilaient l'Archipel se dissipent sous la clarté d'une aurore nouvelle. Du nord enneigé aux rivages méridionaux baignés d'écume, la terre sacrée d'OpenShogun s'ouvre à nouveau aux pas des pionniers.\n\nLes daimyōs de chaque lignée reçoivent le mandat sacré d'établir leur premier fief. Sous la protection de la Trêve Impériale inviolable, le sang ne saurait encore souiller l'herbe des clairières : l'heure est au travail laborieux de la terre et à l'ingéniosité des bâtisseurs. Les haches résonnent dans les forêts de cèdres millénaires, les pioches entaillent les filons des carrières de granit, l'eau des rivières nourrit les premiers sillons de riz et les fourneaux de forge s'embrasent pour fondre le premier fer de l'Archipel.\n\nÉrigez vos 18 parcelles économiques, fondez votre Dōjō et initiez vos premiers disciples aux arts de la lance et de l'arc court. Que chaque seigneur pose dès aujourd'hui les fondations inébranlables d'une dynastie promise à la gloire éternelle.",
             action_url: '?page=resources',
-            action_label: 'Bâtir mon Fief Rural &rarr;',
+            action_label: 'Bâtir mon Fief Rural',
             impact_points: [
                 "Trêve Sacrée du Débutant : Protection impériale absolue contre tout assaut ou raid ennemi.",
                 "Développement des 18 Parcelles Féodales : Déploiement intensif des forêts de bois, carrières de pierre, rizières abondantes et fonderies de fer.",
@@ -2484,7 +2709,7 @@ document.addEventListener('DOMContentLoaded', function() {
             subtitle: "Chronique de la Grande Chevauchée Féodale & des Alliances de Sang",
             message: "Entendez le son rauque du cor de guerre et le fracas des tambours taiko à travers les vallées ! Le mandat de trêve débutante prend fin, tel que scellé par les astres. L'Archipel ne saurait demeurer figé dans la torpeur des premiers enclos : l'espace vital appartient à ceux qui ont le courage de franchir leurs palissades.\n\nPartout dans les provinces, les éclaireurs à cheval s'élancent sur les pistes inconnues. Les oasis sauvages, havres de fertilité gardés par une faune indomptée — ours des montagnes, meutes de loups et sangliers colossaux —, appellent les sabres intrépides. Quiconque domptera ces sanctuaires naturels drapera son clan d'une prospérité éclatante, récoltant la manne vitale nécessaire à l'entretien de vastes osts féodaux.\n\nMais nulle destinée ne se forge dans l'isolement. L'heure est venue de dépêcher des émissaires, d'échanger des serments scellés au saké et de fonder les grandes Alliances féodales. Les frontières s'affrontent, les premiers raids de cavalerie frappent aux avant-postes : l'Archipel s'embrase au rythme des ambitions rivales !",
             action_url: '?page=map',
-            action_label: 'Explorer la Carte des Provinces &rarr;',
+            action_label: 'Explorer la Carte des Provinces',
             impact_points: [
                 "Levée de la Trêve Impériale : Les hostilités sont officiellement ouvertes ; vos villages peuvent désormais lancer et subir des assauts et pillages.",
                 "Conquête des Oasis Sauvages : Terrassez la faune féroce pour assujettir les oasis et octroyer à vos fiefs des bonus économiques massifs (+25% à +50%).",
@@ -2499,7 +2724,7 @@ document.addEventListener('DOMContentLoaded', function() {
             subtitle: "Chronique du Réveil des Forteresses Séculaires & des Reliques Sacrées",
             message: "Du sommet des monts brumeux aux plaines côtières, un grondement millénaire ébranle le sol de l'Archipel : les portes colossales des 12 Forteresses Authentiques du Japon viennent de céder sous le poids de la prophétie ! Les donjons légendaires — Himeji le Héron Blanc, Matsumoto le Corbeau Noir, Inuyama, Hikone, Kumamoto, Matsue, Hirosaki, Maruoka, Bitchū Matsuyama, Marugame, Uwajima et Kōchi — s'éveillent enfin de leur sommeil séculaire.\n\nChacune de ces douze citadelles inexpugnables abrite en son cœur un autel ancestral recelant des Reliques sacrées bénies par les kamis. Ces trésors confèrent des bénédictions prodigieuses à l'Alliance qui ose s'en emparer et tenir les remparts contre les vagues d'assaillants.\n\nEntendez l'avertissement de la Chambre Céleste : la route vers le destin suprême exige le sang et la gloire des sièges. Aucune coalition ne sera jugée digne d'approcher le Dōjō Impérial sans avoir d'abord conquis et tenu sous son joug au moins deux de ces douze forteresses mythiques. Que les catapultes avancent et que les bannières s'élèvent au vent des forteresses !",
             action_url: '?page=castle&code=himeji',
-            action_label: 'Marcher sur les Forteresses &rarr;',
+            action_label: 'Marcher sur les Forteresses',
             impact_points: [
                 "Éveil des 12 Châteaux Authentiques : Les 12 donjons historiques apparaissent sur la carte à 360°, ouverts aux sièges et conquêtes d'alliances.",
                 "Pouvoir des Reliques Ancestrales : La capture d'un donjon octroie de puissants bonus passifs permanents partagés par tous les membres de l'alliance.",
@@ -2514,7 +2739,7 @@ document.addEventListener('DOMContentLoaded', function() {
             subtitle: "Chronique de la Terre Sacrée Centrale & du Chantier de la Merveille",
             message: "Le ciel s'embrase d'une lueur céleste au centre exact du monde connu : la brume impénétrable de Tenchi no Seichi [0 : 0], la Terre Sacrée du Ciel et de la Terre, s'est totalement dissipée ! Les rouleaux des prophéties sont désormais ouverts devant tous les peuples de l'Archipel.\n\nSur cette plaine centrale se dresse l'assise du Dōjō Impérial, la Merveille ultime capable d'unifier à jamais les clans sous un même règne. Seules les Alliances souveraines ayant prouvé leur suprématie en tenant au moins deux Châteaux Authentiques ont l'insigne honneur de poser pied sur ce sanctuaire et d'y amorcer la construction des dix niveaux légendaires.\n\nDes caravanes de milliers de chariots, escortées par des colonnes interminables de samouraïs d'élite, convergent des quatre horizons, transportant des montagnes de bois précieux, de blocs de pierre taillée, de lingots de fer et de sacs de riz. Mais chaque pierre posée attirera la foudre ennemie : béliers draconiques, catapultes Horokubiya et incendies ravageurs tenteront d'anéantir l'édifice avant son élévation finale. Que la bravoure des guerriers protège le cœur battant du Japon !",
             action_url: '?page=imperial_dojo',
-            action_label: 'Rejoindre le Sanctuaire [0:0] &rarr;',
+            action_label: 'Rejoindre le Sanctuaire [0:0]',
             impact_points: [
                 "Ouverture de la Tuile [0 : 0] : Accès débloqué à la Terre Sacrée pour les convois titanesques de ressources et les armées d'assaut lourd.",
                 "Chantier des 10 Paliers de la Merveille : Érection progressive du Dōjō Impérial nécessitant une coordination logistique exceptionnelle de toute votre coalition.",
@@ -2529,7 +2754,7 @@ document.addEventListener('DOMContentLoaded', function() {
             subtitle: "Chronique de l'Avènement Suprême & de la Paix Éternelle des Daimyōs",
             message: "Que les mille cloches des temples de Kyoto et de Kamakura résonnent à l'unisson jusqu'aux confins des mers ! Le dixième et suprême palier du Dōjō Impérial [0 : 0] s'est dressé fièrement vers la voûte céleste, touchant le cœur même du firmament. La Merveille est achevée, et avec elle s'éteint le feu dévastateur des guerres intestines.\n\nSous le regard déférent de la Cour Impériale et l'acclamation fervente de dizaines de milliers de guerriers rassemblés sur la Terre Sacrée, le suzerain de l'Alliance victorieuse gravit les marches sacrées. Les daimyōs rivaux brisent leurs bannières de rancœur et déposent leurs lames au pied de l'estrade d'or : le Mandat du Ciel a rendu son jugement sans appel.\n\nLe titre suprême de Shōgun du Japon est officiellement conféré au grand unificateur ! Une ère d'ordre souverain, de prospérité culturelle et de paix immortelle s'ouvre sur les îles de l'Archipel. Les noms des héros, des stratèges et des bâtisseurs de cette alliance légendaire sont gravés pour l'éternité dans les parchemins d'or du Panthéon d'OpenShogun !",
             action_url: '?page=ranking',
-            action_label: 'Consulter le Panthéon du Monde &rarr;',
+            action_label: 'Consulter le Panthéon du Monde',
             impact_points: [
                 "Victoire Mondiale Définitive : L'achèvement du Palier 10 du Dōjō Impérial met un terme à la course féodale et couronne l'Alliance triomphante.",
                 "Intronisation du Shōgun Suprême : Le chef de clan victorieux reçoit le titre honorifique ultime et siège au sommet de la hiérarchie impériale.",
