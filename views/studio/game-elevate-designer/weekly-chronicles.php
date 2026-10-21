@@ -21,7 +21,10 @@ $allEvents = $adminEventEngine->getAllEvents();
                 Créez, planifiez et gérez les récits historiques du Sengoku et les chaînes de quêtes hebdomadaires.
             </div>
         </div>
-        <div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-info font-monospace shadow-sm" onclick="syncCurrentWeek()">
+                <i class="fa-solid fa-arrows-rotate me-1"></i>Sync Semaine Actuelle
+            </button>
             <button type="button" class="btn btn-warning fw-bold font-monospace shadow-sm" onclick="openCreateEventModal()">
                 <i class="fa-solid fa-plus me-1"></i>Créer une Chronique
             </button>
@@ -106,11 +109,17 @@ $allEvents = $adminEventEngine->getAllEvents();
                                     <div class="rounded border shadow-sm flex-shrink-0" style="width: 120px; height: 85px; background-image: url('<?= htmlspecialchars($ev['image_url']) ?>'); background-size: cover; background-position: center;"></div>
                                     <div class="flex-grow-1">
                                         <div class="d-flex align-items-center gap-2 font-monospace text-muted small mb-1 flex-wrap">
+                                            <?php
+                                            $boundaries = $adminEventEngine->getWeekBoundaries(strtotime($ev['starts_at']));
+                                            ?>
+                                            <span class="badge bg-dark text-warning border border-warning-subtle font-monospace py-0.5 px-1.5">
+                                                <i class="fa-solid fa-calendar-week me-1"></i><?= htmlspecialchars($boundaries['week_label']) ?>
+                                            </span>
                                             <span class="text-primary fw-bold"><i class="fa-solid fa-calendar me-1"></i><?= htmlspecialchars($ev['era_year']) ?></span>
                                             <span>&bull;</span>
-                                            <span>Du <?= date('d/m/Y', strtotime($ev['starts_at'])) ?> au <?= date('d/m/Y', strtotime($ev['ends_at'])) ?></span>
+                                            <span><?= htmlspecialchars($boundaries['period_label']) ?></span>
                                             <?php if (!empty($ev['jp_title'])): ?>
-                                                <span class="badge bg-dark text-warning border border-warning-subtle font-monospace py-0 px-1"><?= htmlspecialchars($ev['jp_title']) ?></span>
+                                                <span class="badge bg-dark text-secondary border border-secondary-subtle font-monospace py-0 px-1"><?= htmlspecialchars($ev['jp_title']) ?></span>
                                             <?php endif; ?>
                                         </div>
                                         <p class="text-secondary small mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
@@ -461,6 +470,23 @@ function saveEventSubmit(e) {
         window.location.reload();
     })
     .catch(err => alert('Erreur réseau lors de la sauvegarde.'));
+}
+
+function syncCurrentWeek() {
+    if (!confirm('Synchroniser automatiquement la chronique active avec la semaine ISO en cours (Lundi 00:00 -> Dimanche 23:59) ?')) return;
+    fetch('/api/weekly_events.php?action=admin_sync_current_week', {
+        method: 'POST'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.success) {
+            alert(data.error || 'Erreur lors de la synchronisation.');
+            return;
+        }
+        alert(data.message || 'Chronique synchronisée avec succès !');
+        window.location.reload();
+    })
+    .catch(err => alert('Erreur réseau lors de la synchronisation.'));
 }
 
 function setEventActive(eventId) {

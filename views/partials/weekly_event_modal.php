@@ -174,11 +174,16 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
             <!-- En-tête de la Chronique Féodale -->
             <div class="modal-header border-bottom border-warning-subtle py-3 px-4 bg-dark text-white d-flex justify-content-between align-items-center flex-shrink-0">
                 <div>
-                    <div class="d-flex align-items-center gap-2 mb-1">
+                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                         <span class="badge bg-warning text-dark fw-bold font-monospace text-uppercase" style="letter-spacing: 0.5px;">
-                            <i class="fa-solid fa-scroll me-1"></i>Chronique Féodale Hebdomadaire
+                            <i class="fa-solid fa-scroll me-1"></i>Chronique Féodale • <?= htmlspecialchars($activeEvent['week_label'] ?? ('Semaine ' . date('W'))) ?>
                         </span>
-                        <div class="badge bg-dark border border-warning text-warning font-monospace py-1 px-2" id="weeklyEventCountdown" data-seconds="<?= $secRemaining ?>">
+                        <?php if (!empty($activeEvent['period_text'])): ?>
+                            <span class="badge bg-dark border border-warning text-warning font-monospace py-1 px-2">
+                                <i class="fa-regular fa-calendar-days me-1"></i><?= htmlspecialchars($activeEvent['period_text']) ?>
+                            </span>
+                        <?php endif; ?>
+                        <div class="badge bg-dark border border-secondary text-light font-monospace py-1 px-2" id="weeklyEventCountdown" data-seconds="<?= $secRemaining ?>">
                             <i class="fa-regular fa-clock me-1"></i><span id="weeklyEventCountdownText">--:--:--</span>
                         </div>
                     </div>

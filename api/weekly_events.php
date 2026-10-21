@@ -103,6 +103,36 @@ try {
             ]);
             break;
 
+        case 'admin_sync_current_week':
+            if (!$isStudioAuthorized) {
+                http_response_code(403);
+                throw new Exception("Accès refusé. Privilèges de Game Studio requis.");
+            }
+            $synced = $eventEngine->syncCurrentWeekEvent();
+            if (!$synced) {
+                throw new Exception("Aucune chronique trouvée pour la semaine en cours.");
+            }
+            echo json_encode([
+                'success' => true,
+                'message' => "Chronique synchronisée avec succès pour " . ($synced['week_label'] ?? 'la semaine') . " : " . $synced['title'],
+                'event'   => $synced
+            ]);
+            break;
+
+        case 'admin_resync_all_dates':
+            if (!$isStudioAuthorized) {
+                http_response_code(403);
+                throw new Exception("Accès refusé. Privilèges de Game Studio requis.");
+            }
+            $year = !empty($_POST['year']) ? (int)$_POST['year'] : null;
+            $count = $eventEngine->resyncAllWeekDates($year);
+            echo json_encode([
+                'success' => true,
+                'message' => "$count chroniques recalibrées du lundi au dimanche.",
+                'count'   => $count
+            ]);
+            break;
+
         case 'admin_set_active':
             if (!$isStudioAuthorized) {
                 http_response_code(403);

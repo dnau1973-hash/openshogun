@@ -371,10 +371,15 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
              data-bs-parent="#resourcesEastAccordion">
             <div class="accordion-body p-2">
                 <div class="p-2 rounded mb-2 text-white shadow-sm" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(234, 179, 8, 0.3);">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="badge bg-warning text-dark fw-bold font-monospace" style="font-size:0.65rem;"><?= htmlspecialchars($activeEvent['era_year']) ?></span>
+                    <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+                        <span class="badge bg-warning text-dark fw-bold font-monospace" style="font-size:0.65rem;"><?= htmlspecialchars($activeEvent['week_label'] ?? '') ?> &bull; <?= htmlspecialchars($activeEvent['era_year']) ?></span>
                         <span class="font-monospace text-warning small"><i class="fa-regular fa-clock me-1"></i><?= gmdate('d\j H\h', max(0, $activeEvent['seconds_remaining'])) ?></span>
                     </div>
+                    <?php if (!empty($activeEvent['period_text'])): ?>
+                        <div class="text-warning-lt font-monospace mb-1" style="font-size:0.68rem;">
+                            <i class="fa-regular fa-calendar me-1"></i><?= htmlspecialchars($activeEvent['period_text']) ?>
+                        </div>
+                    <?php endif; ?>
                     <div class="fw-bold text-white small mb-1"><?= htmlspecialchars($activeEvent['title']) ?></div>
                     <div class="text-secondary" style="font-size:0.75rem; line-height: 1.35;"><?= htmlspecialchars(mb_strimwidth($activeEvent['description'], 0, 110, '...')) ?></div>
                 </div>

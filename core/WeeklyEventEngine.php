@@ -229,13 +229,119 @@ class WeeklyEventEngine {
     }
 
     /**
+     * Calcule précisément les bornes d'une semaine ISO (Lundi 00:00:00 au Dimanche 23:59:59)
+     */
+    public static function getWeekBoundaries(?int $timestamp = null, ?int $week = null, ?int $year = null): array {
+        $ts = $timestamp ?? time();
+        $isoYear = $year ?? (int)date('o', $ts);
+        $w = $week ?? (int)date('W', $ts);
+        $weekStr = sprintf('%02d', $w);
+
+        $mondayTs = strtotime("{$isoYear}-W{$weekStr}-1 00:00:00");
+        $sundayTs = strtotime("{$isoYear}-W{$weekStr}-7 23:59:59");
+
+        $frenchMonths = [
+            1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
+            5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
+            9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
+        ];
+
+        $startDay = date('j', $mondayTs);
+        $startMonth = $frenchMonths[(int)date('n', $mondayTs)] ?? date('M', $mondayTs);
+        $endDay = date('j', $sundayTs);
+        $endMonth = $frenchMonths[(int)date('n', $sundayTs)] ?? date('M', $sundayTs);
+        $endYear = date('Y', $sundayTs);
+
+        if ($startMonth === $endMonth) {
+            $periodStr = "Du Lundi {$startDay} au Dimanche {$endDay} {$endMonth} {$endYear}";
+        } else {
+            $periodStr = "Du Lundi {$startDay} {$startMonth} au Dimanche {$endDay} {$endMonth} {$endYear}";
+        }
+
+        return [
+            'week_number'         => $w,
+            'week_str'            => $weekStr,
+            'iso_year'            => $isoYear,
+            'starts_at'           => date('Y-m-d 00:00:00', $mondayTs),
+            'ends_at'             => date('Y-m-d 23:59:59', $sundayTs),
+            'starts_at_timestamp' => $mondayTs,
+            'ends_at_timestamp'   => $sundayTs,
+            'week_label'          => "Semaine {$w}",
+            'period_label'        => "Semaine {$w} • {$periodStr}",
+            'period_text'         => $periodStr,
+            'starts_at_formatted' => "Lundi {$startDay} {$startMonth} {$endYear}",
+            'ends_at_formatted'   => "Dimanche {$endDay} {$endMonth} {$endYear}"
+        ];
+    }
+
+    /**
+     * Synchronise et active automatiquement la Chronique Féodale de la semaine en cours (Lundi au Dimanche)
+     */
+    public function syncCurrentWeekEvent(): ?array {
+        if (!$this->db) return null;
+
+        $bounds = self::getWeekBoundaries();
+        $curWeekStr = $bounds['week_str'];
+        $monday = $bounds['starts_at'];
+        $sunday = $bounds['ends_at'];
+
+        // Chercher l'événement correspondant à la semaine actuelle
+        $stmt = $this->db->prepare("SELECT * FROM weekly_events WHERE slug LIKE ? LIMIT 1");
+        $stmt->execute(["semaine_{$curWeekStr}_%"]);
+        $event = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($event) {
+            // Désactiver tous les autres événements expirés
+            $this->db->prepare("UPDATE weekly_events SET is_active = 0 WHERE id != ? AND is_active = 1")->execute([$event['id']]);
+            // Activer la chronique de la semaine actuelle avec ses bornes exactes Lundi 00:00 -> Dimanche 23:59
+            $this->db->prepare("UPDATE weekly_events SET is_active = 1, starts_at = ?, ends_at = ? WHERE id = ?")
+                     ->execute([$monday, $sunday, $event['id']]);
+            $event['is_active'] = 1;
+            $event['starts_at'] = $monday;
+            $event['ends_at']   = $sunday;
+        }
+
+        return $event;
+    }
+
+    /**
+     * Recalcule et synchronise les dates du Lundi 00:00:00 au Dimanche 23:59:59 pour toutes les 52 chroniques
+     */
+    public function resyncAllWeekDates(?int $year = null): int {
+        if (!$this->db) return 0;
+        $isoYear = $year ?? (int)date('o');
+        $updated = 0;
+
+        $stmt = $this->db->query("SELECT id, slug FROM weekly_events");
+        $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmtUp = $this->db->prepare("UPDATE weekly_events SET starts_at = ?, ends_at = ? WHERE id = ?");
+
+        foreach ($events as $ev) {
+            if (preg_match('/semaine_(\d+)_/i', $ev['slug'], $m)) {
+                $w = (int)$m[1];
+                $bounds = self::getWeekBoundaries(null, $w, $isoYear);
+                $stmtUp->execute([$bounds['starts_at'], $bounds['ends_at'], $ev['id']]);
+                $updated++;
+            }
+        }
+
+        return $updated;
+    }
+
+    /**
      * Récupère l'événement hebdomadaire actuellement actif
      */
     public function getActiveEvent(?int $userId = null, ?int $planetId = null): ?array {
         if (!$this->db) return null;
 
         $now = date('Y-m-d H:i:s');
-        // Priorité 1 : Événement explicitement marqué actif
+        $nowTs = time();
+        $currentBounds = self::getWeekBoundaries($nowTs);
+        $curWeek = $currentBounds['week_number'];
+        $curWeekStr = $currentBounds['week_str'];
+
+        // 1. Chercher un événement explicitement marqué actif
         $stmt = $this->db->prepare("
             SELECT * FROM weekly_events 
             WHERE is_active = 1 
@@ -245,7 +351,28 @@ class WeeklyEventEngine {
         $stmt->execute();
         $event = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Priorité 2 : Si aucun actif forcé, chercher par fenêtre de dates
+        // 2. Contrôle de validité : si l'événement marqué actif est expiré ou ne correspond pas à la semaine actuelle
+        $needsResync = false;
+        if ($event) {
+            $endTs = strtotime($event['ends_at']);
+            $startTs = strtotime($event['starts_at']);
+            // Si l'événement est périmé dans le temps ou hors de sa semaine
+            if ($endTs < $nowTs || $startTs > $nowTs) {
+                $needsResync = true;
+            }
+        } else {
+            $needsResync = true;
+        }
+
+        // 3. Auto-synchronisation sur la Chronique de la Semaine Courante (Lundi au Dimanche)
+        if ($needsResync) {
+            $synced = $this->syncCurrentWeekEvent();
+            if ($synced) {
+                $event = $synced;
+            }
+        }
+
+        // 4. Si toujours non trouvé, chercher par fenêtre de dates du moment
         if (!$event) {
             $stmtDate = $this->db->prepare("
                 SELECT * FROM weekly_events 
@@ -257,9 +384,8 @@ class WeeklyEventEngine {
             $event = $stmtDate->fetch(PDO::FETCH_ASSOC);
         }
 
-        // Priorité 3 : Chercher par numéro de semaine de l'année (semaine_XX_...)
+        // 5. Chercher par numéro de semaine de l'année (semaine_XX_...)
         if (!$event) {
-            $curWeekStr = sprintf('%02d', (int)date('W'));
             $stmtWeek = $this->db->prepare("
                 SELECT * FROM weekly_events 
                 WHERE slug LIKE ? 
@@ -267,9 +393,16 @@ class WeeklyEventEngine {
             ");
             $stmtWeek->execute(["semaine_{$curWeekStr}_%"]);
             $event = $stmtWeek->fetch(PDO::FETCH_ASSOC);
+            if ($event) {
+                $this->db->prepare("UPDATE weekly_events SET is_active = 1, starts_at = ?, ends_at = ? WHERE id = ?")
+                         ->execute([$currentBounds['starts_at'], $currentBounds['ends_at'], $event['id']]);
+                $event['is_active'] = 1;
+                $event['starts_at'] = $currentBounds['starts_at'];
+                $event['ends_at']   = $currentBounds['ends_at'];
+            }
         }
 
-        // Priorité 4 : Fallback sur le tout premier événement existant
+        // 6. Fallback de sécurité
         if (!$event) {
             $stmtAny = $this->db->query("SELECT * FROM weekly_events ORDER BY id ASC LIMIT 1");
             $event = $stmtAny ? $stmtAny->fetch(PDO::FETCH_ASSOC) : null;
@@ -280,6 +413,19 @@ class WeeklyEventEngine {
         }
 
         $eventId = (int)$event['id'];
+
+        // Enrichissement des métadonnées temporelles (Numéro de semaine & Période Lundi -> Dimanche)
+        $evWeek = $curWeek;
+        if (preg_match('/semaine_(\d+)_/i', $event['slug'] ?? '', $m)) {
+            $evWeek = (int)$m[1];
+        }
+        $evBounds = self::getWeekBoundaries(strtotime($event['starts_at']), $evWeek);
+        $event['week_number']         = $evBounds['week_number'];
+        $event['week_label']          = $evBounds['week_label'];
+        $event['period_label']        = $evBounds['period_label'];
+        $event['period_text']         = $evBounds['period_text'];
+        $event['starts_at_formatted'] = $evBounds['starts_at_formatted'];
+        $event['ends_at_formatted']   = $evBounds['ends_at_formatted'];
 
         // Récupérer les tâches de l'événement
         $stmtTasks = $this->db->prepare("
@@ -293,7 +439,7 @@ class WeeklyEventEngine {
         $event['tasks'] = $tasks;
         $event['total_tasks'] = count($tasks);
 
-        // Calcul du temps restant (en secondes)
+        // Calcul du temps restant (en secondes jusqu'au dimanche 23h59)
         $endTs = strtotime($event['ends_at']);
         $event['seconds_remaining'] = max(0, $endTs - time());
 

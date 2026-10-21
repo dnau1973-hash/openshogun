@@ -46,8 +46,13 @@ if (!empty($pStatus['all_completed']) && empty($pStatus['final_claimed'])) {
                 <div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <span class="badge bg-warning-lt text-warning fw-bold font-monospace" style="font-size: 0.68rem; letter-spacing: 0.5px;">
-                            CHRONIQUE HEBDOMADAIRE DU SENGOKU
+                            CHRONIQUE HEBDOMADAIRE • <?= htmlspecialchars($activeEvent['week_label'] ?? ('Semaine ' . date('W'))) ?>
                         </span>
+                        <?php if (!empty($activeEvent['period_text'])): ?>
+                            <span class="badge bg-dark text-warning border border-warning-subtle font-monospace" style="font-size: 0.68rem;">
+                                <i class="fa-regular fa-calendar-days me-1"></i><?= htmlspecialchars($activeEvent['period_text']) ?>
+                            </span>
+                        <?php endif; ?>
                         <span class="text-secondary font-monospace small">
                             <i class="fa-solid fa-hourglass-start me-0.5"></i><?= htmlspecialchars($activeEvent['era_year']) ?>
                         </span>

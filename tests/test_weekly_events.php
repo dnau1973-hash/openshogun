@@ -272,6 +272,34 @@ assert($deleteRes === true, "Échec de suppression de l'événement 2.");
 assert($engine->getEventDetails($event2Id) === null, "L'événement supprimé ne devrait plus exister.");
 echo "[PASS] Suppression d'événement via l'administration vérifiée.\n";
 
+// 11. Tester le calcul du calendrier Lundi - Dimanche et la synchronisation de semaine
+$currentBoundaries = $engine->getWeekBoundaries();
+assert($currentBoundaries['week_number'] === (int)date('W'), "Le numéro de semaine calculé doit correspondre à la semaine ISO courante.");
+assert(date('N', $currentBoundaries['starts_timestamp']) === '1', "Le début de semaine doit être un Lundi.");
+assert(date('N', $currentBoundaries['ends_timestamp']) === '7', "La fin de semaine doit être un Dimanche.");
+assert(strpos($currentBoundaries['starts_at'], '00:00:00') !== false, "Le début doit être à 00:00:00.");
+assert(strpos($currentBoundaries['ends_at'], '23:59:59') !== false, "La fin doit être à 23:59:59.");
+echo "[PASS] Calcul rigoureux des bornes hebdomadaires (Lundi 00:00:00 -> Dimanche 23:59:59).\n";
+
+$curW = date('W');
+$curYear = date('o');
+$weekEventId = $engine->saveEvent([
+    'slug' => "semaine_{$curW}_gokaido_test",
+    'title' => "Test Chronique Semaine {$curW}",
+    'era_year' => '1604',
+    'description' => 'Chronique de la semaine en cours',
+    'starts_at' => '2000-01-01 00:00:00', // volontairement décalé pour tester l'ajustement
+    'ends_at' => '2000-01-07 23:59:59',
+    'is_active' => 0
+]);
+$synced = $engine->syncCurrentWeekEvent();
+assert($synced !== null, "syncCurrentWeekEvent doit trouver et synchroniser l'événement de la semaine {$curW}.");
+assert((int)$synced['id'] === (int)$weekEventId, "L'événement synchronisé doit être celui de la semaine en cours.");
+assert((int)$synced['is_active'] === 1, "L'événement de la semaine en cours doit être activé.");
+assert($synced['starts_at'] === $currentBoundaries['starts_at'], "La date de début doit être recalibrée sur le Lundi.");
+assert($synced['ends_at'] === $currentBoundaries['ends_at'], "La date de fin doit être recalibrée sur le Dimanche.");
+echo "[PASS] Auto-synchronisation de la chronique active sur la semaine ISO en cours vérifiée.\n";
+
 echo "\n====================================================================\n";
 echo " TOUS LES TESTS DES CHRONIQUES FÉODALES SONT PASSÉS AVEC SUCCÈS (100%)\n";
 echo "====================================================================\n";
