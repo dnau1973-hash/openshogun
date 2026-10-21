@@ -887,19 +887,6 @@ function initDepthParallax() {
         });
     });
 
-    // Support du carrousel Bootstrap : réinitialiser lors du slide
-    document.addEventListener('slid.bs.carousel', e => {
-        if (!e.target) return;
-        const activeItem = e.target.querySelector('.carousel-item.active .depth-parallax-scene');
-        if (activeItem) {
-            bindScene(activeItem);
-            const img = activeItem.querySelector('.depth-parallax-img');
-            if (img) {
-                img.style.transform = '';
-            }
-        }
-    });
-
     // Support optionnel du Gyroscope mobile (inclinaison du smartphone)
     if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission !== 'function') {
         window.addEventListener('deviceorientation', e => {
@@ -910,7 +897,7 @@ function initDepthParallax() {
             const normX = Math.max(-0.5, Math.min(0.5, gamma / 60));
             const normY = Math.max(-0.5, Math.min(0.5, (beta - 45) / 60));
 
-            const visibleScenes = document.querySelectorAll('.modal.show .depth-parallax-scene, .carousel-item.active .depth-parallax-scene');
+            const visibleScenes = document.querySelectorAll('.modal.show .depth-parallax-scene');
             visibleScenes.forEach(scene => {
                 const img = scene.querySelector('.depth-parallax-img');
                 if (img && !scene.classList.contains('is-interacting')) {

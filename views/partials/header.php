@@ -987,18 +987,18 @@ $navItems = [
                 <div class="carousel-inner h-100 w-100">
                     <?php foreach ($carouselSlides as $idx => $slide): ?>
                         <div class="carousel-item h-100 w-100 <?= $idx === 0 ? 'active' : '' ?>">
-                            <a href="?page=city" class="d-block w-100 h-100 position-relative text-decoration-none depth-parallax-scene" title="<?= htmlspecialchars($slide['name']) ?> - Visiter la Cité Castrale">
+                            <a href="?page=city" class="d-block w-100 h-100 position-relative text-decoration-none" title="<?= htmlspecialchars($slide['name']) ?> - Visiter la Cité Castrale">
                                 <img src="<?= htmlspecialchars($slide['url']) ?>" 
-                                     class="d-block w-100 h-100 depth-parallax-img" 
+                                     class="d-block w-100 h-100" 
                                      alt="<?= htmlspecialchars($slide['name']) ?>"
                                      style="object-fit: cover; object-position: <?= htmlspecialchars($slide['position'] ?? 'center center') ?>; filter: brightness(0.92);">
                                 
                                 <!-- Voile dégradé cinéma -->
-                                <div class="position-absolute top-0 start-0 w-100 h-100 depth-parallax-overlay" 
+                                <div class="position-absolute top-0 start-0 w-100 h-100" 
                                      style="background: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.35) 40%, rgba(15,23,42,0.85) 100%);"></div>
 
                                 <!-- Légende supérieure : Tag du Domaine -->
-                                <div class="position-absolute top-0 start-0 p-3 d-flex align-items-center gap-2 depth-parallax-foreground">
+                                <div class="position-absolute top-0 start-0 p-3 d-flex align-items-center gap-2">
                                     <span class="badge bg-dark bg-opacity-75 text-warning font-monospace border border-secondary shadow-sm" style="backdrop-filter: blur(4px); font-size: 0.72rem;">
                                         <i class="fa-solid fa-torii-gate me-1"></i><?= defined('GAME_NAME') ? GAME_NAME : 'La Voie du Shogun' ?>
                                     </span>
@@ -1008,14 +1008,14 @@ $navItems = [
                                 </div>
 
                                 <!-- Bouton raccourci Cité en haut à droite -->
-                                <div class="position-absolute top-0 end-0 p-3 depth-parallax-foreground">
+                                <div class="position-absolute top-0 end-0 p-3">
                                     <span class="badge bg-danger bg-opacity-90 text-white font-monospace shadow-sm" style="backdrop-filter: blur(4px); font-size: 0.72rem;">
                                         <i class="fa-solid fa-city me-1"></i>Cité Castrale
                                     </span>
                                 </div>
 
                                 <!-- Légende inférieure : Titre et description du bâtiment -->
-                                <div class="position-absolute bottom-0 start-0 end-0 px-3 px-lg-4 pb-3 text-start text-white depth-parallax-foreground">
+                                <div class="position-absolute bottom-0 start-0 end-0 px-3 px-lg-4 pb-3 text-start text-white">
                                     <h3 class="mb-1 fw-bold d-flex align-items-center gap-2 text-white" style="font-size: 1.15rem; text-shadow: 0 2px 6px rgba(0,0,0,0.9);">
                                         <i class="<?= htmlspecialchars($slide['icon']) ?>"></i>
                                         <span><?= htmlspecialchars($slide['name']) ?></span>

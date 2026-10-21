@@ -22,15 +22,13 @@ assert(strpos($js, 'initDepthParallax') !== false, "La fonction initDepthParalla
 assert(strpos($js, 'initDepthParallax();') !== false, "initDepthParallax() doit être appelée au DOMContentLoaded");
 assert(strpos($js, 'requestAnimationFrame') !== false, "La boucle de rendu doit utiliser requestAnimationFrame pour du 60/120fps");
 assert(strpos($js, 'shown.bs.modal') !== false, "Les événements des modales Bootstrap doivent être interceptés");
-assert(strpos($js, 'slid.bs.carousel') !== false, "Les transitions du carrousel Bootstrap doivent être gérées");
 echo "✅ [2/5] Moteur interactif JS (lerp, souris, tactile, gyroscope) validé dans app.js !\n";
 
-// 3. Vérification Carrousel en haut de page (views/partials/header.php)
+// 3. Vérification Carrousel en haut de page (views/partials/header.php) - Effet retiré conformément à la demande
 $header = file_get_contents(__DIR__ . '/../views/partials/header.php');
-assert(strpos($header, 'depth-parallax-scene') !== false, "Le carrousel d'en-tête doit comporter la classe .depth-parallax-scene");
-assert(strpos($header, 'depth-parallax-img') !== false, "Les images du carrousel doivent comporter .depth-parallax-img");
-assert(strpos($header, 'depth-parallax-foreground') !== false, "Les textes et badges doivent comporter .depth-parallax-foreground");
-echo "✅ [3/5] Carrousel principal (#headerBuildingsCarousel) équipé en immersion 2.5D !\n";
+assert(strpos($header, 'headerBuildingsCarousel') !== false, "Le carrousel d'en-tête doit exister");
+assert(strpos($header, 'class="d-block w-100 h-100 position-relative text-decoration-none depth-parallax-scene"') === false, "L'effet parallaxe ne doit pas être appliqué au carrousel");
+echo "✅ [3/5] Carrousel principal (#headerBuildingsCarousel) affiché de manière classique (effet retiré) !\n";
 
 // 4. Vérification Modale Castrale de Bâtiment (views/city.php)
 $city = file_get_contents(__DIR__ . '/../views/city.php');
@@ -52,3 +50,4 @@ echo "✅ [5/5] Modales Terroir (#plotUpgradeModal), Garnison (#modalGarrisonUni
 echo "\n=======================================================\n";
 echo ">>> TOUS LES TESTS DU PARALLAXE DE PROFONDEUR SONT 100% OK ! <<<\n";
 echo "=======================================================\n";
+

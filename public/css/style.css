@@ -3205,13 +3205,6 @@
     transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.carousel-item .depth-parallax-img {
-    position: absolute !important;
-    top: -5% !important;
-    left: -5% !important;
-    margin: 0 !important;
-}
-
 @keyframes cinematicBreathing {
     0% {
         transform: scale(1.04) translate3d(0, 0, 0);
