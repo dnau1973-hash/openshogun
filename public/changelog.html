@@ -111,7 +111,7 @@
                             <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
                                 <div class="p-3 bg-light rounded border d-inline-block text-start">
                                     <div class="small text-secondary fw-semibold">Version Active Actuelle</div>
-                                    <div class="h2 text-indigo font-monospace m-0">v1.35.0</div>
+                                    <div class="h2 text-indigo font-monospace m-0">v1.36.0</div>
                                     <div class="small text-success fw-bold mt-1">✔ Système stable &amp; synchronisé</div>
                                 </div>
                             </div>
@@ -123,14 +123,115 @@
                 <div class="space-y-4">
 
                     <!-- ═════════════════════════════════════════════════════════ -->
+                    <!-- VERSION 1.36.0 -->
+                    <!-- ═════════════════════════════════════════════════════════ -->
+                    <div class="timeline-version mb-4">
+                        <div class="timeline-badge-dot" style="background: #10b981; box-shadow: 0 0 0 2px #10b981;"></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="h3 m-0 text-dark fw-bold font-monospace">v1.36.0</span>
+                                <span class="badge bg-success-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-teal-lt fw-bold">🌧️ Météo &amp; Saisons Dynamiques</span>
+                                <span class="badge bg-indigo-lt fw-bold">👥 Console Gestion des Joueurs</span>
+                                <span class="badge bg-azure-lt fw-bold">🗺️ Navigation Carte Fluide &amp; Inertie</span>
+                            </div>
+                            <div class="text-secondary small">
+                                📅 21 Octobre 2026
+                            </div>
+                        </div>
+
+                        <div class="card bg-white border shadow-sm">
+                            <div class="card-body p-4">
+                                <h3 class="card-title text-dark fw-bold mb-3 d-flex align-items-center gap-2">
+                                    <span>🌸</span> Ambiance Météorologique &amp; Saisons Dynamiques, Console Shogunale des Joueurs &amp; Navigation Continue sur la Carte
+                                </h3>
+                                <p class="text-secondary mb-3" style="font-size: 0.95rem; line-height: 1.6;">
+                                    Mise à jour majeure introduisant l'immersion saisonnière et jour/nuit complète sur les panoramas du Terroir et de la Cité, une console d'administration et d'inspection 360° des Daimyōs dans le Game Studio, ainsi qu'une refonte intégrale de la caméra cartographique avec inertie cinétique et zéro rebond.
+                                </p>
+
+                                <div class="row g-3">
+                                    <!-- Bloc 1 : Météo & Saisons -->
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded bg-light h-100">
+                                            <h4 class="h5 fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                                <span>⛅</span> Météo &amp; Saisons Dynamiques (Dorf 1 &amp; 2)
+                                            </h4>
+                                            <ul class="text-secondary small ps-3 mb-0" style="line-height: 1.6;">
+                                                <li><strong>Détection Calendaire Automatique</strong> : Printemps (Mars-Mai), Été (Juin-Août), Automne (Sept-Nov), Hiver (Déc-Fév).</li>
+                                                <li><strong>Cycle Diurne / Nocturne</strong> : Basculement automatique jour (07h-20h) et nuit féodale (20h-07h).</li>
+                                                <li><strong>10 Panoramas HD 16:9 Dédies</strong> :
+                                                    <ul>
+                                                        <li>Plein Soleil éclatant (Printemps &amp; Été)</li>
+                                                        <li>Nuit Féodale sous les étoiles</li>
+                                                        <li>Pluie battante &amp; Averse de jour (Automne)</li>
+                                                        <li>Orage tempétueux nocturne</li>
+                                                        <li>Manteau neigeux diurne &amp; Féerie sous la neige de nuit</li>
+                                                    </ul>
+                                                </li>
+                                                <li><strong>Intégration directe</strong> dans <code>views/resources.php</code> et <code>views/city.php</code> avec cache-busting dynamique.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bloc 2 : Console Joueurs Game Studio -->
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded bg-light h-100">
+                                            <h4 class="h5 fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                                <span>👥</span> Console Shogunale des Joueurs
+                                            </h4>
+                                            <ul class="text-secondary small ps-3 mb-0" style="line-height: 1.6;">
+                                                <li><strong>Sous-onglet dédié Game Studio</strong> (<code>subtab=users</code>) avec badge de comptage dynamique.</li>
+                                                <li><strong>Bandeau KPIs Temps Réel</strong> : population par clan (Oda, Takeda, Tokugawa), actifs en direct (&lt;15 min), immunités et sanctions.</li>
+                                                <li><strong>Recherche Multicritère</strong> : par pseudo, email, nom de fief ou coordonnées géographiques <code>[X:Y]</code>.</li>
+                                                <li><strong>Fiche Daimyō 360° Modale</strong> :
+                                                    <ul>
+                                                        <li>Audit complet des fiefs et réserves (Riz, Bois, Fer)</li>
+                                                        <li>Téléportation de fief vers des coordonnées libres</li>
+                                                        <li>Dons express de Koban avec missive automatique</li>
+                                                        <li>Inspection, soins (100% PV) et résurrection du Héros</li>
+                                                        <li>Réinitialisation de mot de passe &amp; gestion des rôles</li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bloc 3 : Navigation Carte Fluide -->
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded bg-light h-100">
+                                            <h4 class="h5 fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                                <span>🗺️</span> Déplacement Fluide &amp; Inertie
+                                            </h4>
+                                            <ul class="text-secondary small ps-3 mb-0" style="line-height: 1.6;">
+                                                <li><strong>Zéro Rebond (Suppression du Snap-Back)</strong> : la carte reste exactement là où elle est glissée sans retour élastique.</li>
+                                                <li><strong>Inertie Cinétique (Momentum)</strong> : décélération progressive réaliste lors des impulsions rapides de glissement.</li>
+                                                <li><strong>Anneaux Tampons (Overscan = +2 tuiles)</strong> : aucune bordure vide ni fond noir lors des mouvements.</li>
+                                                <li><strong>Contrôles Ergonomiques Multiples</strong> :
+                                                    <ul>
+                                                        <li>Glissement tactile / souris avec curseurs grab/grabbing</li>
+                                                        <li>Navigation molette fluide</li>
+                                                        <li>Touches clavier (Flèches, ZQSD et WASD)</li>
+                                                        <li>Mini-pad directionnel HUD (▲, ▼, ◀, ▶)</li>
+                                                    </ul>
+                                                </li>
+                                                <li><strong>8 Nouvelles Tuiles HD</strong> harmonisées pour les plaines, forêts, montagnes, collines, lacs et dojo.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═════════════════════════════════════════════════════════ -->
                     <!-- VERSION 1.35.0 -->
                     <!-- ═════════════════════════════════════════════════════════ -->
                     <div class="timeline-version mb-4">
-                        <div class="timeline-badge-dot" style="background: #eab308; box-shadow: 0 0 0 2px #eab308;"></div>
+                        <div class="timeline-badge-dot" style="background: #64748b; box-shadow: 0 0 0 2px #64748b;"></div>
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="h3 m-0 text-dark fw-bold font-monospace">v1.35.0</span>
-                                <span class="badge bg-warning-lt fw-bold">Dernière version</span>
+                                <span class="badge bg-secondary-lt fw-bold">Version Stable</span>
                                 <span class="badge bg-purple-lt fw-bold">👑 Chronologie des Ères Mondiales</span>
                                 <span class="badge bg-amber-lt fw-bold">🏯 Guerre des 12 Châteaux</span>
                                 <span class="badge bg-danger-lt fw-bold">⛩️ Dōjō Impérial [0:0]</span>

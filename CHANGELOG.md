@@ -3,6 +3,31 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.36.0] - 2026-10-21
+### Ajouté & Amélioré (Added & Improved)
+- **Ambiance Météorologique & Saisons Dynamiques (`core/EnvironmentThemeEngine.php`, `views/resources.php`, `views/city.php`) :**
+  * **Détection Calendaire Automatique** : Printemps (Mars-Mai), Été (Juin-Août), Automne (Septembre-Novembre), Hiver (Décembre-Février).
+  * **Cycle Diurne / Nocturne** : Basculement automatique jour (07h00-19h59) et nuit féodale (20h00-06h59).
+  * **10 Panoramas HD 16:9 Dédiés** dans `public/assets/terroirs/` et `public/assets/cities/` : Plein Soleil éclatant, Nuit Féodale étoilée, Averse & Pluie battante de jour (Automne), Orage tempétueux nocturne, Manteau neigeux diurne et Nuit féerique sous la neige.
+  * **Prise en charge instantanée** avec cache-busting dynamique `?v=timestamp` dans les vues du Terroir (`views/resources.php`) et de la Cité (`views/city.php`).
+- **Console Shogunale de Gestion des Joueurs (`views/gamestudio/general_users.php`, `views/gamestudio/general.php`, `views/gamestudio.php`, `core/GameStudioEngine.php`, `api/admin.php`) :**
+  * **Sous-onglet dédié Game Studio** (`subtab=users`) avec badge de comptage dynamique des Daimyōs inscrits.
+  * **Bandeau KPIs Temps Réel** : population par faction (Oda, Takeda, Tokugawa), actifs en direct (<15 min), sous immunité débutant, sous Sceau Impérial, et comptes sanctionnés.
+  * **Recherche Multicritère Instantanée** : filtrage par pseudo, courriel, nom de fief ou coordonnées géographiques `[X:Y]`.
+  * **Fiche Daimyō 360° en Modale Interactive** : audit complet des fiefs et réserves (Riz, Bois, Fer), téléportation de fief vers des coordonnées libres, don express de Koban avec missive automatique, inspection/soins/résurrection du Héros Champion, réarmement de mot de passe avec code provisoire sécurisé et gestion des rôles Administrateur / Modérateur.
+- **Refonte Totale du Moteur de Navigation sur la Carte Féodale (`public/js/galaxy_map.js`, `public/css/style.css`, `views/map.php`) :**
+  * **Zéro Rebond (Élimination du Snap-Back)** : caméra continue au sous-pixel près, la carte s'arrête exactement là où elle est lâchée sans retour élastique.
+  * **Inertie Cinétique (Momentum Scrolling)** : glisse organique et décélération progressive réaliste lors d'une impulsion rapide.
+  * **Anneaux de Tuiles Tampons (Overscan = +2 tuiles)** : suppression totale des bordures vides et des bandes noires lors des déplacements.
+  * **Contrôles Ergonomiques Multiples** : glissement tactile/souris avec curseurs `grab`/`grabbing`, navigation molette fluide, clavier complet (Flèches directionnelles, ZQSD, WASD) et mini-pad directionnel HUD (`▲`, `▼`, `◀`, `▶`).
+  * **8 Nouvelles Tuiles HD Harmoniques** pour les plaines, forêts, montagnes, collines, lacs, fiefs, donjons authentiques et le dojo impérial.
+
+## [1.35.0] - 2026-10-21
+### Ajouté (Added)
+- **Système de Déroulement du Monde Féodal, Guerre des 12 Châteaux & Chantier Endgame du Dōjō Impérial (`core/GameStudioEngine.php`, `views/gamestudio/world_timeline.php`) :**
+  * **Frise Chronologique Interactive des 5 Ères Féodales** : Ère I (Aube des Clans), Ère II (Expansion Territoriale), Ère III (Guerre des 12 Châteaux), Ère IV (Dōjō Impérial), Ère V (Unification Impériale).
+  * **Consoles de Lancement 1-Clic Maître du Jeu & Télémétrie en Direct** : radars des forteresses historiques, surveillance du palier 1-10 du Dōjō Impérial [0:0], diffusion LiveOps des décrets et sauvegardes d'univers préservant les comptes joueurs.
+
 ## [1.34.10] - 2026-10-17
 ### Modifié & Supprimé (Changed & Removed)
 - **Persistance 100% Base de Données SQL pour le Studio Narrative Designer & Scénarios de Jeu (`core/ScenarioEngine.php`) :**
