@@ -239,6 +239,25 @@ assertTest("Re-bannissement réussi", $resReban['success'] === true && $resReban
 $activeInDb2 = (int)$sqlite->query("SELECT is_active FROM users WHERE id = 3")->fetchColumn();
 assertTest("is_active en base est repassé à 0", $activeInDb2 === 0);
 
+// TEST 8 : Rendu MVC de la vue general.php avec subtab=users
+echo "\nTest 8 : Rendu MVC views/gamestudio/general.php avec subtab=users\n";
+$_GET['page'] = 'gamestudio';
+$_GET['tab'] = 'general';
+$_GET['subtab'] = 'users';
+
+$usersManagementData = $engine->getGeneralUsersData();
+extract($usersManagementData);
+
+ob_start();
+include __DIR__ . '/../views/gamestudio/general.php';
+$html = ob_get_clean();
+
+assertTest("Le sous-onglet Gestion des Joueurs est généré", strpos($html, 'Registre Impérial des Daimyōs Joueurs') !== false);
+assertTest("Nobunaga est présent dans le rendu HTML", strpos($html, 'Nobunaga') !== false);
+assertTest("Shingen est présent dans le rendu HTML", strpos($html, 'Shingen') !== false);
+assertTest("Ieyasu est présent dans le rendu HTML", strpos($html, 'Ieyasu') !== false);
+assertTest("Le bot AI Raider est exclu du tableau", strpos($html, 'Bot_Raider') === false);
+
 echo "\n=================================================================\n";
 echo " RÉSULTATS : {$testsPassed} / {$totalTests} tests réussis.\n";
 echo "=================================================================\n";

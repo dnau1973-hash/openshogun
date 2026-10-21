@@ -4,6 +4,13 @@
  * Fichier : views/gamestudio/general_users.php
  */
 
+if (!isset($usersList)) {
+    require_once __DIR__ . '/../../core/GameStudioEngine.php';
+    $gEngine = new GameStudioEngine();
+    $usersData = $gEngine->getGeneralUsersData($_GET);
+    extract($usersData);
+}
+
 $kpis = $usersKpis ?? [
     'total_users'        => 0,
     'active_15m'         => 0,

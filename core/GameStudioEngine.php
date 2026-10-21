@@ -1608,9 +1608,28 @@ class GameStudioEngine {
     }
 
     /**
+     * Garantit la présence de la colonne is_active dans la table users
+     */
+    private function ensureUsersIsActiveColumn(): void {
+        try {
+            $cols = $this->db->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+            if (!in_array('is_active', $cols, true)) {
+                $this->db->exec("ALTER TABLE users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 AFTER password_hash");
+            }
+        } catch (Throwable $e) {
+            // Fallback SQLite
+            try {
+                $this->db->exec("ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1");
+            } catch (Throwable $e2) {}
+        }
+    }
+
+    /**
      * Récupère l'ensemble des données, métriques et liste filtrée pour le module Gestion des Joueurs (subtab=users)
      */
     public function getGeneralUsersData(array $filters = []): array {
+        $this->ensureUsersIsActiveColumn();
+
         $nowStr = date('Y-m-d H:i:s');
         $time15mAgo = date('Y-m-d H:i:s', time() - 900);
         $time24hAgo = date('Y-m-d H:i:s', time() - 86400);
@@ -1625,27 +1644,27 @@ class GameStudioEngine {
         $factionCounts = ['terran' => 0, 'vorash' => 0, 'aethelis' => 0];
 
         try {
-            $totalUsers = (int)$this->db->query("SELECT COUNT(*) FROM users WHERE is_bot = 0")->fetchColumn();
+            $totalUsers = (int)$this->db->query("SELECT COUNT(*) FROM users WHERE is_bot = 0 OR is_bot IS NULL")->fetchColumn();
 
-            $stmtAct15 = $this->db->prepare("SELECT COUNT(*) FROM users WHERE is_bot = 0 AND last_active >= ?");
+            $stmtAct15 = $this->db->prepare("SELECT COUNT(*) FROM users WHERE (is_bot = 0 OR is_bot IS NULL) AND last_active >= ?");
             $stmtAct15->execute([$time15mAgo]);
             $active15m = (int)$stmtAct15->fetchColumn();
 
-            $stmtAct24 = $this->db->prepare("SELECT COUNT(*) FROM users WHERE is_bot = 0 AND last_active >= ?");
+            $stmtAct24 = $this->db->prepare("SELECT COUNT(*) FROM users WHERE (is_bot = 0 OR is_bot IS NULL) AND last_active >= ?");
             $stmtAct24->execute([$time24hAgo]);
             $active24h = (int)$stmtAct24->fetchColumn();
 
-            $stmtProt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE is_bot = 0 AND protection_until IS NOT NULL AND protection_until > ?");
+            $stmtProt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE (is_bot = 0 OR is_bot IS NULL) AND protection_until IS NOT NULL AND protection_until > ?");
             $stmtProt->execute([$nowStr]);
             $protectedCount = (int)$stmtProt->fetchColumn();
 
-            $stmtSeal = $this->db->prepare("SELECT COUNT(*) FROM users WHERE is_bot = 0 AND imperial_seal_until IS NOT NULL AND imperial_seal_until > ?");
+            $stmtSeal = $this->db->prepare("SELECT COUNT(*) FROM users WHERE (is_bot = 0 OR is_bot IS NULL) AND imperial_seal_until IS NOT NULL AND imperial_seal_until > ?");
             $stmtSeal->execute([$nowStr]);
             $sealCount = (int)$stmtSeal->fetchColumn();
 
-            $bannedCount = (int)$this->db->query("SELECT COUNT(*) FROM users WHERE is_bot = 0 AND is_active = 0")->fetchColumn();
+            $bannedCount = (int)$this->db->query("SELECT COUNT(*) FROM users WHERE (is_bot = 0 OR is_bot IS NULL) AND is_active = 0")->fetchColumn();
 
-            $fcRows = $this->db->query("SELECT faction, COUNT(*) as c FROM users WHERE is_bot = 0 GROUP BY faction")->fetchAll(PDO::FETCH_KEY_PAIR);
+            $fcRows = $this->db->query("SELECT faction, COUNT(*) as c FROM users WHERE (is_bot = 0 OR is_bot IS NULL) GROUP BY faction")->fetchAll(PDO::FETCH_KEY_PAIR);
             foreach ($fcRows as $fac => $cnt) {
                 if (isset($factionCounts[$fac])) {
                     $factionCounts[$fac] = (int)$cnt;
@@ -1661,7 +1680,7 @@ class GameStudioEngine {
         $page = max(1, (int)($filters['user_page'] ?? $filters['page'] ?? 1));
         $perPage = max(10, min(100, (int)($filters['per_page'] ?? 25)));
 
-        $where = ["u.is_bot = 0"];
+        $where = ["(u.is_bot = 0 OR u.is_bot IS NULL)"];
         $params = [];
 
         if ($search !== '') {
@@ -1791,6 +1810,7 @@ class GameStudioEngine {
      */
     public function getUserProfile(int $userId): ?array {
         if ($userId <= 0) return null;
+        $this->ensureUsersIsActiveColumn();
 
         $stmt = $this->db->prepare("
             SELECT u.id, u.username, u.email, u.faction, u.points, u.is_admin, u.is_moderator,
