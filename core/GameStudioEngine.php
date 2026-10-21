@@ -1606,6 +1606,405 @@ class GameStudioEngine {
             return false;
         }
     }
+
+    /**
+     * Récupère l'ensemble des données, métriques et liste filtrée pour le module Gestion des Joueurs (subtab=users)
+     */
+    public function getGeneralUsersData(array $filters = []): array {
+        $nowStr = date('Y-m-d H:i:s');
+        $time15mAgo = date('Y-m-d H:i:s', time() - 900);
+        $time24hAgo = date('Y-m-d H:i:s', time() - 86400);
+
+        // 1. KPIs globaux
+        $totalUsers = 0;
+        $active15m = 0;
+        $active24h = 0;
+        $protectedCount = 0;
+        $sealCount = 0;
+        $bannedCount = 0;
+        $factionCounts = ['terran' => 0, 'vorash' => 0, 'aethelis' => 0];
+
+        try {
+            $totalUsers = (int)$this->db->query("SELECT COUNT(*) FROM users WHERE is_bot = 0")->fetchColumn();
+
+            $stmtAct15 = $this->db->prepare("SELECT COUNT(*) FROM users WHERE is_bot = 0 AND last_active >= ?");
+            $stmtAct15->execute([$time15mAgo]);
+            $active15m = (int)$stmtAct15->fetchColumn();
+
+            $stmtAct24 = $this->db->prepare("SELECT COUNT(*) FROM users WHERE is_bot = 0 AND last_active >= ?");
+            $stmtAct24->execute([$time24hAgo]);
+            $active24h = (int)$stmtAct24->fetchColumn();
+
+            $stmtProt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE is_bot = 0 AND protection_until IS NOT NULL AND protection_until > ?");
+            $stmtProt->execute([$nowStr]);
+            $protectedCount = (int)$stmtProt->fetchColumn();
+
+            $stmtSeal = $this->db->prepare("SELECT COUNT(*) FROM users WHERE is_bot = 0 AND imperial_seal_until IS NOT NULL AND imperial_seal_until > ?");
+            $stmtSeal->execute([$nowStr]);
+            $sealCount = (int)$stmtSeal->fetchColumn();
+
+            $bannedCount = (int)$this->db->query("SELECT COUNT(*) FROM users WHERE is_bot = 0 AND is_active = 0")->fetchColumn();
+
+            $fcRows = $this->db->query("SELECT faction, COUNT(*) as c FROM users WHERE is_bot = 0 GROUP BY faction")->fetchAll(PDO::FETCH_KEY_PAIR);
+            foreach ($fcRows as $fac => $cnt) {
+                if (isset($factionCounts[$fac])) {
+                    $factionCounts[$fac] = (int)$cnt;
+                }
+            }
+        } catch (Throwable $e) {}
+
+        // 2. Traitement des filtres & pagination
+        $search = trim((string)($filters['search'] ?? ''));
+        $factionFilter = trim((string)($filters['faction'] ?? 'all'));
+        $statusFilter = trim((string)($filters['status'] ?? 'all'));
+        $sort = trim((string)($filters['sort'] ?? 'points_desc'));
+        $page = max(1, (int)($filters['user_page'] ?? $filters['page'] ?? 1));
+        $perPage = max(10, min(100, (int)($filters['per_page'] ?? 25)));
+
+        $where = ["u.is_bot = 0"];
+        $params = [];
+
+        if ($search !== '') {
+            // Détection recherche par coordonnées [x:y]
+            if (preg_match('/^\[?(-?\d+)\s*[:;,]\s*(-?\d+)\]?$/', $search, $mCoord)) {
+                $cx = (int)$mCoord[1];
+                $cy = (int)$mCoord[2];
+                $where[] = "u.id IN (SELECT user_id FROM planets WHERE coord_x = ? AND coord_y = ?)";
+                $params[] = $cx;
+                $params[] = $cy;
+            } else {
+                $where[] = "(u.username LIKE ? OR u.email LIKE ? OR u.id IN (SELECT user_id FROM planets WHERE name LIKE ?))";
+                $like = '%' . $search . '%';
+                $params[] = $like;
+                $params[] = $like;
+                $params[] = $like;
+            }
+        }
+
+        if (in_array($factionFilter, ['terran', 'vorash', 'aethelis'], true)) {
+            $where[] = "u.faction = ?";
+            $params[] = $factionFilter;
+        }
+
+        if ($statusFilter === 'online') {
+            $where[] = "u.last_active >= ?";
+            $params[] = $time15mAgo;
+        } elseif ($statusFilter === 'active24h') {
+            $where[] = "u.last_active >= ?";
+            $params[] = $time24hAgo;
+        } elseif ($statusFilter === 'protected') {
+            $where[] = "u.protection_until IS NOT NULL AND u.protection_until > ?";
+            $params[] = $nowStr;
+        } elseif ($statusFilter === 'seal') {
+            $where[] = "u.imperial_seal_until IS NOT NULL AND u.imperial_seal_until > ?";
+            $params[] = $nowStr;
+        } elseif ($statusFilter === 'banned') {
+            $where[] = "u.is_active = 0";
+        } elseif ($statusFilter === 'admin') {
+            $where[] = "u.is_admin = 1";
+        } elseif ($statusFilter === 'moderator') {
+            $where[] = "u.is_moderator = 1";
+        }
+
+        $whereClause = implode(' AND ', $where);
+
+        // Compte total filtré pour pagination
+        $countSql = "SELECT COUNT(*) FROM users u WHERE {$whereClause}";
+        $stmtCount = $this->db->prepare($countSql);
+        $stmtCount->execute($params);
+        $filteredTotal = (int)$stmtCount->fetchColumn();
+
+        $totalPages = max(1, (int)ceil($filteredTotal / $perPage));
+        if ($page > $totalPages) $page = $totalPages;
+        $offset = ($page - 1) * $perPage;
+
+        // Tri
+        $orderBy = match($sort) {
+            'points_asc'   => "u.points ASC, u.id ASC",
+            'id_desc'      => "u.id DESC",
+            'id_asc'       => "u.id ASC",
+            'active_desc'  => "u.last_active DESC, u.id DESC",
+            'koban_desc'   => "u.gold_coins DESC, u.id DESC",
+            'colonies_desc'=> "colony_count DESC, u.points DESC",
+            default        => "u.points DESC, u.id ASC"
+        };
+
+        // Requête principale
+        $sql = "
+            SELECT 
+                u.id, u.username, u.email, u.faction, u.points, u.is_admin, u.is_moderator,
+                u.is_active, u.created_at, u.last_active, u.protection_until,
+                u.gold_coins, u.imperial_seal_until,
+                (SELECT COUNT(*) FROM planets WHERE user_id = u.id) as colony_count,
+                (SELECT coord_x FROM planets WHERE user_id = u.id AND is_capital = 1 LIMIT 1) as capital_x,
+                (SELECT coord_y FROM planets WHERE user_id = u.id AND is_capital = 1 LIMIT 1) as capital_y,
+                (SELECT name FROM planets WHERE user_id = u.id AND is_capital = 1 LIMIT 1) as capital_name,
+                (SELECT name FROM heroes WHERE user_id = u.id LIMIT 1) as hero_name,
+                (SELECT level FROM heroes WHERE user_id = u.id LIMIT 1) as hero_level,
+                (SELECT health FROM heroes WHERE user_id = u.id LIMIT 1) as hero_health,
+                (SELECT status FROM heroes WHERE user_id = u.id LIMIT 1) as hero_status,
+                a.name as alliance_name, a.tag as alliance_tag
+            FROM users u
+            LEFT JOIN alliances a ON a.id = u.alliance_id
+            WHERE {$whereClause}
+            ORDER BY {$orderBy}
+            LIMIT " . (int)$perPage . " OFFSET " . (int)$offset;
+
+        $stmtList = $this->db->prepare($sql);
+        $stmtList->execute($params);
+        $usersList = $stmtList->fetchAll(PDO::FETCH_ASSOC);
+
+        // Enrichir chaque utilisateur
+        foreach ($usersList as &$usr) {
+            $usr['is_online'] = !empty($usr['last_active']) && (strtotime($usr['last_active']) >= (time() - 900));
+            $usr['protection'] = Auth::getProtectionRemaining($usr);
+            $usr['seal_active'] = !empty($usr['imperial_seal_until']) && (strtotime($usr['imperial_seal_until']) > time());
+        }
+        unset($usr);
+
+        return [
+            'usersKpis' => [
+                'total_users'        => $totalUsers,
+                'active_15m'         => $active15m,
+                'active_24h'         => $active24h,
+                'protected_users'    => $protectedCount,
+                'imperial_seal_users'=> $sealCount,
+                'banned_users'       => $bannedCount,
+                'faction_counts'     => $factionCounts,
+            ],
+            'usersList'       => $usersList,
+            'filteredTotal'   => $filteredTotal,
+            'currentPage'     => $page,
+            'totalPages'      => $totalPages,
+            'perPage'         => $perPage,
+            'activeFilters'   => [
+                'search'  => $search,
+                'faction' => $factionFilter,
+                'status'  => $statusFilter,
+                'sort'    => $sort
+            ]
+        ];
+    }
+
+    /**
+     * Récupère le profil 360° d'un Daimyō pour la modale d'inspection
+     */
+    public function getUserProfile(int $userId): ?array {
+        if ($userId <= 0) return null;
+
+        $stmt = $this->db->prepare("
+            SELECT u.id, u.username, u.email, u.faction, u.points, u.is_admin, u.is_moderator,
+                   u.is_active, u.created_at, u.last_active, u.protection_until,
+                   u.gold_coins, u.imperial_seal_until, u.bio, u.avatar,
+                   a.name as alliance_name, a.tag as alliance_tag
+            FROM users u
+            LEFT JOIN alliances a ON a.id = u.alliance_id
+            WHERE u.id = ?
+        ");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$user) return null;
+
+        $user['is_online'] = !empty($user['last_active']) && (strtotime($user['last_active']) >= (time() - 900));
+        $user['protection'] = Auth::getProtectionRemaining($user);
+        $user['seal_active'] = !empty($user['imperial_seal_until']) && (strtotime($user['imperial_seal_until']) > time());
+
+        // Fiefs
+        $stmtPlanets = $this->db->prepare("
+            SELECT id, name, coord_x, coord_y, planet_type, is_capital,
+                   metal, crystal, deuterium, sake, fish, rice_flour, wooden_beams, charcoal, roof_tiles,
+                   metal_max, crystal_max, deuterium_max, population, created_at
+            FROM planets
+            WHERE user_id = ?
+            ORDER BY is_capital DESC, id ASC
+        ");
+        $stmtPlanets->execute([$userId]);
+        $planets = $stmtPlanets->fetchAll(PDO::FETCH_ASSOC);
+
+        // Héros
+        $stmtHero = $this->db->prepare("SELECT * FROM heroes WHERE user_id = ? LIMIT 1");
+        $stmtHero->execute([$userId]);
+        $hero = $stmtHero->fetch(PDO::FETCH_ASSOC);
+
+        return [
+            'user'        => $user,
+            'planets'     => $planets,
+            'hero'        => $hero ?: null,
+            'protection'  => $user['protection'],
+            'seal_active' => $user['seal_active'],
+            'is_online'   => $user['is_online']
+        ];
+    }
+
+    /**
+     * Crédite des ressources sur une planète/fief spécifique
+     */
+    public function giveResourcesToPlanet(int $planetId, float $metal, float $crystal, float $deuterium): array {
+        if ($planetId <= 0) {
+            return ['success' => false, 'error' => 'Fief cible invalide.'];
+        }
+        $metal = max(0, $metal);
+        $crystal = max(0, $crystal);
+        $deuterium = max(0, $deuterium);
+
+        if ($metal == 0 && $crystal == 0 && $deuterium == 0) {
+            return ['success' => false, 'error' => 'Veuillez renseigner au moins une ressource positive à octroyer.'];
+        }
+
+        $stmt = $this->db->prepare("SELECT id, user_id, name, metal, crystal, deuterium FROM planets WHERE id = ?");
+        $stmt->execute([$planetId]);
+        $planet = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$planet) {
+            return ['success' => false, 'error' => 'Fief introuvable.'];
+        }
+
+        $stmtUp = $this->db->prepare("
+            UPDATE planets 
+            SET metal = metal + ?, crystal = crystal + ?, deuterium = deuterium + ? 
+            WHERE id = ?
+        ");
+        $stmtUp->execute([$metal, $crystal, $deuterium, $planetId]);
+
+        // Envoyer une missive si le fief a un propriétaire
+        if (!empty($planet['user_id'])) {
+            try {
+                require_once __DIR__ . '/MessageEngine.php';
+                $msgEngine = new MessageEngine();
+                $msgEngine->sendSystemMessage(
+                    (int)$planet['user_id'],
+                    "🌾 Manne Impériale reçue sur {$planet['name']} !",
+                    "Noble Daimyō,\n\nUne caravane d'approvisionnement shogunal est arrivée dans votre fief **{$planet['name']}** avec des subsides exceptionnels :\n"
+                    . "• Riz (Métal) : +" . number_format($metal, 0, ',', ' ') . "\n"
+                    . "• Bois (Cristal) : +" . number_format($crystal, 0, ',', ' ') . "\n"
+                    . "• Fer (Deutérium) : +" . number_format($deuterium, 0, ',', ' ') . "\n\n"
+                    . "Ces provisions ont été intégrées directement à vos réserves provinciales."
+                );
+            } catch (Throwable $e) {}
+        }
+
+        return [
+            'success' => true,
+            'message' => "Ressources créditées avec succès sur {$planet['name']} ! (+".number_format($metal)." Riz, +".number_format($crystal)." Bois, +".number_format($deuterium)." Fer)",
+            'new_metal' => (float)$planet['metal'] + $metal,
+            'new_crystal' => (float)$planet['crystal'] + $crystal,
+            'new_deuterium' => (float)$planet['deuterium'] + $deuterium
+        ];
+    }
+
+    /**
+     * Téléporte un fief vers de nouvelles coordonnées libres
+     */
+    public function teleportColony(int $planetId, int $newX, int $newY): array {
+        if ($planetId <= 0) {
+            return ['success' => false, 'error' => 'Fief invalide.'];
+        }
+        $radius = GameConfig::getWorldRadius();
+        if (abs($newX) > $radius || abs($newY) > $radius) {
+            return ['success' => false, 'error' => "Les coordonnées [{$newX}:{$newY}] sont en dehors des frontières du monde (rayon maximal: {$radius})."];
+        }
+
+        $stmt = $this->db->prepare("SELECT id, user_id, name, coord_x, coord_y FROM planets WHERE id = ?");
+        $stmt->execute([$planetId]);
+        $planet = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$planet) {
+            return ['success' => false, 'error' => 'Fief introuvable.'];
+        }
+
+        if ((int)$planet['coord_x'] === $newX && (int)$planet['coord_y'] === $newY) {
+            return ['success' => false, 'error' => 'Le fief est déjà situé à ces coordonnées.'];
+        }
+
+        // Vérifier collision dans planets
+        $stmtCheck = $this->db->prepare("SELECT id, name FROM planets WHERE coord_x = ? AND coord_y = ? AND id != ?");
+        $stmtCheck->execute([$newX, $newY, $planetId]);
+        if ($stmtCheck->fetch()) {
+            return ['success' => false, 'error' => "L'emplacement [{$newX}:{$newY}] est déjà occupé par un autre fief ou village."];
+        }
+
+        // Vérifier collision dans authentic_castles
+        try {
+            $stmtC = $this->db->prepare("SELECT id, name FROM authentic_castles WHERE coord_x = ? AND coord_y = ? AND is_spawned = 1");
+            $stmtC->execute([$newX, $newY]);
+            if ($stmtC->fetch()) {
+                return ['success' => false, 'error' => "L'emplacement [{$newX}:{$newY}] est occupé par un Donjon Authentique du Japon."];
+            }
+        } catch (Throwable $e) {}
+
+        // Déplacer le fief
+        $stmtUp = $this->db->prepare("UPDATE planets SET coord_x = ?, coord_y = ? WHERE id = ?");
+        $stmtUp->execute([$newX, $newY, $planetId]);
+
+        return [
+            'success' => true,
+            'message' => "Le fief {$planet['name']} a été téléporté avec succès de [{$planet['coord_x']}:{$planet['coord_y']}] vers [{$newX}:{$newY}] !",
+            'coord_x' => $newX,
+            'coord_y' => $newY
+        ];
+    }
+
+    /**
+     * Réinitialise le mot de passe d'un utilisateur
+     */
+    public function resetUserPassword(int $userId, ?string $newPassword = null): array {
+        if ($userId <= 0) {
+            return ['success' => false, 'error' => 'Daimyō invalide.'];
+        }
+        $stmt = $this->db->prepare("SELECT id, username, email FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$user) {
+            return ['success' => false, 'error' => 'Daimyō introuvable.'];
+        }
+
+        $passwordToSet = !empty($newPassword) ? trim($newPassword) : ('Shogun_' . substr(bin2hex(random_bytes(4)), 0, 8));
+        if (strlen($passwordToSet) < 6) {
+            return ['success' => false, 'error' => 'Le mot de passe doit comporter au moins 6 caractères.'];
+        }
+
+        $hash = password_hash($passwordToSet, PASSWORD_DEFAULT);
+        $stmtUp = $this->db->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        $stmtUp->execute([$hash, $userId]);
+
+        return [
+            'success' => true,
+            'message' => "Le mot de passe de {$user['username']} a été réinitialisé avec succès !",
+            'temporary_password' => $passwordToSet,
+            'username' => $user['username']
+        ];
+    }
+
+    /**
+     * Active ou suspend (bannit) un compte Daimyō
+     */
+    public function toggleUserBan(int $userId, ?string $reason = null): array {
+        $currentUserId = (int)Auth::id();
+        if ($userId <= 0) {
+            return ['success' => false, 'error' => 'Daimyō invalide.'];
+        }
+        if ($userId === $currentUserId) {
+            return ['success' => false, 'error' => 'Vous ne pouvez pas suspendre votre propre compte Administrateur.'];
+        }
+
+        $stmt = $this->db->prepare("SELECT id, username, is_active FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$user) {
+            return ['success' => false, 'error' => 'Daimyō introuvable.'];
+        }
+
+        $newActive = ((int)$user['is_active'] === 1) ? 0 : 1;
+        $this->db->prepare("UPDATE users SET is_active = ? WHERE id = ?")->execute([$newActive, $userId]);
+
+        $statusLabel = ($newActive === 1) ? 'réactivé et réhabilité' : 'suspendu / banni';
+        $reasonText = !empty($reason) ? " (Motif : " . htmlspecialchars($reason) . ")" : "";
+
+        return [
+            'success' => true,
+            'is_active' => $newActive,
+            'message' => "Le compte du Daimyō {$user['username']} a été {$statusLabel}{$reasonText}."
+        ];
+    }
 }
+
 
 

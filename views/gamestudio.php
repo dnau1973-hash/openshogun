@@ -57,6 +57,10 @@ if (($_GET['tab'] ?? '') === 'backups') {
     header('Location: ?page=gamestudio&tab=general&subtab=backups');
     exit;
 }
+if (in_array($_GET['tab'] ?? '', ['users', 'players', 'daimyos'], true)) {
+    header('Location: ?page=gamestudio&tab=general&subtab=users');
+    exit;
+}
 if (in_array($_GET['tab'] ?? '', ['world', 'world_config', 'elevate_speed', 'elevate_survey', 'elevate_oases'], true)) {
     header('Location: ?page=gamestudio&tab=general&subtab=world_config');
     exit;
@@ -319,6 +323,9 @@ if ($currentTab === 'dashboard') {
     if ($currentSubTab === 'world_config') {
         $worldConfigData = $gameStudioEngine->getWorldConfigData();
         extract($worldConfigData);
+    } elseif ($currentSubTab === 'users') {
+        $usersManagementData = $gameStudioEngine->getGeneralUsersData($_GET);
+        extract($usersManagementData);
     }
 } elseif ($currentTab === 'elevate_research') {
     require_once __DIR__ . '/../core/ResearchElevateService.php';
@@ -921,6 +928,13 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div>
                                 <div>GitHub Sync &amp; Mises à Jour</div>
                                 <div class="small text-secondary">Déploiement continu, commits &amp; synchronisation</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'users') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=users">
+                            <i class="fa-solid fa-users text-warning"></i>
+                            <div>
+                                <div>Gestion des Joueurs &amp; Fiefs</div>
+                                <div class="small text-secondary">Daimyōs, inspection 360°, immunité &amp; outils GM</div>
                             </div>
                         </a>
                     </div>

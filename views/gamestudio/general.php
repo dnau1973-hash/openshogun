@@ -5,7 +5,7 @@
  */
 
 $currentPageSlug = $page ?? 'gamestudio';
-$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates'], true) ? $_GET['subtab'] : 'overview';
+$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates', 'users'], true) ? $_GET['subtab'] : 'overview';
 ?>
 
 <div class="gamestudio-general">
@@ -58,6 +58,14 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'b
                     <i class="fa-solid fa-arrows-rotate text-teal"></i>
                     <span>GitHub Sync &amp; Mises à Jour</span>
                     <span class="badge bg-teal-lt ms-1 font-monospace"><?= htmlspecialchars($gitInfo['short_sha'] ?? 'HEAD') ?></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="?page=gamestudio&tab=general&subtab=users" 
+                   class="nav-link py-2 px-3 d-flex align-items-center justify-content-center gap-2 <?= $currentSubTab === 'users' ? 'active fw-bold text-warning border-bottom-0' : 'text-secondary' ?>">
+                    <i class="fa-solid fa-users text-warning"></i>
+                    <span>Gestion des Joueurs</span>
+                    <span class="badge bg-warning-lt ms-1 font-monospace"><?= number_format((int)($totalUsers ?? 0), 0, ',', ' ') ?></span>
                 </a>
             </li>
         </ul>
@@ -781,5 +789,10 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'b
         <!-- SOUS-ONGLET 3 : GITHUB SYNC & MISES À JOUR                         -->
         <!-- ═══════════════════════════════════════════════════════════════════ -->
         <?php require __DIR__ . '/../partials/admin_updates.php'; ?>
+    <?php elseif ($currentSubTab === 'users'): ?>
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- SOUS-ONGLET 5 : GESTION DES JOUEURS & FIEFS                        -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <?php require __DIR__ . '/general_users.php'; ?>
     <?php endif; ?>
 </div>

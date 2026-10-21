@@ -26,7 +26,11 @@ $studioAllowedActions = [
     'backup_database', 'list_backups', 'restore_backup',
     'save_settings', 'spawn_spontaneous_village', 'run_bot_cycle',
     'generate_bots', 'delete_bot', 'get_bot_spawn_status', 'get_bots',
-    'check_github_updates', 'install_github_update', 'save_github_settings'
+    'check_github_updates', 'install_github_update', 'save_github_settings',
+    'get_user_profile', 'give_koban', 'extend_protection', 'revoke_protection',
+    'toggle_admin', 'toggle_moderator', 'toggle_ban', 'give_resources',
+    'teleport_colony', 'reset_user_password',
+    'admin_heal_hero', 'admin_revive_hero', 'admin_reset_hero_quota', 'admin_grant_relic'
 ];
 
 // 1. Vérification stricte des droits Administrateur ou Studio Habilité
@@ -293,6 +297,73 @@ try {
                 'message' => "+{$amount} Koban attribués avec succès à {$targetUser['username']} ! (Nouveau solde : " . number_format($newBalance) . " Koban)",
                 'new_balance' => $newBalance
             ]);
+            break;
+
+        // Obtenir le profil 360° d'un Daimyō pour la modale d'inspection
+        case 'get_user_profile':
+            $targetUserId = (int)($_GET['user_id'] ?? $_POST['user_id'] ?? 0);
+            if ($targetUserId <= 0) {
+                throw new Exception("Identifiant Daimyō invalide.");
+            }
+            $profile = $gameStudioEngine->getUserProfile($targetUserId);
+            if (!$profile) {
+                throw new Exception("Daimyō introuvable.");
+            }
+            echo json_encode([
+                'success' => true,
+                'profile' => $profile
+            ]);
+            break;
+
+        // Octroyer des ressources sur un fief
+        case 'give_resources':
+            $planetId = (int)($_POST['planet_id'] ?? 0);
+            $metal = (float)($_POST['metal'] ?? 0);
+            $crystal = (float)($_POST['crystal'] ?? 0);
+            $deuterium = (float)($_POST['deuterium'] ?? 0);
+
+            $res = $gameStudioEngine->giveResourcesToPlanet($planetId, $metal, $crystal, $deuterium);
+            if (!$res['success']) {
+                throw new Exception($res['error'] ?? "Échec de l'octroi des ressources.");
+            }
+            echo json_encode($res);
+            break;
+
+        // Téléporter un fief vers de nouvelles coordonnées
+        case 'teleport_colony':
+            $planetId = (int)($_POST['planet_id'] ?? 0);
+            $newX = (int)($_POST['coord_x'] ?? 0);
+            $newY = (int)($_POST['coord_y'] ?? 0);
+
+            $res = $gameStudioEngine->teleportColony($planetId, $newX, $newY);
+            if (!$res['success']) {
+                throw new Exception($res['error'] ?? "Échec de la téléportation.");
+            }
+            echo json_encode($res);
+            break;
+
+        // Réinitialiser le mot de passe d'un Daimyō
+        case 'reset_user_password':
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            $newPassword = !empty($_POST['new_password']) ? (string)$_POST['new_password'] : null;
+
+            $res = $gameStudioEngine->resetUserPassword($targetUserId, $newPassword);
+            if (!$res['success']) {
+                throw new Exception($res['error'] ?? "Échec de la réinitialisation du mot de passe.");
+            }
+            echo json_encode($res);
+            break;
+
+        // Suspendre ou réactiver un compte Daimyō
+        case 'toggle_ban':
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+            $reason = !empty($_POST['reason']) ? trim((string)$_POST['reason']) : null;
+
+            $res = $gameStudioEngine->toggleUserBan($targetUserId, $reason);
+            if (!$res['success']) {
+                throw new Exception($res['error'] ?? "Échec de la modification du statut du compte.");
+            }
+            echo json_encode($res);
             break;
 
         // Obtenir la liste actualisée des bots
