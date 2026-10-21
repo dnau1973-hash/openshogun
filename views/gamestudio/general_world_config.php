@@ -1152,65 +1152,83 @@ unset($_SESSION['general_flash']);
 
                                 <!-- Stepper 5 Ères avec Padding Généreux -->
                                 <div class="row g-3 g-xl-4">
-                                    <?php if (!empty($eras)): foreach ($eras as $eId => $era): 
-                                        $isCompleted = ($era['status'] === 'completed');
-                                        $isActive = ($era['status'] === 'active');
-                                        $isLocked = ($era['status'] === 'locked');
-                                        $borderClass = $isActive ? 'border-warning shadow' : ($isCompleted ? 'border-success' : 'border-secondary opacity-75');
-                                        $cardBg = $isActive ? 'bg-white' : ($isCompleted ? 'bg-white' : 'bg-light');
+                                    <?php if (!empty($eras)): 
+                                        $eraImages = [
+                                            1 => '/public/assets/ere/era_1_aube_des_clans.jpg',
+                                            2 => '/public/assets/ere/era_2_expansion_territoriale.jpg',
+                                            3 => '/public/assets/ere/era_3_guerre_12_chateaux.jpg',
+                                            4 => '/public/assets/ere/era_4_dojo_imperial.jpg',
+                                            5 => '/public/assets/ere/era_5_unification_shogunat.jpg'
+                                        ];
+                                        foreach ($eras as $eId => $era): 
+                                            $isCompleted = ($era['status'] === 'completed');
+                                            $isActive = ($era['status'] === 'active');
+                                            $isLocked = ($era['status'] === 'locked');
+                                            $borderClass = $isActive ? 'border-warning shadow' : ($isCompleted ? 'border-success' : 'border-secondary opacity-75');
+                                            $cardBg = $isActive ? 'bg-white' : ($isCompleted ? 'bg-white' : 'bg-light');
+                                            $eraImg = $eraImages[$eId] ?? '/public/assets/ere/era_1_aube_des_clans.jpg';
                                     ?>
                                         <div class="col-lg col-md-4 col-sm-6">
-                                            <div class="card h-100 <?= $borderClass ?> <?= $cardBg ?> p-3.5 p-xl-4 rounded-3 shadow-sm position-relative d-flex flex-column">
-                                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                                    <span class="badge <?= $era['badge'] ?> px-2.5 py-1.5 fs-6 fw-bold">
-                                                        <i class="fa-solid <?= $era['icon'] ?> me-1"></i>Ère <?= $eId ?>
-                                                    </span>
-                                                    <?php if ($isActive): ?>
-                                                        <span class="badge bg-warning text-dark fw-bold px-2 py-1 fs-6">
-                                                            <i class="fa-solid fa-play me-1"></i>En Cours
+                                            <div class="card h-100 <?= $borderClass ?> <?= $cardBg ?> overflow-hidden rounded-3 shadow-sm position-relative d-flex flex-column">
+                                                <!-- Illustration d'Ère Intégrée -->
+                                                <div style="position: relative; width: 100%; height: 110px; overflow: hidden; background: #0f172a; cursor: pointer;" onclick="previewEraProclamationModal(<?= $eId ?>)" title="Cliquer pour afficher la proclamation impériale">
+                                                    <img src="<?= $eraImg ?>" alt="<?= htmlspecialchars($era['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                                                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.25) 60%, transparent 100%);"></div>
+                                                    <div style="position: absolute; top: 8px; left: 8px;">
+                                                        <span class="badge <?= $era['badge'] ?> px-2 py-1 fs-6 fw-bold shadow-sm">
+                                                            <i class="fa-solid <?= $era['icon'] ?> me-1"></i>Ère <?= $eId ?>
                                                         </span>
-                                                    <?php elseif ($isCompleted): ?>
-                                                        <span class="badge bg-success-lt text-success fw-bold px-2 py-1 fs-6">
-                                                            <i class="fa-solid fa-check me-1"></i>Achevée
-                                                        </span>
-                                                    <?php else: ?>
-                                                        <span class="badge bg-secondary-lt text-muted px-2 py-1 fs-6">
-                                                            <i class="fa-solid fa-lock me-1"></i>À Venir
-                                                        </span>
-                                                    <?php endif; ?>
-                                                </div>
-
-                                                <h5 class="fw-bold mb-1 text-dark" style="font-size:1rem;">
-                                                    <?= htmlspecialchars($era['name']) ?>
-                                                </h5>
-                                                <div class="text-primary small fw-semibold mb-2" style="font-size:0.8rem;">
-                                                    <?= htmlspecialchars($era['subtitle']) ?>
-                                                </div>
-                                                <div class="text-muted small mb-3 flex-grow-1" style="font-size:0.8125rem; line-height:1.5;">
-                                                    <?= htmlspecialchars($era['description']) ?>
-                                                </div>
-
-                                                <div class="pt-3 border-top d-flex justify-content-between align-items-center mt-auto gap-1">
-                                                    <span class="badge bg-light text-secondary border font-monospace py-1.5 px-2" style="font-size:0.75rem;">
-                                                        <?= htmlspecialchars($era['trigger_label']) ?>
-                                                    </span>
-                                                    <div class="d-flex align-items-center gap-1">
-                                                        <button type="button" 
-                                                                class="btn btn-sm btn-outline-info py-1 px-2 fw-bold" 
-                                                                onclick="previewEraProclamationModal(<?= $eId ?>)" 
-                                                                title="Prévisualiser la modale de proclamation impériale">
-                                                            <i class="fa-solid fa-scroll me-1"></i>Décret
-                                                        </button>
-                                                        <?php if (!$isActive): ?>
-                                                            <button type="submit" 
-                                                                    formaction="?page=gamestudio&tab=general&subtab=world_config" 
-                                                                    name="action" value="set_world_era" 
-                                                                    onclick="document.getElementById('inputForcedEra').value = '<?= $eId ?>';"
-                                                                    class="btn btn-sm btn-outline-secondary py-1 px-2 fw-bold"
-                                                                    title="Forcer le passage à cette Ère">
-                                                                <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                                                            </button>
+                                                    </div>
+                                                    <div style="position: absolute; top: 8px; right: 8px;">
+                                                        <?php if ($isActive): ?>
+                                                            <span class="badge bg-warning text-dark fw-bold px-2 py-1 fs-6 shadow-sm">
+                                                                <i class="fa-solid fa-play me-1"></i>En Cours
+                                                            </span>
+                                                        <?php elseif ($isCompleted): ?>
+                                                            <span class="badge bg-success text-white fw-bold px-2 py-1 fs-6 shadow-sm">
+                                                                <i class="fa-solid fa-check me-1"></i>Achevée
+                                                            </span>
+                                                        <?php else: ?>
+                                                            <span class="badge bg-dark bg-opacity-75 text-light px-2 py-1 fs-6 shadow-sm">
+                                                                <i class="fa-solid fa-lock me-1"></i>À Venir
+                                                            </span>
                                                         <?php endif; ?>
+                                                    </div>
+                                                </div>
+
+                                                <div class="p-3 d-flex flex-column flex-grow-1">
+                                                    <h5 class="fw-bold mb-1 text-dark" style="font-size:0.95rem;">
+                                                        <?= htmlspecialchars($era['name']) ?>
+                                                    </h5>
+                                                    <div class="text-primary small fw-semibold mb-2" style="font-size:0.775rem;">
+                                                        <?= htmlspecialchars($era['subtitle']) ?>
+                                                    </div>
+                                                    <div class="text-muted small mb-3 flex-grow-1" style="font-size:0.8rem; line-height:1.45;">
+                                                        <?= htmlspecialchars($era['description']) ?>
+                                                    </div>
+
+                                                    <div class="pt-2.5 border-top d-flex justify-content-between align-items-center mt-auto gap-1">
+                                                        <span class="badge bg-light text-secondary border font-monospace py-1 px-1.5" style="font-size:0.7rem;">
+                                                            <?= htmlspecialchars($era['trigger_label']) ?>
+                                                        </span>
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <button type="button" 
+                                                                    class="btn btn-sm btn-outline-info py-1 px-2 fw-bold" 
+                                                                    onclick="previewEraProclamationModal(<?= $eId ?>)" 
+                                                                    title="Prévisualiser la modale de proclamation impériale">
+                                                                <i class="fa-solid fa-scroll me-1"></i>Décret
+                                                            </button>
+                                                            <?php if (!$isActive): ?>
+                                                                <button type="submit" 
+                                                                        formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                                                        name="action" value="set_world_era" 
+                                                                        onclick="document.getElementById('inputForcedEra').value = '<?= $eId ?>';"
+                                                                        class="btn btn-sm btn-outline-secondary py-1 px-2 fw-bold"
+                                                                        title="Forcer le passage à cette Ère">
+                                                                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                                                </button>
+                                                            <?php endif; ?>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1766,70 +1784,70 @@ unset($_SESSION['general_flash']);
     </div>
 
     <!-- ========================================================
-         MODALE OFFICIELLE : PROCLAMATION & DÉCRET IMPÉRIAL
-         (Modèle Haute Définition avec Illustration Supérieure Style Pêcheur / Mineur / Héros)
+         MODALE OFFICIELLE : PROCLAMATION & DÉCRET IMPÉRIAL (STUDIO)
+         (Modèle Grand Format Haute Définition avec Illustration Supérieure Style Pêcheur / Mineur / Héros)
          ======================================================== -->
     <div class="modal fade" id="modalImperialProclamationStudio" tabindex="-1" aria-labelledby="imperialStudioModalTitle" aria-hidden="true" style="z-index: 1070;">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 560px;">
-            <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 14px;">
-                <!-- Illustration d'en-tête (215px) avec overlay dégradé sombre (Style Pêcheur / Mineur / Héros) -->
-                <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
-                    <img id="imperialStudioModalImage" src="/public/assets/shogun_castle_city_bg.jpg" alt="Illustration Impériale" style="width: 100%; height: 100%; object-fit: cover; object-position: center 30%;">
-                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
-                    <div style="position: absolute; bottom: 14px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
-                        <div style="max-width: 75%;">
-                            <span id="imperialStudioModalBadge" class="badge bg-warning text-dark fw-bold px-2.5 py-1 mb-1.5 shadow-sm" style="font-size:0.75rem;">
-                                <i class="fa-solid fa-crown me-1"></i>Proclamation Impériale
+        <div class="modal-dialog modal-dialog-centered" style="width: 860px; max-width: 95vw; margin: 1.75rem auto;">
+            <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 16px; height: 85vh; max-height: 800px; display: flex; flex-direction: column; background: #ffffff;">
+                <!-- Illustration d'en-tête (260px fixe) avec overlay dégradé sombre (Style Pêcheur / Mineur / Héros) -->
+                <div style="position: relative; width: 100%; height: 260px; min-height: 260px; max-height: 260px; flex-shrink: 0; overflow: hidden; background: #0f172a;">
+                    <img id="imperialStudioModalImage" src="/public/assets/ere/era_1_aube_des_clans.jpg" alt="Illustration Impériale" style="width: 100%; height: 100%; object-fit: cover; object-position: center 30%;">
+                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.4) 50%, rgba(0,0,0,0.2) 100%);"></div>
+                    <div style="position: absolute; bottom: 16px; left: 24px; right: 24px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                        <div style="max-width: 78%;">
+                            <span id="imperialStudioModalBadge" class="badge bg-warning text-dark fw-bold px-3 py-1.5 mb-2 shadow-sm" style="font-size:0.8rem; letter-spacing: 0.5px;">
+                                <i class="fa-solid fa-crown me-1.5"></i>Proclamation Impériale
                             </span>
-                            <h3 class="m-0 fw-bold text-white shadow-sm" id="imperialStudioModalTitle" style="font-size: 1.25rem; line-height: 1.25;">
+                            <h3 class="m-0 fw-bold text-white shadow-sm" id="imperialStudioModalTitle" style="font-size: 1.35rem; line-height: 1.3;">
                                 Titre de la Proclamation
                             </h3>
                         </div>
                         <div>
-                            <span class="badge bg-dark bg-opacity-75 border border-light text-warning font-monospace fs-6 px-3 py-1 shadow-sm">
-                                <i class="fa-solid fa-stamp me-1"></i>Sceau Impérial
+                            <span class="badge bg-dark bg-opacity-75 border border-warning text-warning font-monospace fs-6 px-3 py-1.5 shadow-sm">
+                                <i class="fa-solid fa-stamp me-1.5"></i>Sceau Impérial
                             </span>
                         </div>
                     </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 16px; right: 16px; z-index: 10;"></button>
                 </div>
 
-                <!-- Corps de la modale -->
-                <div class="modal-body p-4 bg-white">
-                    <!-- Encart Parchemin du Message -->
-                    <div class="p-3.5 rounded border mb-3 shadow-sm" style="background: #fdfbf7; border-left: 4px solid #f59e0b !important;">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <span style="font-size: 1.2rem;"><i class="fa-solid fa-scroll text-warning"></i></span>
-                            <strong class="text-warning small" id="imperialStudioModalSubtitle">Chronique Officielle du Shōgunat :</strong>
+                <!-- Corps de la modale scrollable -->
+                <div class="modal-body p-4 bg-white" style="flex: 1 1 auto; overflow-y: auto; scroll-behavior: smooth;">
+                    <!-- Encart Parchemin du Message Développé -->
+                    <div class="p-4 rounded-3 border mb-3 shadow-sm" style="background: #fdfbf7; border-left: 5px solid #d97706 !important;">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span style="font-size: 1.3rem;"><i class="fa-solid fa-scroll text-warning"></i></span>
+                            <strong class="text-warning fw-bold" id="imperialStudioModalSubtitle" style="font-size: 1.05rem;">Chronique Officielle du Shōgunat :</strong>
                         </div>
-                        <p class="small text-secondary m-0" id="imperialStudioModalMessage" style="line-height: 1.6; font-size: 0.925rem;">
+                        <div class="text-secondary m-0" id="imperialStudioModalMessage" style="line-height: 1.75; font-size: 0.95rem; text-align: justify; white-space: pre-line;">
                             Message de la proclamation...
-                        </p>
+                        </div>
                     </div>
 
                     <!-- Encart Impacts Stratégiques sur l'Archipel -->
-                    <div class="p-3 rounded border mb-3" style="background: #f8fafc;" id="imperialStudioModalImpactsBox">
-                        <div class="small fw-bold text-dark mb-2 d-flex align-items-center gap-1.5">
+                    <div class="p-3.5 rounded-3 border mb-3" style="background: #f8fafc;" id="imperialStudioModalImpactsBox">
+                        <div class="small fw-bold text-dark mb-2.5 d-flex align-items-center gap-2" style="font-size: 0.95rem;">
                             <i class="fa-solid fa-gavel text-primary"></i>
                             <span>Conséquences Stratégiques &amp; Directives Féodales :</span>
                         </div>
-                        <ul class="small text-secondary ps-3 mb-0" id="imperialStudioModalImpactList" style="line-height: 1.55;">
+                        <ul class="small text-secondary ps-3 mb-0" id="imperialStudioModalImpactList" style="line-height: 1.65; font-size: 0.9rem;">
                             <!-- Points injectés dynamiquement -->
                         </ul>
                     </div>
 
                     <!-- Sceau et signature -->
-                    <div class="d-flex justify-content-between align-items-center text-muted small pt-2 border-top">
-                        <div class="d-flex align-items-center gap-1.5">
+                    <div class="d-flex justify-content-between align-items-center text-muted small pt-3 border-top">
+                        <div class="d-flex align-items-center gap-2">
                             <i class="fa-solid fa-certificate text-warning"></i>
-                            <span>Décret authentifié par la Chambre Céleste</span>
+                            <span>Décret authentifié par la Chambre Céleste &amp; le Shōgun</span>
                         </div>
-                        <span class="font-monospace text-secondary" style="font-size:0.75rem;"><?= date('d/m/Y H:i') ?></span>
+                        <span class="font-monospace text-secondary" style="font-size:0.8rem;"><?= date('d/m/Y H:i') ?></span>
                     </div>
                 </div>
 
-                <!-- Pied de modale -->
-                <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                <!-- Pied de modale fixe -->
+                <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center" style="flex-shrink: 0; border-top: 1px solid #e2e8f0;">
                     <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">
                         <i class="fa-solid fa-xmark me-1"></i>Fermer
                     </button>
@@ -2445,73 +2463,78 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.eraProclamationsData = {
         1: {
-            image: '/public/assets/shogun_rural_terroir_panorama.jpg',
+            image: '/public/assets/ere/era_1_aube_des_clans.jpg',
             badge: "Ère I • L'Aube des Clans",
             title: "🌱 Décret Impérial : Avènement de l'Ère I — L'Aube des Clans",
-            subtitle: "Chronique Officielle du Shōgunat :",
-            message: "Par décret du Shōgun, l'Archipel s'éveille ! Les daimyōs fondent leurs premiers fiefs sous la protection impériale. Développez vos parcelles de riz, de bois, de pierre et de fer dans la concorde et la paix débutante.",
+            subtitle: "Chronique Sacrée du Renouveau & de l'Éclosion Rurale",
+            message: "Par décret suprême de la Cour Impériale et du Shōgunat, les brumes ancestrales qui voilaient l'Archipel se dissipent sous la clarté d'une aurore nouvelle. Du nord enneigé aux rivages méridionaux baignés d'écume, la terre sacrée d'OpenShogun s'ouvre à nouveau aux pas des pionniers.\n\nLes daimyōs de chaque lignée reçoivent le mandat sacré d'établir leur premier fief. Sous la protection de la Trêve Impériale inviolable, le sang ne saurait encore souiller l'herbe des clairières : l'heure est au travail laborieux de la terre et à l'ingéniosité des bâtisseurs. Les haches résonnent dans les forêts de cèdres millénaires, les pioches entaillent les filons des carrières de granit, l'eau des rivières nourrit les premiers sillons de riz et les fourneaux de forge s'embrasent pour fondre le premier fer de l'Archipel.\n\nÉrigez vos 18 parcelles économiques, fondez votre Dōjō et initiez vos premiers disciples aux arts de la lance et de l'arc court. Que chaque seigneur pose dès aujourd'hui les fondations inébranlables d'une dynastie promise à la gloire éternelle.",
             action_url: '?page=resources',
             action_label: 'Bâtir mon Fief Rural &rarr;',
             impact_points: [
-                "Immunité débutant garantie sous la bienveillance impériale du Shōgun.",
-                "Essor des 18 parcelles économiques (Forêt, Carrière, Rizières, Fonderies).",
-                "Entraînement des premiers fantassins et archers de garnison au Dojo."
+                "Trêve Sacrée du Débutant : Protection impériale absolue contre tout assaut ou raid ennemi.",
+                "Développement des 18 Parcelles Féodales : Déploiement intensif des forêts de bois, carrières de pierre, rizières abondantes et fonderies de fer.",
+                "Éveil Militaire & Sentinelles : Bâtissez le Dōjō de garnison et instruisez vos premières cohortes de lanciers (Ashigaru Yari) et d'archers (Yumi).",
+                "Préparation Logistique : Accumulez vivres et matériaux en prévision de l'ouverture prochaine des frontières et des pistes marchandes."
             ]
         },
         2: {
-            image: '/public/assets/nav_map.jpg',
+            image: '/public/assets/ere/era_2_expansion_territoriale.jpg',
             badge: "Ère II • Expansion Territoriale",
             title: "🧭 Proclamation Impériale : Avènement de l'Ère II — L'Expansion Territoriale",
-            subtitle: "Chronique Officielle du Shōgunat :",
-            message: "La paix débutante est levée ! Le Shōgun ouvre la grande conquête féodale. Que les daimyōs soumettent les bêtes sauvages des oasis, forgent de puissantes alliances et étendent leurs frontières à travers tout l'Archipel.",
+            subtitle: "Chronique de la Grande Chevauchée Féodale & des Alliances de Sang",
+            message: "Entendez le son rauque du cor de guerre et le fracas des tambours taiko à travers les vallées ! Le mandat de trêve débutante prend fin, tel que scellé par les astres. L'Archipel ne saurait demeurer figé dans la torpeur des premiers enclos : l'espace vital appartient à ceux qui ont le courage de franchir leurs palissades.\n\nPartout dans les provinces, les éclaireurs à cheval s'élancent sur les pistes inconnues. Les oasis sauvages, havres de fertilité gardés par une faune indomptée — ours des montagnes, meutes de loups et sangliers colossaux —, appellent les sabres intrépides. Quiconque domptera ces sanctuaires naturels drapera son clan d'une prospérité éclatante, récoltant la manne vitale nécessaire à l'entretien de vastes osts féodaux.\n\nMais nulle destinée ne se forge dans l'isolement. L'heure est venue de dépêcher des émissaires, d'échanger des serments scellés au saké et de fonder les grandes Alliances féodales. Les frontières s'affrontent, les premiers raids de cavalerie frappent aux avant-postes : l'Archipel s'embrase au rythme des ambitions rivales !",
             action_url: '?page=map',
             action_label: 'Explorer la Carte des Provinces &rarr;',
             impact_points: [
-                "Fin de l'immunité débutant : les assauts et raids de clans rivaux sont déclarés.",
-                "Conquête des Oasis : soumettez la faune sauvage pour capter +25% à +50% de ressources.",
-                "Fondation de nouveaux fiefs secondaires et essor des grandes coalitions."
+                "Levée de la Trêve Impériale : Les hostilités sont officiellement ouvertes ; vos villages peuvent désormais lancer et subir des assauts et pillages.",
+                "Conquête des Oasis Sauvages : Terrassez la faune féroce pour assujettir les oasis et octroyer à vos fiefs des bonus économiques massifs (+25% à +50%).",
+                "Pacte des Alliances Féodales : Fondez ou rejoignez une faction souveraine, érigez des ambassades et coordonnez vos garnisons défensives.",
+                "Fondation de Fiefs Secondaires : Envoyez des colons et pionniers revendiquer de nouvelles terres stratégiques sur la carte du monde."
             ]
         },
         3: {
-            image: '/public/assets/castles/himeji.jpg',
+            image: '/public/assets/ere/era_3_guerre_12_chateaux.jpg',
             badge: "Ère III • Guerre des 12 Châteaux",
             title: "🏯 Dépêche Impériale : Avènement de l'Ère III — La Guerre des 12 Châteaux",
-            subtitle: "Chronique Officielle du Shōgunat :",
-            message: "Les portes des 12 Forteresses Authentiques du Japon viennent de s'ouvrir sur l'Archipel ! Daimyōs et Alliances, marchez sur les donjons sacrés et emparez-vous de leurs Reliques séculaires !",
+            subtitle: "Chronique du Réveil des Forteresses Séculaires & des Reliques Sacrées",
+            message: "Du sommet des monts brumeux aux plaines côtières, un grondement millénaire ébranle le sol de l'Archipel : les portes colossales des 12 Forteresses Authentiques du Japon viennent de céder sous le poids de la prophétie ! Les donjons légendaires — Himeji le Héron Blanc, Matsumoto le Corbeau Noir, Inuyama, Hikone, Kumamoto, Matsue, Hirosaki, Maruoka, Bitchū Matsuyama, Marugame, Uwajima et Kōchi — s'éveillent enfin de leur sommeil séculaire.\n\nChacune de ces douze citadelles inexpugnables abrite en son cœur un autel ancestral recelant des Reliques sacrées bénies par les kamis. Ces trésors confèrent des bénédictions prodigieuses à l'Alliance qui ose s'en emparer et tenir les remparts contre les vagues d'assaillants.\n\nEntendez l'avertissement de la Chambre Céleste : la route vers le destin suprême exige le sang et la gloire des sièges. Aucune coalition ne sera jugée digne d'approcher le Dōjō Impérial sans avoir d'abord conquis et tenu sous son joug au moins deux de ces douze forteresses mythiques. Que les catapultes avancent et que les bannières s'élèvent au vent des forteresses !",
             action_url: '?page=castle&code=himeji',
             action_label: 'Marcher sur les Forteresses &rarr;',
             impact_points: [
-                "Déploiement des 12 Donjons Historiques à 360° sur toute la carte de l'Archipel.",
-                "Capture des Reliques Ancestrales accordant de puissants bonus passifs à l'Alliance.",
-                "Posséder au moins 2 châteaux est obligatoire pour prétendre au Dōjō Impérial [0:0]."
+                "Éveil des 12 Châteaux Authentiques : Les 12 donjons historiques apparaissent sur la carte à 360°, ouverts aux sièges et conquêtes d'alliances.",
+                "Pouvoir des Reliques Ancestrales : La capture d'un donjon octroie de puissants bonus passifs permanents partagés par tous les membres de l'alliance.",
+                "Condition d'Éligibilité Impériale : Détenir et préserver un minimum de 2 châteaux authentiques est le prérequis absolu pour revendiquer le Dōjō central [0:0].",
+                "Guerre Totale de Coalitions : Escarmouches de diversion, prises de garnisons et blocus prolongés deviennent le cœur du théâtre militaire."
             ]
         },
         4: {
-            image: '/public/assets/map/tile_imperial_dojo.jpg',
+            image: '/public/assets/ere/era_4_dojo_imperial.jpg',
             badge: "Ère IV • Dōjō Impérial [0 : 0]",
             title: "⛩️ Proclamation Shōgunale : Avènement de l'Ère IV — Le Dōjō Impérial [0:0]",
-            subtitle: "Chronique Officielle du Shōgunat :",
-            message: "La brume mystique se dissipe sur la Terre Sacrée [0 : 0] (Tenchi no Seichi) ! Les Alliances détenant au moins 2 châteaux sont appelées à revendiquer le sanctuaire suprême et acheminer des convois titanesques pour ériger la Merveille.",
+            subtitle: "Chronique de la Terre Sacrée Centrale & du Chantier de la Merveille",
+            message: "Le ciel s'embrase d'une lueur céleste au centre exact du monde connu : la brume impénétrable de Tenchi no Seichi [0 : 0], la Terre Sacrée du Ciel et de la Terre, s'est totalement dissipée ! Les rouleaux des prophéties sont désormais ouverts devant tous les peuples de l'Archipel.\n\nSur cette plaine centrale se dresse l'assise du Dōjō Impérial, la Merveille ultime capable d'unifier à jamais les clans sous un même règne. Seules les Alliances souveraines ayant prouvé leur suprématie en tenant au moins deux Châteaux Authentiques ont l'insigne honneur de poser pied sur ce sanctuaire et d'y amorcer la construction des dix niveaux légendaires.\n\nDes caravanes de milliers de chariots, escortées par des colonnes interminables de samouraïs d'élite, convergent des quatre horizons, transportant des montagnes de bois précieux, de blocs de pierre taillée, de lingots de fer et de sacs de riz. Mais chaque pierre posée attirera la foudre ennemie : béliers draconiques, catapultes Horokubiya et incendies ravageurs tenteront d'anéantir l'édifice avant son élévation finale. Que la bravoure des guerriers protège le cœur battant du Japon !",
             action_url: '?page=imperial_dojo',
             action_label: 'Rejoindre le Sanctuaire [0:0] &rarr;',
             impact_points: [
-                "Ouverture de la tuile centrale [0 : 0] : convois titanesques et armes de siège autorisés.",
-                "Chantier des 10 Niveaux de la Merveille accessible aux alliances éligibles.",
-                "Attaques de siège massives au bélier et à la catapulte pour raser le Dōjō adverse."
+                "Ouverture de la Tuile [0 : 0] : Accès débloqué à la Terre Sacrée pour les convois titanesques de ressources et les armées d'assaut lourd.",
+                "Chantier des 10 Paliers de la Merveille : Érection progressive du Dōjō Impérial nécessitant une coordination logistique exceptionnelle de toute votre coalition.",
+                "Guerre de Siège Dévastatrice : Emploi de béliers massifs et de trébuchets pour pilonner et réduire à néant les étages du sanctuaire adverse.",
+                "Mobilisation Totale de l'Archipel : L'ensemble de l'économie et des réserves militaires du monde converge vers la défense ou l'anéantissement de la tuile [0:0]."
             ]
         },
         5: {
-            image: '/public/assets/shogun_castle_city_bg.jpg',
+            image: '/public/assets/ere/era_5_unification_shogunat.jpg',
             badge: "Ère V • Shōgunat Immortel",
             title: "👑 Triomphe Impérial : Avènement de l'Ère V — L'Unification du Shōgunat",
-            subtitle: "Chronique Officielle du Shōgunat :",
-            message: "Le Sanctuaire Céleste du Dōjō Impérial [0:0] a atteint le Palier 10 Suprême ! Les cloches de la paix résonnent sur tout l'Archipel. Le Japon est réunifié sous la bannière éternelle du nouveau Shōgun !",
+            subtitle: "Chronique de l'Avènement Suprême & de la Paix Éternelle des Daimyōs",
+            message: "Que les mille cloches des temples de Kyoto et de Kamakura résonnent à l'unisson jusqu'aux confins des mers ! Le dixième et suprême palier du Dōjō Impérial [0 : 0] s'est dressé fièrement vers la voûte céleste, touchant le cœur même du firmament. La Merveille est achevée, et avec elle s'éteint le feu dévastateur des guerres intestines.\n\nSous le regard déférent de la Cour Impériale et l'acclamation fervente de dizaines de milliers de guerriers rassemblés sur la Terre Sacrée, le suzerain de l'Alliance victorieuse gravit les marches sacrées. Les daimyōs rivaux brisent leurs bannières de rancœur et déposent leurs lames au pied de l'estrade d'or : le Mandat du Ciel a rendu son jugement sans appel.\n\nLe titre suprême de Shōgun du Japon est officiellement conféré au grand unificateur ! Une ère d'ordre souverain, de prospérité culturelle et de paix immortelle s'ouvre sur les îles de l'Archipel. Les noms des héros, des stratèges et des bâtisseurs de cette alliance légendaire sont gravés pour l'éternité dans les parchemins d'or du Panthéon d'OpenShogun !",
             action_url: '?page=ranking',
             action_label: 'Consulter le Panthéon du Monde &rarr;',
             impact_points: [
-                "Victoire mondiale proclamée suite à l'achèvement du Palier 10 du Dōjō.",
-                "Le suzerain de l'alliance bâtisseuse est proclamé Shōgun suprême du Japon.",
-                "Entrée définitive des champions dans les Chroniques éternelles d'OpenShogun."
+                "Victoire Mondiale Définitive : L'achèvement du Palier 10 du Dōjō Impérial met un terme à la course féodale et couronne l'Alliance triomphante.",
+                "Intronisation du Shōgun Suprême : Le chef de clan victorieux reçoit le titre honorifique ultime et siège au sommet de la hiérarchie impériale.",
+                "Entrée au Panthéon Immortel : Inscription irrévocable des exploits, classements et états de service dans les Chroniques Éternelles du serveur.",
+                "Célébration Pan-Archipel : Trêve universelle proclamée, festivités impériales et préparation du Grand Cycle de réincarnation pour le monde à venir."
             ]
         }
     };

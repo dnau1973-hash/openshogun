@@ -1393,82 +1393,92 @@ class GameStudioEngine {
         $era = max(1, min(5, $era));
         try {
             require_once __DIR__ . '/LiveOpsEngine.php';
-            $liveOps = new LiveOpsEngine();
+            $liveOps = new LiveOpsEngine($this->db);
 
             $dispatches = [
                 1 => [
                     'title'   => "🌱 Décret Impérial : Avènement de l'Ère I — L'Aube des Clans",
-                    'message' => "Par décret du Shōgun, l'Archipel s'éveille ! Les daimyōs fondent leurs premiers fiefs sous la protection impériale. Développez vos parcelles de riz, de bois, de pierre et de fer dans la concorde et la paix débutante.",
+                    'subtitle'=> "Chronique Sacrée du Renouveau & de l'Éclosion Rurale",
+                    'message' => "Par décret suprême de la Cour Impériale et du Shōgunat, les brumes ancestrales qui voilaient l'Archipel se dissipent sous la clarté d'une aurore nouvelle. Du nord enneigé aux rivages méridionaux baignés d'écume, la terre sacrée d'OpenShogun s'ouvre à nouveau aux pas des pionniers.\n\nLes daimyōs de chaque lignée reçoivent le mandat sacré d'établir leur premier fief. Sous la protection de la Trêve Impériale inviolable, le sang ne saurait encore souiller l'herbe des clairières : l'heure est au travail laborieux de la terre et à l'ingéniosité des bâtisseurs. Les haches résonnent dans les forêts de cèdres millénaires, les pioches entaillent les filons des carrières de granit, l'eau des rivières nourrit les premiers sillons de riz et les fourneaux de forge s'embrasent pour fondre le premier fer de l'Archipel.\n\nÉrigez vos 18 parcelles économiques, fondez votre Dōjō et initiez vos premiers disciples aux arts de la lance et de l'arc court. Que chaque seigneur pose dès aujourd'hui les fondations inébranlables d'une dynastie promise à la gloire éternelle.",
                     'type'    => 'success',
                     'duration'=> 1440,
-                    'image'   => '/public/assets/shogun_rural_terroir_panorama.jpg',
+                    'image'   => '/public/assets/ere/era_1_aube_des_clans.jpg',
                     'badge'   => 'Ère I • L\'Aube des Clans',
                     'action_url'   => '?page=resources',
                     'action_label' => 'Bâtir mon Fief Rural &rarr;',
                     'impact_points'=> [
-                        'Immunité débutant garantie sous la bienveillance impériale du Shōgun.',
-                        'Essor des 18 parcelles économiques (Forêt, Carrière, Rizières, Fonderies).',
-                        'Entraînement des premiers fantassins et archers de garnison au Dojo.'
+                        'Trêve Sacrée du Débutant : Protection impériale absolue contre tout assaut ou raid ennemi.',
+                        'Développement des 18 Parcelles Féodales : Déploiement intensif des forêts de bois, carrières de pierre, rizières abondantes et fonderies de fer.',
+                        'Éveil Militaire & Sentinelles : Bâtissez le Dōjō de garnison et instruisez vos premières cohortes de lanciers (Ashigaru Yari) et d\'archers (Yumi).',
+                        'Préparation Logistique : Accumulez vivres et matériaux en prévision de l\'ouverture prochaine des frontières et des pistes marchandes.'
                     ]
                 ],
                 2 => [
                     'title'   => "🧭 Proclamation Impériale : Avènement de l'Ère II — L'Expansion Territoriale",
-                    'message' => "La paix débutante est levée ! Le Shōgun ouvre la grande conquête féodale. Que les daimyōs soumettent les bêtes sauvages des oasis, forgent de puissantes alliances et étendent leurs frontières à travers tout l'Archipel.",
+                    'subtitle'=> "Chronique de la Grande Chevauchée Féodale & des Alliances de Sang",
+                    'message' => "Entendez le son rauque du cor de guerre et le fracas des tambours taiko à travers les vallées ! Le mandat de trêve débutante prend fin, tel que scellé par les astres. L'Archipel ne saurait demeurer figé dans la torpeur des premiers enclos : l'espace vital appartient à ceux qui ont le courage de franchir leurs palissades.\n\nPartout dans les provinces, les éclaireurs à cheval s'élancent sur les pistes inconnues. Les oasis sauvages, havres de fertilité gardés par une faune indomptée — ours des montagnes, meutes de loups et sangliers colossaux —, appellent les sabres intrépides. Quiconque domptera ces sanctuaires naturels drapera son clan d'une prospérité éclatante, récoltant la manne vitale nécessaire à l'entretien de vastes osts féodaux.\n\nMais nulle destinée ne se forge dans l'isolement. L'heure est venue de dépêcher des émissaires, d'échanger des serments scellés au saké et de fonder les grandes Alliances féodales. Les frontières s'affrontent, les premiers raids de cavalerie frappent aux avant-postes : l'Archipel s'embrase au rythme des ambitions rivales !",
                     'type'    => 'warning',
                     'duration'=> 1440,
-                    'image'   => '/public/assets/nav_map.jpg',
+                    'image'   => '/public/assets/ere/era_2_expansion_territoriale.jpg',
                     'badge'   => 'Ère II • Expansion Territoriale',
                     'action_url'   => '?page=map',
                     'action_label' => 'Explorer la Carte des Provinces &rarr;',
                     'impact_points'=> [
-                        'Fin de l\'immunité débutant : les assauts et raids de clans rivaux sont déclarés.',
-                        'Conquête des Oasis : soumettez la faune sauvage pour capter +25% à +50% de ressources.',
-                        'Fondation de nouveaux fiefs secondaires et essor des grandes coalitions.'
+                        'Levée de la Trêve Impériale : Les hostilités sont officiellement ouvertes ; vos villages peuvent désormais lancer et subir des assauts et pillages.',
+                        'Conquête des Oasis Sauvages : Terrassez la faune féroce pour assujettir les oasis et octroyer à vos fiefs des bonus économiques massifs (+25% à +50%).',
+                        'Pacte des Alliances Féodales : Fondez ou rejoignez une faction souveraine, érigez des ambassades et coordonnez vos garnisons défensives.',
+                        'Fondation de Fiefs Secondaires : Envoyez des colons et pionniers revendiquer de nouvelles terres stratégiques sur la carte du monde.'
                     ]
                 ],
                 3 => [
                     'title'   => "🏯 Dépêche Impériale : Avènement de l'Ère III — La Guerre des 12 Châteaux",
-                    'message' => "Les portes des 12 Forteresses Authentiques du Japon viennent de s'ouvrir sur l'Archipel ! Daimyōs et Alliances, marchez sur les donjons sacrés et emparez-vous de leurs Reliques séculaires !",
+                    'subtitle'=> "Chronique du Réveil des Forteresses Séculaires & des Reliques Sacrées",
+                    'message' => "Du sommet des monts brumeux aux plaines côtières, un grondement millénaire ébranle le sol de l'Archipel : les portes colossales des 12 Forteresses Authentiques du Japon viennent de céder sous le poids de la prophétie ! Les donjons légendaires — Himeji le Héron Blanc, Matsumoto le Corbeau Noir, Inuyama, Hikone, Kumamoto, Matsue, Hirosaki, Maruoka, Bitchū Matsuyama, Marugame, Uwajima et Kōchi — s'éveillent enfin de leur sommeil séculaire.\n\nChacune de ces douze citadelles inexpugnables abrite en son cœur un autel ancestral recelant des Reliques sacrées bénies par les kamis. Ces trésors confèrent des bénédictions prodigieuses à l'Alliance qui ose s'en emparer et tenir les remparts contre les vagues d'assaillants.\n\nEntendez l'avertissement de la Chambre Céleste : la route vers le destin suprême exige le sang et la gloire des sièges. Aucune coalition ne sera jugée digne d'approcher le Dōjō Impérial sans avoir d'abord conquis et tenu sous son joug au moins deux de ces douze forteresses mythiques. Que les catapultes avancent et que les bannières s'élèvent au vent des forteresses !",
                     'type'    => 'warning',
                     'duration'=> 2880,
-                    'image'   => '/public/assets/castles/himeji.jpg',
+                    'image'   => '/public/assets/ere/era_3_guerre_12_chateaux.jpg',
                     'badge'   => 'Ère III • Guerre des 12 Châteaux',
                     'action_url'   => '?page=castle&code=himeji',
                     'action_label' => 'Marcher sur les Forteresses &rarr;',
                     'impact_points'=> [
-                        'Déploiement des 12 Donjons Historiques à 360° sur toute la carte de l\'Archipel.',
-                        'Capture des Reliques Ancestrales accordant de puissants bonus passifs à l\'Alliance.',
-                        'Posséder au moins 2 châteaux est obligatoire pour prétendre au Dōjō Impérial [0:0].'
+                        'Éveil des 12 Châteaux Authentiques : Les 12 donjons historiques apparaissent sur la carte à 360°, ouverts aux sièges et conquêtes d\'alliances.',
+                        'Pouvoir des Reliques Ancestrales : La capture d\'un donjon octroie de puissants bonus passifs permanents partagés par tous les membres de l\'alliance.',
+                        'Condition d\'Éligibilité Impériale : Détenir et préserver un minimum de 2 châteaux authentiques est le prérequis absolu pour revendiquer le Dōjō central [0:0].',
+                        'Guerre Totale de Coalitions : Escarmouches de diversion, prises de garnisons et blocus prolongés deviennent le cœur du théâtre militaire.'
                     ]
                 ],
                 4 => [
                     'title'   => "⛩️ Proclamation Shōgunale : Avènement de l'Ère IV — Le Dōjō Impérial [0:0]",
-                    'message' => "La brume mystique se dissipe sur la Terre Sacrée [0 : 0] (Tenchi no Seichi) ! Les Alliances détenant au moins 2 châteaux sont appelées à revendiquer le sanctuaire suprême et acheminer des convois titanesques pour ériger la Merveille.",
+                    'subtitle'=> "Chronique de la Terre Sacrée Centrale & du Chantier de la Merveille",
+                    'message' => "Le ciel s'embrase d'une lueur céleste au centre exact du monde connu : la brume impénétrable de Tenchi no Seichi [0 : 0], la Terre Sacrée du Ciel et de la Terre, s'est totalement dissipée ! Les rouleaux des prophéties sont désormais ouverts devant tous les peuples de l'Archipel.\n\nSur cette plaine centrale se dresse l'assise du Dōjō Impérial, la Merveille ultime capable d'unifier à jamais les clans sous un même règne. Seules les Alliances souveraines ayant prouvé leur suprématie en tenant au moins deux Châteaux Authentiques ont l'insigne honneur de poser pied sur ce sanctuaire et d'y amorcer la construction des dix niveaux légendaires.\n\nDes caravanes de milliers de chariots, escortées par des colonnes interminables de samouraïs d'élite, convergent des quatre horizons, transportant des montagnes de bois précieux, de blocs de pierre taillée, de lingots de fer et de sacs de riz. Mais chaque pierre posée attirera la foudre ennemie : béliers draconiques, catapultes Horokubiya et incendies ravageurs tenteront d'anéantir l'édifice avant son élévation finale. Que la bravoure des guerriers protège le cœur battant du Japon !",
                     'type'    => 'danger',
                     'duration'=> 4320,
-                    'image'   => '/public/assets/map/tile_imperial_dojo.jpg',
+                    'image'   => '/public/assets/ere/era_4_dojo_imperial.jpg',
                     'badge'   => 'Ère IV • Dōjō Impérial [0 : 0]',
                     'action_url'   => '?page=imperial_dojo',
                     'action_label' => 'Rejoindre le Sanctuaire [0:0] &rarr;',
                     'impact_points'=> [
-                        'Ouverture de la tuile centrale [0 : 0] : convois titanesques et armes de siège autorisés.',
-                        'Chantier des 10 Niveaux de la Merveille accessible aux alliances éligibles.',
-                        'Attaques de siège massives au bélier et à la catapulte pour raser le Dōjō adverse.'
+                        'Ouverture de la Tuile [0 : 0] : Accès débloqué à la Terre Sacrée pour les convois titanesques de ressources et les armées d\'assaut lourd.',
+                        'Chantier des 10 Paliers de la Merveille : Érection progressive du Dōjō Impérial nécessitant une coordination logistique exceptionnelle de toute votre coalition.',
+                        'Guerre de Siège Dévastatrice : Emploi de béliers massifs et de trébuchets pour pilonner et réduire à néant les étages du sanctuaire adverse.',
+                        'Mobilisation Totale de l\'Archipel : L\'ensemble de l\'économie et des réserves militaires du monde converge vers la défense ou l\'anéantissement de la tuile [0:0].'
                     ]
                 ],
                 5 => [
                     'title'   => "👑 Triomphe Impérial : Avènement de l'Ère V — L'Unification du Shōgunat",
-                    'message' => "Le Sanctuaire Céleste du Dōjō Impérial [0:0] a atteint le Palier 10 Suprême ! Les cloches de la paix résonnent sur tout l'Archipel. Le Japon est réunifié sous la bannière éternelle du nouveau Shōgun !",
+                    'subtitle'=> "Chronique de l'Avènement Suprême & de la Paix Éternelle des Daimyōs",
+                    'message' => "Que les mille cloches des temples de Kyoto et de Kamakura résonnent à l'unisson jusqu'aux confins des mers ! Le dixième et suprême palier du Dōjō Impérial [0 : 0] s'est dressé fièrement vers la voûte céleste, touchant le cœur même du firmament. La Merveille est achevée, et avec elle s'éteint le feu dévastateur des guerres intestines.\n\nSous le regard déférent de la Cour Impériale et l'acclamation fervente de dizaines de milliers de guerriers rassemblés sur la Terre Sacrée, le suzerain de l'Alliance victorieuse gravit les marches sacrées. Les daimyōs rivaux brisent leurs bannières de rancœur et déposent leurs lames au pied de l'estrade d'or : le Mandat du Ciel a rendu son jugement sans appel.\n\nLe titre suprême de Shōgun du Japon est officiellement conféré au grand unificateur ! Une ère d'ordre souverain, de prospérité culturelle et de paix immortelle s'ouvre sur les îles de l'Archipel. Les noms des héros, des stratèges et des bâtisseurs de cette alliance légendaire sont gravés pour l'éternité dans les parchemins d'or du Panthéon d'OpenShogun !",
                     'type'    => 'primary',
                     'duration'=> 10080,
-                    'image'   => '/public/assets/shogun_castle_city_bg.jpg',
+                    'image'   => '/public/assets/ere/era_5_unification_shogunat.jpg',
                     'badge'   => 'Ère V • Shōgunat Immortel',
                     'action_url'   => '?page=ranking',
                     'action_label' => 'Consulter le Panthéon du Monde &rarr;',
                     'impact_points'=> [
-                        'Victoire mondiale proclamée suite à l\'achèvement du Palier 10 du Dōjō.',
-                        'Le suzerain de l\'alliance bâtisseuse est proclamé Shōgun suprême du Japon.',
-                        'Entrée définitive des champions dans les Chroniques éternelles d\'OpenShogun.'
+                        'Victoire Mondiale Définitive : L\'achèvement du Palier 10 du Dōjō Impérial met un terme à la course féodale et couronne l\'Alliance triomphante.',
+                        'Intronisation du Shōgun Suprême : Le chef de clan victorieux reçoit le titre honorifique ultime et siège au sommet de la hiérarchie impériale.',
+                        'Entrée au Panthéon Immortel : Inscription irrévocable des exploits, classements et états de service dans les Chroniques Éternelles du serveur.',
+                        'Célébration Pan-Archipel : Trêve universelle proclamée, festivités impériales et préparation du Grand Cycle de réincarnation pour le monde à venir.'
                     ]
                 ],
             ];
@@ -1477,6 +1487,7 @@ class GameStudioEngine {
             $extra = [
                 'image'         => $d['image'],
                 'badge'         => $d['badge'],
+                'subtitle'      => $d['subtitle'] ?? 'Chronique Officielle du Shōgunat :',
                 'era'           => $era,
                 'action_url'    => $d['action_url'],
                 'action_label'  => $d['action_label'],

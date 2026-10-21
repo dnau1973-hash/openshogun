@@ -254,26 +254,32 @@ for ($eraTest = 1; $eraTest <= 5; $eraTest++) {
     assertTest($bcOk === true, "Diffusion de la dépêche impériale pour l'Ère {$eraTest} réussie");
 }
 
-echo "\n[TEST 12] Vérification de la Modale Proclamation Impériale Illustrée HD...\n";
+echo "\n[TEST 12] Vérification de la Modale Proclamation Impériale Illustrée HD Grand Format & Récits Développés...\n";
 $headerContent = file_get_contents(__DIR__ . '/../views/partials/header.php');
 assertTest(str_contains($headerContent, 'id="modalImperialProclamation"'), "Modale #modalImperialProclamation présente dans header.php");
-assertTest(str_contains($headerContent, 'height: 215px;'), "En-tête illustré 215px présent dans header.php");
-assertTest(str_contains($headerContent, 'object-fit: cover; object-position: center 30%'), "Cadrage de l'illustration présent dans header.php");
+assertTest(str_contains($headerContent, 'height: 260px;'), "En-tête illustré agrandi 260px présent dans header.php");
+assertTest(str_contains($headerContent, 'overflow-y: auto'), "Défilement / scroll intérieur présent dans le corps de la modale");
 assertTest(str_contains($headerContent, 'id="imperialModalTitle"'), "Titre dynamique impérial présent dans header.php");
+assertTest(str_contains($headerContent, 'id="imperialModalSubtitle"'), "Sous-titre de la chronique présent dans header.php");
 assertTest(str_contains($headerContent, 'id="imperialModalImpactList"'), "Liste des impacts stratégiques présente dans header.php");
 
 assertTest(str_contains($viewContent, 'id="modalImperialProclamationStudio"'), "Modale #modalImperialProclamationStudio présente dans general_world_config.php");
-assertTest(str_contains($viewContent, 'height: 215px;'), "En-tête illustré 215px présent dans general_world_config.php");
+assertTest(str_contains($viewContent, 'height: 260px;'), "En-tête illustré agrandi 260px présent dans general_world_config.php");
+assertTest(str_contains($viewContent, 'overflow-y: auto'), "Défilement / scroll intérieur présent dans la modale studio");
 assertTest(str_contains($viewContent, 'previewEraProclamationModal'), "Fonction de prévisualisation JS par Ère présente");
 assertTest(str_contains($viewContent, 'openActiveBroadcastModal'), "Fonction d'ouverture de dépêche active JS présente");
+assertTest(str_contains($viewContent, '/public/assets/ere/era_1_aube_des_clans.jpg'), "Illustration Ère 1 intégrée dans la timeline studio");
+assertTest(str_contains($viewContent, '/public/assets/ere/era_5_unification_shogunat.jpg'), "Illustration Ère 5 intégrée dans la timeline studio");
 
 require_once __DIR__ . '/../core/LiveOpsEngine.php';
 $liveOps = new LiveOpsEngine();
 $activeBc = $liveOps->getActiveBroadcast();
 assertTest(!empty($activeBc), "Dépêche impériale active récupérée");
-assertTest(!empty($activeBc['image']), "Image d'en-tête présente dans la dépêche impériale");
+assertTest(str_contains($activeBc['image'], '/public/assets/ere/'), "Image de l'ère issue de public/assets/ere/");
 assertTest(!empty($activeBc['badge']), "Badge de décret présent dans la dépêche impériale");
-assertTest(!empty($activeBc['impact_points']) && is_array($activeBc['impact_points']), "Points d'impacts présents dans la dépêche impériale");
+assertTest(!empty($activeBc['subtitle']), "Sous-titre littéraire présent dans la dépêche impériale");
+assertTest(strlen($activeBc['message']) > 300, "Narration de l'ère richement développée (> 300 caractères)");
+assertTest(!empty($activeBc['impact_points']) && count($activeBc['impact_points']) >= 3, "Au moins 3 directives stratégiques féodales détaillées");
 
 echo "\n[TEST 13] Vérification de l'auto-synchronisation de la Proclamation avec l'Ère active (Ère 4)...\n";
 GameConfig::set('server_current_era', 4);
