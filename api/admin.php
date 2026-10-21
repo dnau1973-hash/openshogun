@@ -449,6 +449,42 @@ try {
             echo json_encode(['success' => true, 'stats' => $stats]);
             break;
 
+        // Déroulement du Monde : Déclencher la Guerre des 12 Châteaux (Ère III)
+        case 'trigger_castles_war':
+            require_once __DIR__ . '/../core/GameStudioEngine.php';
+            $gameStudio = new GameStudioEngine();
+            $broadcast = !empty($_POST['broadcast']);
+            $res = $gameStudio->triggerCastlesWar($broadcast);
+            echo json_encode($res);
+            break;
+
+        // Déroulement du Monde : Débloquer le Dōjō Impérial [0:0] (Ère IV)
+        case 'trigger_imperial_dojo':
+            require_once __DIR__ . '/../core/GameStudioEngine.php';
+            $gameStudio = new GameStudioEngine();
+            $broadcast = !empty($_POST['broadcast']);
+            $res = $gameStudio->triggerImperialDojo($broadcast);
+            echo json_encode($res);
+            break;
+
+        // Déroulement du Monde : Forcer l'Ère active
+        case 'set_world_era':
+            require_once __DIR__ . '/../core/GameStudioEngine.php';
+            $gameStudio = new GameStudioEngine();
+            $era = (int)($_POST['era'] ?? 1);
+            $broadcast = !empty($_POST['broadcast']);
+            $res = $gameStudio->setWorldEra($era, $broadcast);
+            echo json_encode($res);
+            break;
+
+        // Déroulement du Monde : Obtenir la télémétrie des Ères et Endgame
+        case 'get_world_timeline':
+            require_once __DIR__ . '/../core/GameStudioEngine.php';
+            $gameStudio = new GameStudioEngine();
+            $res = $gameStudio->getWorldLifecycleData();
+            echo json_encode(['success' => true, 'timeline' => $res]);
+            break;
+
         // Sauvegarder les positions calibrées en Drag & Drop (Cité ou Terroir)
         case 'save_slot_positions':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

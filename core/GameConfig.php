@@ -71,11 +71,62 @@ class GameConfig {
                     'starter_fish' => 250,
                     'starter_gold_coins' => 100,
                     'beginner_protection_days' => 7,
-                    'preserve_human_users_on_reset' => true
+                    'preserve_human_users_on_reset' => true,
+                    // Déroulement du Jeu & Chronologie des Ères (Progression & Endgame)
+                    'server_start_timestamp' => time() - (86400 * 3),
+                    'server_current_era' => 1,
+                    'era_auto_progression_enabled' => true,
+                    'era_castles_auto_day' => 7,
+                    'era_castles_unlocked' => false,
+                    'era_dojo_auto_day' => 21,
+                    'era_dojo_unlocked' => false,
+                    'era_broadcast_announcements' => true,
+                    'era_victory_alliance_id' => 0
                 ];
             }
         }
         return self::$cache;
+    }
+
+    /**
+     * Récupère l'horodatage initial d'ouverture du monde
+     */
+    public static function getServerStartTimestamp(): int {
+        $ts = (int)self::get('server_start_timestamp', 0);
+        if ($ts <= 0) {
+            $ts = time() - (86400 * 3);
+        }
+        return $ts;
+    }
+
+    /**
+     * Calcule l'âge actuel du serveur en jours décimaux
+     */
+    public static function getServerAgeDays(): float {
+        $start = self::getServerStartTimestamp();
+        $diff = max(0, time() - $start);
+        return round($diff / 86400, 1);
+    }
+
+    /**
+     * Récupère le numéro de l'Ère mondiale active (1 à 5)
+     */
+    public static function getServerCurrentEra(): int {
+        return max(1, min(5, (int)self::get('server_current_era', 1)));
+    }
+
+    /**
+     * Vérifie si la Guerre des 12 Châteaux a été débloquée
+     */
+    public static function isCastlesWarUnlocked(): bool {
+        return (bool)self::get('era_castles_unlocked', false);
+    }
+
+    /**
+     * Vérifie si le chantier du Dōjō Impérial [0:0] a été débloqué
+     */
+    public static function isImperialDojoUnlocked(): bool {
+        return (bool)self::get('era_dojo_unlocked', false);
     }
 
     /**

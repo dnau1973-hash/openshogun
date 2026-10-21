@@ -107,6 +107,11 @@ unset($_SESSION['general_flash']);
                         <i class="fa-solid fa-arrows-rotate text-danger me-1.5"></i>6. Réinitialisation
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-bold text-dark py-2.5 px-3" data-bs-toggle="tab" href="#section-world-timeline-config">
+                        <i class="fa-solid fa-crown text-warning me-1.5"></i>7. Déroulement du Jeu &amp; Ères
+                    </a>
+                </li>
             </ul>
 
             <div class="tab-content">
@@ -979,13 +984,534 @@ unset($_SESSION['general_flash']);
                         </div>
                     </div>
                 </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- ONGLET 7 : DÉROULEMENT DU JEU & ÈRES MONDIALES (PROGRESSION)    -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <div class="tab-pane fade" id="section-world-timeline-config" role="tabpanel">
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
+                            <div>
+                                <h4 class="text-dark fw-bold m-0 d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-crown text-warning"></i>7. Déroulement du Jeu &amp; Chronologie des Ères Féodales
+                                </h4>
+                                <div class="text-muted small mt-0.5">
+                                    Direction stratégique du cycle de vie du serveur : automatisation des 5 Ères, lancement de la Guerre des 12 Châteaux et ouverture du chantier du Dōjō Impérial [0 : 0].
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-purple-lt font-monospace fs-5 px-3 py-1.5">
+                                    <i class="fa-solid fa-hourglass-start me-1"></i>Âge : J+<?= number_format((float)($serverAgeDays ?? 0), 1, ',', ' ') ?>
+                                </span>
+                                <span class="badge bg-warning text-dark font-monospace fs-5 px-3 py-1.5 shadow-sm">
+                                    <i class="fa-solid fa-flag me-1"></i>Ère Active : <?= (int)($currentEra ?? 1) ?> / 5
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- ── A. FRISE CHRONOLOGIQUE DES 5 ÈRES MONDIALES ── -->
+                        <div class="card border shadow-sm mb-4 bg-light">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                    <h5 class="fw-bold text-dark m-0 d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-timeline text-primary"></i>Chronologie &amp; Paliers Historiques de l'Archipel
+                                    </h5>
+                                    <div class="small text-muted">
+                                        Ouverture du serveur : <strong class="text-dark"><?= date('d/m/Y H:i', (int)($startTimestamp ?? time())) ?></strong>
+                                    </div>
+                                </div>
+
+                                <!-- Stepper 5 Ères -->
+                                <div class="row g-2">
+                                    <?php if (!empty($eras)): foreach ($eras as $eId => $era): 
+                                        $isCompleted = ($era['status'] === 'completed');
+                                        $isActive = ($era['status'] === 'active');
+                                        $isLocked = ($era['status'] === 'locked');
+                                        $borderClass = $isActive ? 'border-warning shadow' : ($isCompleted ? 'border-success' : 'border-secondary opacity-75');
+                                        $cardBg = $isActive ? 'bg-white' : ($isCompleted ? 'bg-white' : 'bg-light');
+                                    ?>
+                                        <div class="col-lg col-md-4 col-sm-6">
+                                            <div class="card h-100 <?= $borderClass ?> <?= $cardBg ?> p-2.5 position-relative">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <span class="badge <?= $era['badge'] ?> px-2 py-1">
+                                                        <i class="fa-solid <?= $era['icon'] ?> me-1"></i>Ère <?= $eId ?>
+                                                    </span>
+                                                    <?php if ($isActive): ?>
+                                                        <span class="badge bg-warning text-dark fw-bold">
+                                                            <i class="fa-solid fa-play me-1"></i>En Cours
+                                                        </span>
+                                                    <?php elseif ($isCompleted): ?>
+                                                        <span class="badge bg-success-lt text-success fw-bold">
+                                                            <i class="fa-solid fa-check me-1"></i>Achevée
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-secondary-lt text-muted">
+                                                            <i class="fa-solid fa-lock me-1"></i>Verrouillée
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
+
+                                                <h6 class="fw-bold mb-1 text-dark" style="font-size:0.875rem;">
+                                                    <?= htmlspecialchars($era['name']) ?>
+                                                </h6>
+                                                <div class="text-primary small fw-semibold mb-1" style="font-size:0.75rem;">
+                                                    <?= htmlspecialchars($era['subtitle']) ?>
+                                                </div>
+                                                <div class="text-muted small mb-2 flex-grow-1" style="font-size:0.75rem; line-height:1.3;">
+                                                    <?= htmlspecialchars($era['description']) ?>
+                                                </div>
+
+                                                <div class="pt-2 border-top d-flex justify-content-between align-items-center mt-auto">
+                                                    <span class="badge bg-light text-secondary border font-monospace" style="font-size:0.7rem;">
+                                                        <?= htmlspecialchars($era['trigger_label']) ?>
+                                                    </span>
+                                                    <?php if (!$isActive): ?>
+                                                        <button type="submit" 
+                                                                formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                                                name="action" value="set_world_era" 
+                                                                onclick="document.getElementById('inputForcedEra').value = '<?= $eId ?>';"
+                                                                class="btn btn-xs btn-outline-secondary py-0.5 px-1.5"
+                                                                title="Forcer le passage à cette Ère">
+                                                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── B. CONSOLE DU DÉCLENCHEMENT DE LA GUERRE DES 12 CHÂTEAUX (ÈRE III) ── -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-xl-6">
+                                <div class="card border <?= !empty($castlesUnlocked) ? 'border-success' : 'border-warning' ?> h-100 shadow-sm">
+                                    <div class="card-header <?= !empty($castlesUnlocked) ? 'bg-success-lt' : 'bg-warning-lt' ?> py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-chess-rook fs-3 <?= !empty($castlesUnlocked) ? 'text-success' : 'text-warning' ?>"></i>
+                                            <div>
+                                                <h5 class="fw-bold m-0 text-dark">Guerre des 12 Châteaux Authentiques (Ère III)</h5>
+                                                <div class="text-muted small">Éveil des 12 forteresses historiques &amp; conquête des Reliques nationales</div>
+                                            </div>
+                                        </div>
+                                        <?php if (!empty($castlesUnlocked)): ?>
+                                            <span class="badge bg-success text-white px-3 py-1.5 fs-6 shadow-sm">
+                                                <i class="fa-solid fa-fire me-1"></i>En Guerre Ouverte
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary text-white px-3 py-1.5 fs-6 shadow-sm">
+                                                <i class="fa-solid fa-lock me-1"></i>Forteresses en Sommeil
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <!-- Actions 1-Clic Maître du Jeu -->
+                                        <div class="p-3 bg-light rounded border mb-3">
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                                <div class="fw-bold text-dark">
+                                                    <i class="fa-solid fa-hand-fist text-danger me-1"></i>Ordre Shōgunal Direct (LiveOps 1-Clic) :
+                                                </div>
+                                                <div class="form-check form-switch m-0">
+                                                    <input class="form-check-input" type="checkbox" id="switchBroadcastCastles" name="broadcast_announcement" value="1" checked>
+                                                    <label class="form-check-label small" for="switchBroadcastCastles">Diffuser Dépêche Impériale</label>
+                                                </div>
+                                            </div>
+                                            <p class="text-muted small mb-3">
+                                                Déploie immédiatement les 12 forteresses de manière homogène à 360° sur la carte et active l'Ère III. Tous les Daimyōs et Alliances peuvent marcher dessus.
+                                            </p>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <button type="submit" 
+                                                        formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                                        name="action" value="trigger_castles_war" 
+                                                        class="btn <?= !empty($castlesUnlocked) ? 'btn-outline-success' : 'btn-warning' ?> shadow-sm fw-bold">
+                                                    <i class="fa-solid fa-chess-rook me-2"></i><?= !empty($castlesUnlocked) ? 'Réactualiser & Répartir les 12 Châteaux' : '🏯 Déclencher la Guerre des 12 Châteaux Immédiatement' ?>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Programmation Calendaire -->
+                                        <div class="row g-3 align-items-center mb-3">
+                                            <div class="col-md-7">
+                                                <label class="form-label fw-bold text-dark small mb-1">
+                                                    <i class="fa-solid fa-calendar-days text-primary me-1"></i>Déclenchement Automatique Planifié :
+                                                </label>
+                                                <div class="text-muted small">Jour de jeu où les donjons s'ouvrent spontanément si non déclenchés manuellement.</div>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-white font-monospace fw-bold">Jour J +</span>
+                                                    <input type="number" class="form-control text-center font-monospace fw-bold" 
+                                                           name="era_castles_auto_day" id="inputCastlesAutoDay" 
+                                                           min="1" max="100" value="<?= (int)($castlesAutoDay ?? 7) ?>">
+                                                    <span class="input-group-text bg-light text-muted">jours</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Synthèse Statistique Châteaux -->
+                                        <div class="row g-2 text-center pt-2 border-top">
+                                            <div class="col-4">
+                                                <div class="p-2 border rounded bg-white">
+                                                    <div class="text-muted small" style="font-size:0.75rem;">Total Forteresses</div>
+                                                    <div class="fw-bold fs-4 text-primary font-monospace"><?= (int)($castlesCount ?? 12) ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="p-2 border rounded bg-white">
+                                                    <div class="text-muted small" style="font-size:0.75rem;">Déployées Carte</div>
+                                                    <div class="fw-bold fs-4 text-success font-monospace"><?= (int)($castlesSpawnedCount ?? 0) ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="p-2 border rounded bg-white">
+                                                    <div class="text-muted small" style="font-size:0.75rem;">Sous Alliance</div>
+                                                    <div class="fw-bold fs-4 text-warning font-monospace"><?= (int)($castlesHeldCount ?? 0) ?></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Radar Télémétrique des 12 Châteaux -->
+                            <div class="col-xl-6">
+                                <div class="card border shadow-sm h-100">
+                                    <div class="card-header bg-light py-2.5 px-3 d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold text-dark small">
+                                            <i class="fa-solid fa-radar text-info me-1.5"></i>Radar Opérationnel des 12 Châteaux Authentiques
+                                        </span>
+                                        <span class="badge bg-secondary-lt font-monospace"><?= (int)($castlesSpawnedCount ?? 0) ?> / 12 Actifs</span>
+                                    </div>
+                                    <div class="card-body p-0" style="max-height: 380px; overflow-y: auto;">
+                                        <div class="table-responsive m-0">
+                                            <table class="table table-vcenter table-sm card-table table-striped table-hover">
+                                                <thead class="sticky-top bg-light">
+                                                    <tr>
+                                                        <th>Château Authentique</th>
+                                                        <th>Position</th>
+                                                        <th>Statut / Souveraineté</th>
+                                                        <th>Relique Ancestrale</th>
+                                                        <th class="text-end">Vue</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php if (!empty($castlesList)): foreach ($castlesList as $cItem): 
+                                                        $isSp = !empty($cItem['is_spawned']);
+                                                        $hasOwner = !empty($cItem['alliance_tag']) || !empty($cItem['owner_name']);
+                                                    ?>
+                                                        <tr>
+                                                            <td>
+                                                                <strong class="text-dark"><?= htmlspecialchars($cItem['name']) ?></strong>
+                                                                <div class="text-muted" style="font-size:0.7rem;"><?= htmlspecialchars($cItem['province'] ?? 'Japon Historique') ?></div>
+                                                            </td>
+                                                            <td class="font-monospace text-primary">
+                                                                [<?= (int)$cItem['coord_x'] ?> : <?= (int)$cItem['coord_y'] ?>]
+                                                            </td>
+                                                            <td>
+                                                                <?php if ($hasOwner && !empty($cItem['alliance_tag'])): ?>
+                                                                    <span class="badge bg-primary text-white font-monospace">
+                                                                        [<?= htmlspecialchars($cItem['alliance_tag']) ?>] <?= htmlspecialchars($cItem['owner_name'] ?? '') ?>
+                                                                    </span>
+                                                                <?php elseif ($isSp): ?>
+                                                                    <span class="badge bg-warning-lt text-warning">Défense Neutre</span>
+                                                                <?php else: ?>
+                                                                    <span class="badge bg-secondary-lt text-muted">Non Déployé</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="small">
+                                                                <span class="text-purple fw-semibold"><?= htmlspecialchars($cItem['relic_name'] ?? 'Relique Impériale') ?></span>
+                                                                <div class="text-muted" style="font-size:0.7rem;">+<?= (int)($cItem['relic_bonus_percent'] ?? 20) ?>% <?= htmlspecialchars($cItem['relic_type'] ?? 'Bonus') ?></div>
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <a href="?page=castle&code=<?= urlencode($cItem['code'] ?? 'himeji') ?>" target="_blank" class="btn btn-xs btn-outline-primary py-0.5 px-2">
+                                                                    <i class="fa-solid fa-eye"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; else: ?>
+                                                        <tr>
+                                                            <td colspan="5" class="text-center text-muted py-3">Aucun château répertorié.</td>
+                                                        </tr>
+                                                    <?php endif; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── C. CONSOLE DU DÉCLENCHEMENT DU DŌJŌ IMPÉRIAL [0:0] (ÈRE IV) ── -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-xl-6">
+                                <div class="card border <?= !empty($dojoUnlocked) ? 'border-danger' : 'border-secondary' ?> h-100 shadow-sm">
+                                    <div class="card-header <?= !empty($dojoUnlocked) ? 'bg-danger-lt' : 'bg-secondary-lt' ?> py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-torii-gate fs-3 <?= !empty($dojoUnlocked) ? 'text-danger' : 'text-secondary' ?>"></i>
+                                            <div>
+                                                <h5 class="fw-bold m-0 text-dark">Chantier du Dōjō Impérial [0 : 0] (Ère IV - Endgame)</h5>
+                                                <div class="text-muted small">Sanctuaire Suprême de Tenchi no Seichi &amp; Sièges Titanesques</div>
+                                            </div>
+                                        </div>
+                                        <?php if (!empty($dojoUnlocked)): ?>
+                                            <span class="badge bg-danger text-white px-3 py-1.5 fs-6 shadow-sm">
+                                                <i class="fa-solid fa-door-open me-1"></i>Sanctuaire Ouvert
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary text-white px-3 py-1.5 fs-6 shadow-sm">
+                                                <i class="fa-solid fa-cloud me-1"></i>Brumes Ancestrales (Scellé)
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <!-- Actions 1-Clic Maître du Jeu -->
+                                        <div class="p-3 bg-light rounded border mb-3">
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                                <div class="fw-bold text-dark">
+                                                    <i class="fa-solid fa-torii-gate text-danger me-1"></i>Ouverture Impériale Directe (LiveOps 1-Clic) :
+                                                </div>
+                                                <div class="form-check form-switch m-0">
+                                                    <input class="form-check-input" type="checkbox" id="switchBroadcastDojo" name="broadcast_announcement" value="1" checked>
+                                                    <label class="form-check-label small" for="switchBroadcastDojo">Diffuser Proclamation Shōgunale</label>
+                                                </div>
+                                            </div>
+                                            <p class="text-muted small mb-3">
+                                                Lève instantanément les brumes mystiques sur la tuile centrale [0 : 0]. Autorise les flottes de convois titanesques et les engins de siège pour ériger la Merveille mondiale.
+                                            </p>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <button type="submit" 
+                                                        formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                                        name="action" value="trigger_imperial_dojo" 
+                                                        class="btn <?= !empty($dojoUnlocked) ? 'btn-outline-danger' : 'btn-danger' ?> shadow-sm fw-bold">
+                                                    <i class="fa-solid fa-torii-gate me-2"></i><?= !empty($dojoUnlocked) ? 'Réactualiser le Sanctuaire [0:0]' : '⛩️ Débloquer le Chantier du Dōjō Impérial [0:0] Immédiatement' ?>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Programmation Calendaire -->
+                                        <div class="row g-3 align-items-center mb-3">
+                                            <div class="col-md-7">
+                                                <label class="form-label fw-bold text-dark small mb-1">
+                                                    <i class="fa-solid fa-calendar-check text-danger me-1"></i>Déblocage Automatique Planifié :
+                                                </label>
+                                                <div class="text-muted small">Jour de jeu où la tuile [0:0] s'ouvre d'elle-même aux coalitions de l'Archipel.</div>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-white font-monospace fw-bold">Jour J +</span>
+                                                    <input type="number" class="form-control text-center font-monospace fw-bold" 
+                                                           name="era_dojo_auto_day" id="inputDojoAutoDay" 
+                                                           min="1" max="200" value="<?= (int)($dojoAutoDay ?? 21) ?>">
+                                                    <span class="input-group-text bg-light text-muted">jours</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Règle de condition d'accès -->
+                                        <div class="alert alert-info py-2 px-3 mb-0 small d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-circle-info fs-4"></i>
+                                            <div>
+                                                <strong>Condition de Revendication :</strong> Une Alliance doit détenir <strong>au minimum 2 Châteaux Authentiques</strong> pour revendiquer le chantier de [0 : 0] et ériger les 10 niveaux.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Moniteur d'Érection de la Merveille -->
+                            <div class="col-xl-6">
+                                <div class="card border shadow-sm h-100">
+                                    <div class="card-header bg-light py-2.5 px-3 d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold text-dark small">
+                                            <i class="fa-solid fa-monument text-danger me-1.5"></i>Télémétrie en Direct de la Merveille [0 : 0]
+                                        </span>
+                                        <a href="?page=imperial_dojo" target="_blank" class="btn btn-xs btn-outline-danger py-0.5 px-2">
+                                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Ouvrir Vue Sanctuaire
+                                        </a>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div>
+                                                <div class="text-muted small">Alliance Suzeraine Dépositaire :</div>
+                                                <div class="fw-bold fs-4 text-dark">
+                                                    <?php if (!empty($dojoState['alliance_name'])): ?>
+                                                        <span class="badge bg-danger text-white fs-5">[<?= htmlspecialchars($dojoState['alliance_tag']) ?>]</span>
+                                                        <?= htmlspecialchars($dojoState['alliance_name']) ?>
+                                                    <?php else: ?>
+                                                        <span class="text-muted fst-italic"><i class="fa-solid fa-hand-holding-heart me-1"></i>Terre Neutre Sacrée (Non Revendiquée)</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="text-muted small">Progression Merveille :</div>
+                                                <span class="badge bg-purple font-monospace fs-4 px-3 py-1">
+                                                    Niveau <?= (int)($dojoCurrLevel ?? 0) ?> / 10
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Jauge de Points de Structure (HP) -->
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center small mb-1">
+                                                <span class="fw-bold text-dark"><i class="fa-solid fa-shield-heart text-danger me-1"></i>Points de Structure (Résistance aux Sièges) :</span>
+                                                <span class="font-monospace text-muted"><?= number_format((int)($dojoHp ?? 0), 0, ',', ' ') ?> / <?= number_format((int)($dojoMaxHp ?? 5000000), 0, ',', ' ') ?> HP (<?= (int)($dojoHpPercent ?? 0) ?>%)</span>
+                                            </div>
+                                            <div class="progress" style="height: 10px;">
+                                                <div class="progress-bar bg-danger" role="progressbar" style="width: <?= (int)($dojoHpPercent ?? 0) ?>%;" aria-valuenow="<?= (int)($dojoHpPercent ?? 0) ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Jauge Matériaux Palier en Cours -->
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center small mb-1">
+                                                <span class="fw-bold text-dark"><i class="fa-solid fa-cubes-stacked text-primary me-1"></i>Stocks de Convois pour Palier <?= (int)($dojoTargetLevel ?? 1) ?> :</span>
+                                                <span class="font-monospace fw-bold text-primary"><?= (int)($dojoStockProgress ?? 0) ?>% Réunis</span>
+                                            </div>
+                                            <div class="progress" style="height: 10px;">
+                                                <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?= (int)($dojoStockProgress ?? 0) ?>%;" aria-valuenow="<?= (int)($dojoStockProgress ?? 0) ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Grille Compacte des Ressources Requises -->
+                                        <div class="row g-2 text-center" style="font-size:0.75rem;">
+                                            <div class="col-3">
+                                                <div class="p-1.5 border rounded bg-light">
+                                                    <div class="text-muted">Bois</div>
+                                                    <div class="fw-bold font-monospace text-dark"><?= number_format((int)($dojoState['stock_wood'] ?? 0), 0, ',', ' ') ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="p-1.5 border rounded bg-light">
+                                                    <div class="text-muted">Granit</div>
+                                                    <div class="fw-bold font-monospace text-dark"><?= number_format((int)($dojoState['stock_granite'] ?? 0), 0, ',', ' ') ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="p-1.5 border rounded bg-light">
+                                                    <div class="text-muted">Fer</div>
+                                                    <div class="fw-bold font-monospace text-dark"><?= number_format((int)($dojoState['stock_metal'] ?? 0), 0, ',', ' ') ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="p-1.5 border rounded bg-light">
+                                                    <div class="text-muted">Riz</div>
+                                                    <div class="fw-bold font-monospace text-dark"><?= number_format((int)($dojoState['stock_rice'] ?? 0), 0, ',', ' ') ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="p-1.5 border rounded bg-light">
+                                                    <div class="text-muted">Poutres Cèdre</div>
+                                                    <div class="fw-bold font-monospace text-dark"><?= number_format((int)($dojoState['stock_beams'] ?? 0), 0, ',', ' ') ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="p-1.5 border rounded bg-light">
+                                                    <div class="text-muted">Tuiles Oni</div>
+                                                    <div class="fw-bold font-monospace text-dark"><?= number_format((int)($dojoState['stock_oni_tiles'] ?? 0), 0, ',', ' ') ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="p-1.5 border rounded bg-light">
+                                                    <div class="text-muted">Ryō d'Or</div>
+                                                    <div class="fw-bold font-monospace text-dark"><?= number_format((int)($dojoState['stock_gold'] ?? 0), 0, ',', ' ') ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="p-1.5 border rounded bg-light">
+                                                    <div class="text-muted">Châteaux Tenus</div>
+                                                    <div class="fw-bold font-monospace text-<?= ($dojoState['castles_owned'] ?? 0) >= 2 ? 'success' : 'danger' ?>"><?= (int)($dojoState['castles_owned'] ?? 0) ?> / 2 requis</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── D. PARAMÈTRES GLOBAUX & DIRECTIVES DU CYCLE DE VIE DU SERVEUR ── -->
+                        <div class="card border shadow-sm">
+                            <div class="card-header bg-light py-3 px-4 d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold m-0 text-dark">
+                                    <i class="fa-solid fa-sliders text-primary me-2"></i>Directives Générales &amp; Forçage Manuel de l'Ère Active
+                                </h5>
+                                <span class="badge bg-primary-lt font-monospace fs-6 px-3 py-1">Contrôles Maître du Jeu (GM)</span>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="row g-4 align-items-center">
+                                    <!-- Date de démarrage du monde -->
+                                    <div class="col-lg-4 col-md-6">
+                                        <label class="form-label fw-bold text-dark small mb-1">
+                                            <i class="fa-solid fa-calendar-plus text-primary me-1"></i>Date &amp; Heure d'Ouverture du Serveur :
+                                        </label>
+                                        <input type="datetime-local" class="form-control font-monospace" 
+                                               name="server_start_date" id="inputServerStartDate" 
+                                               value="<?= htmlspecialchars((string)($serverStartDate ?? date('Y-m-d\TH:i'))) ?>">
+                                        <div class="text-muted small mt-1">Sert de référence zéro (J+0) pour le calcul de l'âge et la cadence automatique.</div>
+                                    </div>
+
+                                    <!-- Switch Progression Automatique -->
+                                    <div class="col-lg-4 col-md-6">
+                                        <div class="form-check form-switch pt-2">
+                                            <input class="form-check-input" type="checkbox" id="switchEraAutoProgression" name="era_auto_progression_enabled" value="1" <?= !empty($autoProgression) ? 'checked' : '' ?>>
+                                            <label class="form-check-label fw-bold text-dark" for="switchEraAutoProgression">
+                                                Progression Automatique Calendaire
+                                            </label>
+                                        </div>
+                                        <div class="text-muted small mt-1">Déclenche automatiquement les Ères selon l'âge du monde (J+<?= (int)($castlesAutoDay ?? 7) ?> pour Châteaux, J+<?= (int)($dojoAutoDay ?? 21) ?> pour Dōjō).</div>
+                                    </div>
+
+                                    <!-- Switch Broadcast Annonces -->
+                                    <div class="col-lg-4 col-md-6">
+                                        <div class="form-check form-switch pt-2">
+                                            <input class="form-check-input" type="checkbox" id="switchEraBroadcast" name="era_broadcast_announcements" value="1" <?= !empty($broadcastAnnounce) ? 'checked' : '' ?>>
+                                            <label class="form-check-label fw-bold text-dark" for="switchEraBroadcast">
+                                                Dépêches Impériales LiveOps
+                                            </label>
+                                        </div>
+                                        <div class="text-muted small mt-1">Affiche une bannière d'alerte mondiale solennelle à tous les joueurs lors des transitions d'ère.</div>
+                                    </div>
+
+                                    <!-- Forçage Direct de l'Ère -->
+                                    <div class="col-12 pt-3 border-top">
+                                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                            <div>
+                                                <label class="form-label fw-bold text-dark mb-0">
+                                                    <i class="fa-solid fa-gavel text-warning me-1"></i>Sélecteur d'Ère Active (Forçage Manuel Shōgunal) :
+                                                </label>
+                                                <div class="text-muted small">Sélectionnez manuellement l'Ère souhaitée pour forcer instantanément l'état du monde.</div>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <select class="form-select font-monospace fw-bold" name="server_current_era" id="selectServerCurrentEra" style="width: auto;">
+                                                    <option value="1" <?= ($currentEra ?? 1) == 1 ? 'selected' : '' ?>>Ère I : L'Aube des Clans (J+0)</option>
+                                                    <option value="2" <?= ($currentEra ?? 1) == 2 ? 'selected' : '' ?>>Ère II : Expansion Territoriale (J+3)</option>
+                                                    <option value="3" <?= ($currentEra ?? 1) == 3 ? 'selected' : '' ?>>Ère III : La Guerre des 12 Châteaux</option>
+                                                    <option value="4" <?= ($currentEra ?? 1) == 4 ? 'selected' : '' ?>>Ère IV : Le Dōjō Impérial [0:0]</option>
+                                                    <option value="5" <?= ($currentEra ?? 1) == 5 ? 'selected' : '' ?>>Ère V : L'Unification Impériale</option>
+                                                </select>
+                                                <input type="hidden" name="world_era" id="inputForcedEra" value="<?= (int)($currentEra ?? 1) ?>">
+                                                <button type="submit" 
+                                                        formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                                        name="action" value="set_world_era" 
+                                                        onclick="document.getElementById('inputForcedEra').value = document.getElementById('selectServerCurrentEra').value;"
+                                                        class="btn btn-warning shadow-sm fw-bold">
+                                                    <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Appliquer l'Ère
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Pied de Carte Commun : Sauvegarde Globale Unique -->
             <div class="card-footer bg-light d-flex justify-content-between align-items-center flex-wrap gap-2 py-3 px-4 border-top">
                 <div class="text-muted small d-flex align-items-center gap-1.5">
                     <i class="fa-solid fa-circle-info text-primary"></i>
-                    <span>Toutes les modifications apportées aux onglets 1 à 6 sont enregistrées <strong>simultanément</strong>.</span>
+                    <span>Toutes les modifications apportées aux onglets 1 à 7 sont enregistrées <strong>simultanément</strong>.</span>
                 </div>
                 <button type="submit" class="btn btn-primary px-4 shadow-sm d-flex align-items-center gap-2">
                     <i class="fa-solid fa-floppy-disk"></i>

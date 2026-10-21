@@ -1,0 +1,249 @@
+<?php
+/**
+ * Test Automatisé : Déroulement du Jeu & Chronologie des Ères Mondiales
+ * Fichier : tests/test_world_timeline_lifecycle.php
+ */
+declare(strict_types=1);
+
+require_once __DIR__ . '/../core/Database.php';
+require_once __DIR__ . '/../core/GameConfig.php';
+require_once __DIR__ . '/../core/GameStudioEngine.php';
+require_once __DIR__ . '/../core/CastleEngine.php';
+require_once __DIR__ . '/../core/ImperialDojoEngine.php';
+
+function assertTest(bool $condition, string $title): void {
+    if ($condition) {
+        echo "  [PASS] " . $title . "\n";
+    } else {
+        echo "  [FAIL] " . $title . "\n";
+        exit(1);
+    }
+}
+
+echo "========================================================================\n";
+echo "  BANC DE TESTS : DÉROULEMENT DU JEU & CHRONOLOGIE DES ÈRES (GAME STUDIO)\n";
+echo "========================================================================\n\n";
+
+// Configuration SQLite en mémoire
+$sqlite = new PDO('sqlite::memory:');
+$sqlite->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$sqlite->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+$sqlite->sqliteCreateFunction('UNIX_TIMESTAMP', 'time');
+$sqlite->sqliteCreateFunction('NOW', fn() => date('Y-m-d H:i:s'));
+Database::setConnection($sqlite);
+
+// Schéma de test minimal
+$sqlite->exec("CREATE TABLE game_settings (
+    setting_key TEXT PRIMARY KEY,
+    setting_value TEXT,
+    setting_type TEXT DEFAULT 'string',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)");
+
+$sqlite->exec("CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    alliance_id INTEGER DEFAULT NULL,
+    is_bot INTEGER DEFAULT 0,
+    created_at INTEGER DEFAULT 0
+)");
+
+$sqlite->exec("CREATE TABLE alliances (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    tag TEXT,
+    leader_id INTEGER
+)");
+
+$sqlite->exec("CREATE TABLE planets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    user_id INTEGER DEFAULT NULL,
+    coord_x INTEGER DEFAULT 0,
+    coord_y INTEGER DEFAULT 0,
+    planet_type TEXT DEFAULT 'colony',
+    metal INTEGER DEFAULT 0,
+    crystal INTEGER DEFAULT 0,
+    deuterium INTEGER DEFAULT 0,
+    energy_used INTEGER DEFAULT 0,
+    energy_max INTEGER DEFAULT 100,
+    metal_max INTEGER DEFAULT 100000,
+    crystal_max INTEGER DEFAULT 100000,
+    deuterium_max INTEGER DEFAULT 100000,
+    is_capital INTEGER DEFAULT 0,
+    last_resource_update INTEGER DEFAULT 0,
+    created_at INTEGER DEFAULT 0
+)");
+
+$sqlite->exec("CREATE TABLE authentic_castles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    code TEXT,
+    province TEXT,
+    description TEXT,
+    image TEXT,
+    relic_name TEXT,
+    relic_type TEXT,
+    relic_bonus_percent INTEGER DEFAULT 20,
+    coord_x INTEGER DEFAULT 0,
+    coord_y INTEGER DEFAULT 0,
+    default_x INTEGER DEFAULT 0,
+    default_y INTEGER DEFAULT 0,
+    is_spawned INTEGER DEFAULT 0,
+    planet_id INTEGER DEFAULT NULL,
+    created_at INTEGER DEFAULT 0
+)");
+
+$sqlite->exec("CREATE TABLE imperial_dojo (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    coord_x INTEGER DEFAULT 0,
+    coord_y INTEGER DEFAULT 0,
+    controlling_alliance_id INTEGER DEFAULT NULL,
+    current_level INTEGER DEFAULT 0,
+    target_level INTEGER DEFAULT 1,
+    status TEXT DEFAULT 'unclaimed',
+    health_points INTEGER DEFAULT 0,
+    max_health_points INTEGER DEFAULT 5000000,
+    stock_wood INTEGER DEFAULT 0,
+    stock_granite INTEGER DEFAULT 0,
+    stock_metal INTEGER DEFAULT 0,
+    stock_rice INTEGER DEFAULT 0,
+    stock_beams INTEGER DEFAULT 0,
+    stock_tiles INTEGER DEFAULT 0,
+    stock_oni_tiles INTEGER DEFAULT 0,
+    stock_gold INTEGER DEFAULT 0,
+    construction_started_at INTEGER DEFAULT NULL,
+    construction_finishes_at INTEGER DEFAULT NULL,
+    created_at INTEGER DEFAULT 0,
+    updated_at INTEGER DEFAULT 0
+)");
+
+$sqlite->exec("CREATE TABLE oases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    coord_x INTEGER DEFAULT 0,
+    coord_y INTEGER DEFAULT 0,
+    owner_planet_id INTEGER DEFAULT NULL
+)");
+
+$sqlite->exec("CREATE TABLE oasis_units (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    oasis_id INTEGER,
+    unit_code TEXT,
+    count INTEGER DEFAULT 0,
+    is_wild INTEGER DEFAULT 1
+)");
+
+// Insertion de quelques châteaux authentiques
+$sqlite->exec("INSERT INTO authentic_castles (id, name, code, province, relic_name, relic_type, relic_bonus_percent, default_x, default_y, is_spawned)
+VALUES 
+(1, 'Château de Himeji', 'himeji', 'Harima', 'Bannière du Héron Blanc', 'Vitesse de marche', 25, 12, 10, 0),
+(2, 'Château de Matsumoto', 'matsumoto', 'Shinano', 'Corbeau d''Ébène', 'Défense des remparts', 30, -15, 8, 0),
+(3, 'Château de Hikone', 'hikone', 'Omi', 'Armure du Démon Rouge', 'Attaque d''infanterie', 20, 5, -18, 0)");
+
+echo "[TEST 1] Vérification de l'initialisation et des méthodes de GameConfig pour les Ères...\n";
+assertTest(GameConfig::getServerCurrentEra() === 1, "Ère initiale par défaut = 1");
+assertTest(GameConfig::isCastlesWarUnlocked() === false, "Guerre des 12 Châteaux verrouillée par défaut");
+assertTest(GameConfig::isImperialDojoUnlocked() === false, "Dōjō Impérial verrouillé par défaut");
+assertTest(GameConfig::getServerAgeDays() >= 0.0, "Calcul de l'âge du serveur en jours fonctionnel");
+
+echo "\n[TEST 2] Extraction de la télémétrie du cycle de vie via GameStudioEngine::getWorldLifecycleData()...\n";
+$gameStudio = new GameStudioEngine();
+$data = $gameStudio->getWorldLifecycleData();
+
+assertTest(isset($data['currentEra']) && $data['currentEra'] === 1, "currentEra présent dans la télémétrie");
+assertTest(isset($data['serverAgeDays']), "serverAgeDays présent dans la télémétrie");
+assertTest(isset($data['eras']) && count($data['eras']) === 5, "Les 5 Ères Féodales sont présentes");
+assertTest($data['eras'][1]['status'] === 'active', "Ère 1 active");
+assertTest($data['eras'][3]['status'] === 'locked', "Ère 3 verrouillée");
+assertTest(isset($data['castlesList']) && count($data['castlesList']) === 3, "Radar des châteaux authentiques alimenté");
+assertTest(isset($data['dojoState']), "Moniteur du Dōjō Impérial initialisé");
+assertTest($data['dojoCurrLevel'] === 0, "Niveau initial du Dōjō = 0");
+assertTest($data['dojoMaxHp'] === 5000000, "HP Max du Dōjō = 5 000 000");
+
+echo "\n[TEST 3] Sauvegarde des paramètres de chronologie et d'automatisation des Ères...\n";
+$saveRes = $gameStudio->saveEraSettings([
+    'era_auto_progression_enabled' => '1',
+    'era_castles_auto_day'         => '10',
+    'era_dojo_auto_day'            => '25',
+    'era_broadcast_announcements'  => '1',
+    'server_current_era'           => '2'
+]);
+assertTest($saveRes['success'] === true, "saveEraSettings() retourne un succès");
+assertTest(GameConfig::getServerCurrentEra() === 2, "L'Ère courante est mise à jour à 2");
+assertTest((int)GameConfig::get('era_castles_auto_day') === 10, "era_castles_auto_day sauvegardé à 10");
+assertTest((int)GameConfig::get('era_dojo_auto_day') === 25, "era_dojo_auto_day sauvegardé à 25");
+
+echo "\n[TEST 4] Déclenchement 1-clic de la Guerre des 12 Châteaux (Ère III)...\n";
+$warRes = $gameStudio->triggerCastlesWar(false);
+assertTest($warRes['success'] === true, "triggerCastlesWar() exécuté avec succès");
+assertTest(GameConfig::isCastlesWarUnlocked() === true, "era_castles_unlocked activé");
+assertTest(GameConfig::getServerCurrentEra() >= 3, "Le monde bascule au minimum en Ère III");
+
+// Vérifier que les châteaux ont été déployés
+$refreshedData = $gameStudio->getWorldLifecycleData();
+assertTest($refreshedData['castlesUnlocked'] === true, "castlesUnlocked reflété dans getWorldLifecycleData");
+assertTest($refreshedData['eras'][3]['status'] === 'active', "L'Ère III est désormais active");
+
+echo "\n[TEST 5] Déclenchement 1-clic du Chantier du Dōjō Impérial [0:0] (Ère IV)...\n";
+$dojoRes = $gameStudio->triggerImperialDojo(false);
+assertTest($dojoRes['success'] === true, "triggerImperialDojo() exécuté avec succès");
+assertTest(GameConfig::isImperialDojoUnlocked() === true, "era_dojo_unlocked activé");
+assertTest(GameConfig::getServerCurrentEra() >= 4, "Le monde bascule au minimum en Ère IV");
+
+$refreshedData2 = $gameStudio->getWorldLifecycleData();
+assertTest($refreshedData2['dojoUnlocked'] === true, "dojoUnlocked reflété dans getWorldLifecycleData");
+assertTest($refreshedData2['eras'][4]['status'] === 'active', "L'Ère IV est active");
+assertTest($refreshedData2['eras'][3]['status'] === 'completed', "L'Ère III est marquée achevée");
+
+echo "\n[TEST 6] Forçage manuel de l'Ère (Override GM)...\n";
+$setEraRes = $gameStudio->setWorldEra(5, false);
+assertTest($setEraRes['success'] === true, "setWorldEra(5) exécuté avec succès");
+assertTest(GameConfig::getServerCurrentEra() === 5, "Ère 5 active");
+$refreshedData3 = $gameStudio->getWorldLifecycleData();
+assertTest($refreshedData3['eras'][5]['status'] === 'active', "Ère V marquée active");
+
+echo "\n[TEST 7] Intégration de getWorldLifecycleData dans getWorldConfigData()...\n";
+$fullWorldConfig = $gameStudio->getWorldConfigData();
+assertTest(isset($fullWorldConfig['currentEra']), "currentEra présent dans getWorldConfigData");
+assertTest(isset($fullWorldConfig['castlesUnlocked']), "castlesUnlocked présent dans getWorldConfigData");
+assertTest(isset($fullWorldConfig['dojoUnlocked']), "dojoUnlocked présent dans getWorldConfigData");
+assertTest(isset($fullWorldConfig['castlesList']), "castlesList présent dans getWorldConfigData");
+assertTest(isset($fullWorldConfig['dojoState']), "dojoState présent dans getWorldConfigData");
+
+echo "\n[TEST 8] Rendu HTML de l'Onglet 7 dans general_world_config.php...\n";
+$viewPath = __DIR__ . '/../views/gamestudio/general_world_config.php';
+$viewContent = file_get_contents($viewPath);
+
+assertTest(str_contains($viewContent, '7. Déroulement du Jeu &amp; Ères'), "Lien d'onglet 7 présent dans la barre de navigation");
+assertTest(str_contains($viewContent, 'id="section-world-timeline-config"'), "Conteneur ancre de l'onglet 7 présent");
+assertTest(str_contains($viewContent, 'Chronologie &amp; Paliers Historiques de l\'Archipel'), "Titre de la Frise Chronologique présent");
+assertTest(str_contains($viewContent, 'Guerre des 12 Châteaux Authentiques (Ère III)'), "Console Guerre des 12 Châteaux présente");
+assertTest(str_contains($viewContent, 'value="trigger_castles_war"'), "Bouton d'action trigger_castles_war présent");
+assertTest(str_contains($viewContent, 'Radar Opérationnel des 12 Châteaux Authentiques'), "Radar des 12 Châteaux présent");
+assertTest(str_contains($viewContent, 'Chantier du Dōjō Impérial [0 : 0] (Ère IV - Endgame)'), "Console Dōjō Impérial présente");
+assertTest(str_contains($viewContent, 'value="trigger_imperial_dojo"'), "Bouton d'action trigger_imperial_dojo présent");
+assertTest(str_contains($viewContent, 'Télémétrie en Direct de la Merveille [0 : 0]'), "Moniteur de la Merveille [0:0] présent");
+assertTest(str_contains($viewContent, 'name="era_auto_progression_enabled"'), "Switch de progression automatique présent");
+assertTest(str_contains($viewContent, 'name="era_castles_auto_day"'), "Champ de jour auto pour châteaux présent");
+assertTest(str_contains($viewContent, 'name="era_dojo_auto_day"'), "Champ de jour auto pour dojo présent");
+assertTest(str_contains($viewContent, 'id="selectServerCurrentEra"'), "Sélecteur de forçage de l'Ère active présent");
+assertTest(str_contains($viewContent, 'onglets 1 à 7 sont enregistrées'), "Mention des onglets 1 à 7 dans le footer présente");
+
+echo "\n[TEST 9] Vérification du contrôleur POST dans views/gamestudio.php...\n";
+$controllerContent = file_get_contents(__DIR__ . '/../views/gamestudio.php');
+assertTest(str_contains($controllerContent, "saveEraSettings(\$_POST)"), "saveEraSettings appelé dans save_all_world_settings");
+assertTest(str_contains($controllerContent, "'trigger_castles_war'"), "Action trigger_castles_war gérée");
+assertTest(str_contains($controllerContent, "'trigger_imperial_dojo'"), "Action trigger_imperial_dojo gérée");
+assertTest(str_contains($controllerContent, "'set_world_era'"), "Action set_world_era gérée");
+
+echo "\n[TEST 10] Vérification des endpoints d'API dans api/admin.php...\n";
+$apiContent = file_get_contents(__DIR__ . '/../api/admin.php');
+assertTest(str_contains($apiContent, "case 'trigger_castles_war':"), "Endpoint API trigger_castles_war présent");
+assertTest(str_contains($apiContent, "case 'trigger_imperial_dojo':"), "Endpoint API trigger_imperial_dojo présent");
+assertTest(str_contains($apiContent, "case 'set_world_era':"), "Endpoint API set_world_era présent");
+assertTest(str_contains($apiContent, "case 'get_world_timeline':"), "Endpoint API get_world_timeline présent");
+
+echo "\n========================================================================\n";
+echo " TOUS LES TESTS DU DÉROULEMENT DU JEU (ÈRE & ENDGAME) SONT 100% AU VERT !\n";
+echo "========================================================================\n";

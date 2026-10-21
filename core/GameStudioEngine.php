@@ -633,7 +633,7 @@ class GameStudioEngine {
             $botsList = $botEngine->getBots();
         } catch (Throwable $e) {}
 
-        return [
+        $baseConfig = [
             'worldRadius'           => $radius,
             'totalTiles'            => $totalTiles,
             'gridDimension'         => $gridDimension,
@@ -689,6 +689,11 @@ class GameStudioEngine {
             // Régénération & Préservation des Joueurs Humains (Item 6)
             'preserveHumanUsers'     => (bool)GameConfig::get('preserve_human_users_on_reset', true)
         ];
+
+        // ── Déroulement du Jeu & Chronologie des Ères Féodales (Item 7) ──
+        $lifecycleData = $this->getWorldLifecycleData();
+
+        return array_merge($baseConfig, $lifecycleData);
     }
 
     /**
@@ -1013,6 +1018,359 @@ class GameStudioEngine {
         GameConfig::set('preserve_human_users_on_reset', $preserveHumanUsers ? 1 : 0);
         $worldGen = new WorldGenerator($this->db);
         return $worldGen->resetUniverse($adminPassword, $neutralCount, $deployBots, $preserveHumanUsers);
+    }
+
+    /**
+     * Récupère les données télémétriques et l'état du Déroulement du Monde (Item 7)
+     */
+    public function getWorldLifecycleData(): array {
+        require_once __DIR__ . '/GameConfig.php';
+        require_once __DIR__ . '/CastleEngine.php';
+        require_once __DIR__ . '/ImperialDojoEngine.php';
+
+        $startTimestamp = GameConfig::getServerStartTimestamp();
+        $serverAgeDays = GameConfig::getServerAgeDays();
+        $currentEra = GameConfig::getServerCurrentEra();
+        $autoProgression = (bool)GameConfig::get('era_auto_progression_enabled', true);
+        $castlesAutoDay = (int)GameConfig::get('era_castles_auto_day', 7);
+        $castlesUnlocked = GameConfig::isCastlesWarUnlocked();
+        $dojoAutoDay = (int)GameConfig::get('era_dojo_auto_day', 21);
+        $dojoUnlocked = GameConfig::isImperialDojoUnlocked();
+        $broadcastAnnounce = (bool)GameConfig::get('era_broadcast_announcements', true);
+
+        // Si la progression automatique est active, vérification des seuils
+        if ($autoProgression) {
+            if (!$castlesUnlocked && $serverAgeDays >= $castlesAutoDay) {
+                $this->triggerCastlesWar($broadcastAnnounce);
+                $castlesUnlocked = true;
+                if ($currentEra < 3) {
+                    $currentEra = 3;
+                    GameConfig::set('server_current_era', 3);
+                }
+            }
+            if (!$dojoUnlocked && $serverAgeDays >= $dojoAutoDay) {
+                $this->triggerImperialDojo($broadcastAnnounce);
+                $dojoUnlocked = true;
+                if ($currentEra < 4) {
+                    $currentEra = 4;
+                    GameConfig::set('server_current_era', 4);
+                }
+            }
+        }
+
+        // Définition des 5 Ères Féodales
+        $eras = [
+            1 => [
+                'id' => 1,
+                'name' => "L'Aube des Clans",
+                'subtitle' => 'Éclosion Rurale & Paix Débutante',
+                'badge' => 'bg-teal-lt text-teal',
+                'icon' => 'fa-seedling',
+                'trigger_label' => 'J+0 (Lancement du Monde)',
+                'trigger_day' => 0,
+                'description' => "Fondation des premiers fiefs ruraux, développement des parcelles de riz, bois, pierre et fer sous la bienveillance du Shōgun.",
+                'status' => ($currentEra > 1) ? 'completed' : (($currentEra === 1) ? 'active' : 'locked')
+            ],
+            2 => [
+                'id' => 2,
+                'name' => 'Expansion Territoriale',
+                'subtitle' => 'Conquête des Oasis & Alliances',
+                'badge' => 'bg-blue-lt text-blue',
+                'icon' => 'fa-compass',
+                'trigger_label' => 'J+3 (Fin de protection)',
+                'trigger_day' => 3,
+                'description' => "Fin de l'immunité débutant, soumission des bêtes sauvages dans les oasis, création des grandes coalitions et premiers raids.",
+                'status' => ($currentEra > 2) ? 'completed' : (($currentEra === 2) ? 'active' : 'locked')
+            ],
+            3 => [
+                'id' => 3,
+                'name' => 'La Guerre des 12 Châteaux',
+                'subtitle' => 'Éveil des Donjons & Reliques',
+                'badge' => 'bg-amber-lt text-amber',
+                'icon' => 'fa-chess-rook',
+                'trigger_label' => "J+{$castlesAutoDay} (Éveil des Donjons)",
+                'trigger_day' => $castlesAutoDay,
+                'description' => "Les portes des 12 Châteaux Authentiques s'ouvrent à 360°. Les alliances s'affrontent pour capturer les reliques nationales et asseoir leur suprématie.",
+                'status' => ($currentEra > 3) ? 'completed' : (($currentEra === 3) ? 'active' : 'locked'),
+                'is_unlocked' => $castlesUnlocked
+            ],
+            4 => [
+                'id' => 4,
+                'name' => 'Le Dōjō Impérial [0 : 0]',
+                'subtitle' => 'Sanctuaire Suprême & Sièges Titanesques',
+                'badge' => 'bg-purple-lt text-purple',
+                'icon' => 'fa-torii-gate',
+                'trigger_label' => "J+{$dojoAutoDay} (Ouverture de Tenchi no Seichi)",
+                'trigger_day' => $dojoAutoDay,
+                'description' => "La brume se dissipe sur la tuile centrale [0 : 0]. Les coalitions détenant au moins 2 châteaux acheminent des convois titanesques pour ériger les 10 niveaux du Sanctuaire.",
+                'status' => ($currentEra > 4) ? 'completed' : (($currentEra === 4) ? 'active' : 'locked'),
+                'is_unlocked' => $dojoUnlocked
+            ],
+            5 => [
+                'id' => 5,
+                'name' => "L'Unification Impériale",
+                'subtitle' => 'Proclamation du Nouveau Shōgun',
+                'badge' => 'bg-yellow-lt text-yellow',
+                'icon' => 'fa-crown',
+                'trigger_label' => 'Niveau 10 du Dōjō Érigé',
+                'trigger_day' => null,
+                'description' => "Victoire mondiale définitive. Le Daimyō victorieux est proclamé Shōgun suprême de tout l'Archipel, scellant l'unification sous une bannière immortelle.",
+                'status' => ($currentEra === 5) ? 'active' : 'locked'
+            ],
+        ];
+
+        // ── Télémétrie des 12 Châteaux Authentiques ──
+        $rawCastles = [];
+        $castlesCount = 0;
+        $castlesSpawnedCount = 0;
+        $castlesHeldCount = 0;
+        $castlesByAlliance = [];
+
+        try {
+            $castleEngine = new CastleEngine();
+            $rawCastles = $castleEngine->getAllCastles();
+            $castlesCount = count($rawCastles);
+
+            foreach ($rawCastles as &$c) {
+                $isSpawned = !empty($c['is_spawned']);
+                if ($isSpawned) $castlesSpawnedCount++;
+                
+                $allianceName = null;
+                $allianceTag = null;
+                $ownerName = null;
+                if (!empty($c['planet_id'])) {
+                    try {
+                        $stP = $this->db->prepare("
+                            SELECT p.name as planet_name, u.username, a.id as alliance_id, a.name as alliance_name, a.tag as alliance_tag
+                            FROM planets p
+                            LEFT JOIN users u ON p.user_id = u.id
+                            LEFT JOIN alliances a ON u.alliance_id = a.id
+                            WHERE p.id = ?
+                        ");
+                        $stP->execute([(int)$c['planet_id']]);
+                        if ($pInfo = $stP->fetch(PDO::FETCH_ASSOC)) {
+                            $ownerName = $pInfo['username'];
+                            $allianceName = $pInfo['alliance_name'];
+                            $allianceTag = $pInfo['alliance_tag'];
+                            if ($allianceTag) {
+                                $castlesHeldCount++;
+                                $castlesByAlliance[$allianceTag] = ($castlesByAlliance[$allianceTag] ?? 0) + 1;
+                            }
+                        }
+                    } catch (Throwable $e) {}
+                }
+                $c['owner_name'] = $ownerName;
+                $c['alliance_name'] = $allianceName;
+                $c['alliance_tag'] = $allianceTag;
+            }
+            unset($c);
+        } catch (Throwable $e) {}
+
+        // ── Télémétrie du Dōjō Impérial [0:0] ──
+        $dojoState = [];
+        $currLvl = 0;
+        $targetLvl = 1;
+        $targetLvlConfig = ImperialDojoEngine::LEVEL_CONFIG[1] ?? [];
+        $stockProgress = 0;
+        $dojoHp = 0;
+        $dojoMaxHp = 5000000;
+        $dojoHpPercent = 0;
+
+        try {
+            $dojoEngine = new ImperialDojoEngine($this->db);
+            $dojoState = $dojoEngine->getDojoState();
+            $currLvl = (int)($dojoState['current_level'] ?? 0);
+            $targetLvl = max(1, min(10, (int)($dojoState['target_level'] ?? 1)));
+            $targetLvlConfig = ImperialDojoEngine::LEVEL_CONFIG[$targetLvl] ?? ImperialDojoEngine::LEVEL_CONFIG[1];
+            
+            $stockProgress = $dojoEngine->calculateStockProgress($dojoState, $targetLvl);
+            $dojoHp = (int)($dojoState['health_points'] ?? 0);
+            $dojoMaxHp = max(1, (int)($dojoState['max_health_points'] ?? 5000000));
+            $dojoHpPercent = min(100, (int)round(($dojoHp / $dojoMaxHp) * 100));
+
+            if ($currLvl >= 10 && $currentEra < 5) {
+                $currentEra = 5;
+                GameConfig::set('server_current_era', 5);
+                $eras[5]['status'] = 'active';
+                $eras[4]['status'] = 'completed';
+            }
+        } catch (Throwable $e) {}
+
+        return [
+            'startTimestamp'            => $startTimestamp,
+            'serverStartDate'           => date('Y-m-d\TH:i', $startTimestamp),
+            'serverAgeDays'             => $serverAgeDays,
+            'currentEra'                => $currentEra,
+            'autoProgression'           => $autoProgression,
+            'castlesAutoDay'            => $castlesAutoDay,
+            'castlesUnlocked'           => $castlesUnlocked,
+            'dojoAutoDay'               => $dojoAutoDay,
+            'dojoUnlocked'              => $dojoUnlocked,
+            'broadcastAnnounce'         => $broadcastAnnounce,
+            'eras'                      => $eras,
+            // 12 Châteaux
+            'castlesList'               => $rawCastles,
+            'castlesCount'              => $castlesCount,
+            'castlesSpawnedCount'       => $castlesSpawnedCount,
+            'castlesHeldCount'          => $castlesHeldCount,
+            'castlesByAlliance'         => $castlesByAlliance,
+            // Dōjō Impérial
+            'dojoState'                 => $dojoState,
+            'dojoCurrLevel'             => $currLvl,
+            'dojoTargetLevel'           => $targetLvl,
+            'dojoTargetConfig'          => $targetLvlConfig,
+            'dojoStockProgress'         => $stockProgress,
+            'dojoHp'                    => $dojoHp,
+            'dojoMaxHp'                 => $dojoMaxHp,
+            'dojoHpPercent'             => $dojoHpPercent,
+        ];
+    }
+
+    /**
+     * Enregistre les paramètres généraux de chronologie et d'automatisation des Ères (Item 7)
+     */
+    public function saveEraSettings(array $post): array {
+        $autoProgression = !empty($post['era_auto_progression_enabled']);
+        $castlesAutoDay = max(1, min(100, (int)($post['era_castles_auto_day'] ?? 7)));
+        $castlesUnlocked = !empty($post['era_castles_unlocked']);
+        $dojoAutoDay = max(1, min(200, (int)($post['era_dojo_auto_day'] ?? 21)));
+        $dojoUnlocked = !empty($post['era_dojo_unlocked']);
+        $broadcast = !empty($post['era_broadcast_announcements']);
+        $era = max(1, min(5, (int)($post['server_current_era'] ?? 1)));
+
+        GameConfig::set('era_auto_progression_enabled', $autoProgression ? 1 : 0);
+        GameConfig::set('era_castles_auto_day', $castlesAutoDay);
+        GameConfig::set('era_castles_unlocked', $castlesUnlocked ? 1 : 0);
+        GameConfig::set('era_dojo_auto_day', $dojoAutoDay);
+        GameConfig::set('era_dojo_unlocked', $dojoUnlocked ? 1 : 0);
+        GameConfig::set('era_broadcast_announcements', $broadcast ? 1 : 0);
+        GameConfig::set('server_current_era', $era);
+
+        if (!empty($post['server_start_date'])) {
+            $ts = strtotime((string)$post['server_start_date']);
+            if ($ts && $ts > 0) {
+                GameConfig::set('server_start_timestamp', $ts);
+            }
+        }
+
+        return [
+            'success' => true,
+            'message' => "Paramètres de chronologie et déroulement des Ères enregistrés avec succès."
+        ];
+    }
+
+    /**
+     * Déclenche immédiatement la Guerre des 12 Châteaux (Item 7)
+     */
+    public function triggerCastlesWar(bool $broadcast = true): array {
+        require_once __DIR__ . '/CastleEngine.php';
+        $castleEngine = new CastleEngine();
+        $deployRes = $castleEngine->deployCastlesHomogeneously();
+        
+        GameConfig::set('era_castles_unlocked', 1);
+        $currentEra = GameConfig::getServerCurrentEra();
+        if ($currentEra < 3) {
+            GameConfig::set('server_current_era', 3);
+        }
+
+        if ($broadcast) {
+            try {
+                require_once __DIR__ . '/LiveOpsEngine.php';
+                $liveOps = new LiveOpsEngine();
+                $liveOps->setBroadcast(
+                    "🏯 Guerre des 12 Châteaux Ouverte !",
+                    "Les portes des 12 Forteresses Authentiques du Japon viennent de s'ouvrir sur l'Archipel ! Daimyōs, marchez sur les donjons ancestraux et emparez-vous des reliques sacrées !",
+                    "warning",
+                    1440,
+                    true
+                );
+            } catch (Throwable $e) {}
+        }
+
+        return [
+            'success' => true,
+            'deployed' => $deployRes,
+            'message' => "La Guerre des 12 Châteaux Authentiques a été lancée avec succès ! Les forteresses sont déployées à 360° et le monde bascule en Ère III."
+        ];
+    }
+
+    /**
+     * Débloque immédiatement le chantier du Dōjō Impérial [0:0] (Item 7)
+     */
+    public function triggerImperialDojo(bool $broadcast = true): array {
+        require_once __DIR__ . '/ImperialDojoEngine.php';
+        $dojoEngine = new ImperialDojoEngine($this->db);
+        $dojo = $dojoEngine->ensureDojoTile();
+
+        GameConfig::set('era_dojo_unlocked', 1);
+        $currentEra = GameConfig::getServerCurrentEra();
+        if ($currentEra < 4) {
+            GameConfig::set('server_current_era', 4);
+        }
+
+        if ($broadcast) {
+            try {
+                require_once __DIR__ . '/LiveOpsEngine.php';
+                $liveOps = new LiveOpsEngine();
+                $liveOps->setBroadcast(
+                    "⛩️ Le Sanctuaire du Dōjō Impérial [0:0] est Accessible !",
+                    "La Terre Sacrée [0 : 0] (Tenchi no Seichi) est désormais ouverte ! Les Alliances détenant au moins 2 châteaux peuvent revendiquer le sanctuaire et acheminer des convois titanesques pour ériger la Merveille.",
+                    "danger",
+                    1440,
+                    true
+                );
+            } catch (Throwable $e) {}
+        }
+
+        return [
+            'success' => true,
+            'dojo' => $dojo,
+            'message' => "Le chantier du Dōjō Impérial [0:0] a été débloqué avec succès ! La tuile centrale est accessible et le monde entre dans la Grande Bataille Finale (Ère IV)."
+        ];
+    }
+
+    /**
+     * Force l'Ère active du monde (Item 7 - Override GM)
+     */
+    public function setWorldEra(int $era, bool $broadcast = true): array {
+        $era = max(1, min(5, $era));
+        GameConfig::set('server_current_era', $era);
+
+        if ($era >= 3 && !GameConfig::isCastlesWarUnlocked()) {
+            $this->triggerCastlesWar(false);
+        }
+        if ($era >= 4 && !GameConfig::isImperialDojoUnlocked()) {
+            $this->triggerImperialDojo(false);
+        }
+
+        $eraNames = [
+            1 => "Ère I : L'Aube des Clans",
+            2 => "Ère II : Expansion Territoriale",
+            3 => "Ère III : La Guerre des 12 Châteaux",
+            4 => "Ère IV : Le Dōjō Impérial [0:0]",
+            5 => "Ère V : L'Unification Impériale"
+        ];
+        $eraTitle = $eraNames[$era] ?? "Ère {$era}";
+
+        if ($broadcast) {
+            try {
+                require_once __DIR__ . '/LiveOpsEngine.php';
+                $liveOps = new LiveOpsEngine();
+                $liveOps->setBroadcast(
+                    "📜 Décret Impérial : Avènement de la {$eraTitle}",
+                    "Le Shōgun décrète solennellement l'entrée du monde féodal dans l'{$eraTitle}. Préparez vos légions et vos cités !",
+                    "primary",
+                    720,
+                    true
+                );
+            } catch (Throwable $e) {}
+        }
+
+        return [
+            'success' => true,
+            'era' => $era,
+            'message' => "Ère active du monde basculée sur : {$eraTitle}."
+        ];
     }
 }
 

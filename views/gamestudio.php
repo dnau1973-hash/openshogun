@@ -116,6 +116,9 @@ if ($currentTab === 'dashboard') {
                 $gameStudioEngine->saveRegenerationSettings(!empty($_POST['preserve_human_users']));
             }
 
+            // 7. Déroulement du Jeu & Chronologie des Ères (Progression & Endgame)
+            $gameStudioEngine->saveEraSettings($_POST);
+
             $_SESSION['general_flash'] = [
                 'type' => 'success',
                 'msg'  => "Ensemble des paramètres de la configuration du monde enregistré avec succès !" . (!empty($warnings) ? ' ' . implode(' ', $warnings) : '')
@@ -238,6 +241,42 @@ if ($currentTab === 'dashboard') {
                 ];
             }
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-regeneration-config');
+            exit;
+        } elseif ($_POST['action'] === 'save_world_era_settings') {
+            $res = $gameStudioEngine->saveEraSettings($_POST);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Paramètres de chronologie des Ères enregistrés.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
+            exit;
+        } elseif ($_POST['action'] === 'trigger_castles_war') {
+            $broadcast = !empty($_POST['broadcast_announcement']);
+            $res = $gameStudioEngine->triggerCastlesWar($broadcast);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Guerre des 12 Châteaux déclenchée avec succès !'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
+            exit;
+        } elseif ($_POST['action'] === 'trigger_imperial_dojo') {
+            $broadcast = !empty($_POST['broadcast_announcement']);
+            $res = $gameStudioEngine->triggerImperialDojo($broadcast);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Chantier du Dōjō Impérial débloqué avec succès !'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
+            exit;
+        } elseif ($_POST['action'] === 'set_world_era') {
+            $era = (int)($_POST['world_era'] ?? 1);
+            $broadcast = !empty($_POST['broadcast_announcement']);
+            $res = $gameStudioEngine->setWorldEra($era, $broadcast);
+            $_SESSION['general_flash'] = [
+                'type' => !empty($res['success']) ? 'success' : 'danger',
+                'msg'  => $res['message'] ?? 'Ère active du monde mise à jour.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
             exit;
         }
     }
