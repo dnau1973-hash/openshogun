@@ -1045,9 +1045,15 @@ unset($_SESSION['general_flash']);
                                                 <span class="text-muted small"><?= htmlspecialchars($activeBroadcast['message'] ?? '') ?></span>
                                             </div>
                                         </div>
-                                        <span class="badge bg-info text-white font-monospace">
-                                            <i class="fa-solid fa-clock me-1"></i>En Ligne jusqu'au <?= !empty($activeBroadcast['expires_at']) ? date('d/m H:i', strtotime($activeBroadcast['expires_at'])) : '' ?>
-                                        </span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-info text-white font-monospace">
+                                                <i class="fa-solid fa-clock me-1"></i>En Ligne jusqu'au <?= !empty($activeBroadcast['expires_at']) ? date('d/m H:i', strtotime($activeBroadcast['expires_at'])) : '' ?>
+                                            </span>
+                                            <button type="button" class="btn btn-sm btn-white text-dark fw-bold shadow-sm d-flex align-items-center gap-1.5" onclick="openActiveBroadcastModal()">
+                                                <i class="fa-solid fa-scroll text-warning"></i>
+                                                <span>Voir la Modale Décret</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 <?php endif; ?>
 
@@ -1091,20 +1097,28 @@ unset($_SESSION['general_flash']);
                                                     <?= htmlspecialchars($era['description']) ?>
                                                 </div>
 
-                                                <div class="pt-3 border-top d-flex justify-content-between align-items-center mt-auto">
+                                                <div class="pt-3 border-top d-flex justify-content-between align-items-center mt-auto gap-1">
                                                     <span class="badge bg-light text-secondary border font-monospace py-1.5 px-2" style="font-size:0.75rem;">
                                                         <?= htmlspecialchars($era['trigger_label']) ?>
                                                     </span>
-                                                    <?php if (!$isActive): ?>
-                                                        <button type="submit" 
-                                                                formaction="?page=gamestudio&tab=general&subtab=world_config" 
-                                                                name="action" value="set_world_era" 
-                                                                onclick="document.getElementById('inputForcedEra').value = '<?= $eId ?>';"
-                                                                class="btn btn-sm btn-outline-secondary py-1 px-2.5 fw-bold"
-                                                                title="Forcer le passage à cette Ère">
-                                                            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i>Activer
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <button type="button" 
+                                                                class="btn btn-sm btn-outline-info py-1 px-2 fw-bold" 
+                                                                onclick="previewEraProclamationModal(<?= $eId ?>)" 
+                                                                title="Prévisualiser la modale de proclamation impériale">
+                                                            <i class="fa-solid fa-scroll me-1"></i>Décret
                                                         </button>
-                                                    <?php endif; ?>
+                                                        <?php if (!$isActive): ?>
+                                                            <button type="submit" 
+                                                                    formaction="?page=gamestudio&tab=general&subtab=world_config" 
+                                                                    name="action" value="set_world_era" 
+                                                                    onclick="document.getElementById('inputForcedEra').value = '<?= $eId ?>';"
+                                                                    class="btn btn-sm btn-outline-secondary py-1 px-2 fw-bold"
+                                                                    title="Forcer le passage à cette Ère">
+                                                                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                                            </button>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1643,6 +1657,82 @@ unset($_SESSION['general_flash']);
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         MODALE OFFICIELLE : PROCLAMATION & DÉCRET IMPÉRIAL
+         (Modèle Haute Définition avec Illustration Supérieure Style Pêcheur / Mineur / Héros)
+         ======================================================== -->
+    <div class="modal fade" id="modalImperialProclamationStudio" tabindex="-1" aria-labelledby="imperialStudioModalTitle" aria-hidden="true" style="z-index: 1070;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 560px;">
+            <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 14px;">
+                <!-- Illustration d'en-tête (215px) avec overlay dégradé sombre (Style Pêcheur / Mineur / Héros) -->
+                <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
+                    <img id="imperialStudioModalImage" src="/public/assets/shogun_castle_city_bg.jpg" alt="Illustration Impériale" style="width: 100%; height: 100%; object-fit: cover; object-position: center 30%;">
+                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
+                    <div style="position: absolute; bottom: 14px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                        <div style="max-width: 75%;">
+                            <span id="imperialStudioModalBadge" class="badge bg-warning text-dark fw-bold px-2.5 py-1 mb-1.5 shadow-sm" style="font-size:0.75rem;">
+                                <i class="fa-solid fa-crown me-1"></i>Proclamation Impériale
+                            </span>
+                            <h3 class="m-0 fw-bold text-white shadow-sm" id="imperialStudioModalTitle" style="font-size: 1.25rem; line-height: 1.25;">
+                                Titre de la Proclamation
+                            </h3>
+                        </div>
+                        <div>
+                            <span class="badge bg-dark bg-opacity-75 border border-light text-warning font-monospace fs-6 px-3 py-1 shadow-sm">
+                                <i class="fa-solid fa-stamp me-1"></i>Sceau Impérial
+                            </span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+                </div>
+
+                <!-- Corps de la modale -->
+                <div class="modal-body p-4 bg-white">
+                    <!-- Encart Parchemin du Message -->
+                    <div class="p-3.5 rounded border mb-3 shadow-sm" style="background: #fdfbf7; border-left: 4px solid #f59e0b !important;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span style="font-size: 1.2rem;"><i class="fa-solid fa-scroll text-warning"></i></span>
+                            <strong class="text-warning small" id="imperialStudioModalSubtitle">Chronique Officielle du Shōgunat :</strong>
+                        </div>
+                        <p class="small text-secondary m-0" id="imperialStudioModalMessage" style="line-height: 1.6; font-size: 0.925rem;">
+                            Message de la proclamation...
+                        </p>
+                    </div>
+
+                    <!-- Encart Impacts Stratégiques sur l'Archipel -->
+                    <div class="p-3 rounded border mb-3" style="background: #f8fafc;" id="imperialStudioModalImpactsBox">
+                        <div class="small fw-bold text-dark mb-2 d-flex align-items-center gap-1.5">
+                            <i class="fa-solid fa-gavel text-primary"></i>
+                            <span>Conséquences Stratégiques &amp; Directives Féodales :</span>
+                        </div>
+                        <ul class="small text-secondary ps-3 mb-0" id="imperialStudioModalImpactList" style="line-height: 1.55;">
+                            <!-- Points injectés dynamiquement -->
+                        </ul>
+                    </div>
+
+                    <!-- Sceau et signature -->
+                    <div class="d-flex justify-content-between align-items-center text-muted small pt-2 border-top">
+                        <div class="d-flex align-items-center gap-1.5">
+                            <i class="fa-solid fa-certificate text-warning"></i>
+                            <span>Décret authentifié par la Chambre Céleste</span>
+                        </div>
+                        <span class="font-monospace text-secondary" style="font-size:0.75rem;"><?= date('d/m/Y H:i') ?></span>
+                    </div>
+                </div>
+
+                <!-- Pied de modale -->
+                <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark me-1"></i>Fermer
+                    </button>
+                    <a href="?page=resources" class="btn btn-warning text-dark fw-bold px-4 shadow-sm" id="imperialStudioModalActionBtn">
+                        <i class="fa-solid fa-arrow-right me-1"></i>Compris, Excellence
+                    </a>
                 </div>
             </div>
         </div>
@@ -2235,6 +2325,145 @@ document.addEventListener('DOMContentLoaded', function() {
         if (chkAck) chkAck.checked = true;
         window.checkRegenValidation();
         if (keyInp) keyInp.focus();
+    };
+
+    // ═══════════════════════════════════════════════════════════════════
+    // GESTION DE LA MODALE PROCLAMATION & DÉCRET IMPÉRIAL (GAME STUDIO)
+    // ═══════════════════════════════════════════════════════════════════
+    window.activeBroadcastData = <?= json_encode($activeBroadcast ?? null, JSON_UNESCAPED_UNICODE) ?>;
+
+    window.eraProclamationsData = {
+        1: {
+            image: '/public/assets/shogun_rural_terroir_panorama.jpg',
+            badge: "Ère I • L'Aube des Clans",
+            title: "🌱 Décret Impérial : Avènement de l'Ère I — L'Aube des Clans",
+            subtitle: "Chronique Officielle du Shōgunat :",
+            message: "Par décret du Shōgun, l'Archipel s'éveille ! Les daimyōs fondent leurs premiers fiefs sous la protection impériale. Développez vos parcelles de riz, de bois, de pierre et de fer dans la concorde et la paix débutante.",
+            action_url: '?page=resources',
+            action_label: 'Bâtir mon Fief Rural &rarr;',
+            impact_points: [
+                "Immunité débutant garantie sous la bienveillance impériale du Shōgun.",
+                "Essor des 18 parcelles économiques (Forêt, Carrière, Rizières, Fonderies).",
+                "Entraînement des premiers fantassins et archers de garnison au Dojo."
+            ]
+        },
+        2: {
+            image: '/public/assets/nav_map.jpg',
+            badge: "Ère II • Expansion Territoriale",
+            title: "🧭 Proclamation Impériale : Avènement de l'Ère II — L'Expansion Territoriale",
+            subtitle: "Chronique Officielle du Shōgunat :",
+            message: "La paix débutante est levée ! Le Shōgun ouvre la grande conquête féodale. Que les daimyōs soumettent les bêtes sauvages des oasis, forgent de puissantes alliances et étendent leurs frontières à travers tout l'Archipel.",
+            action_url: '?page=map',
+            action_label: 'Explorer la Carte des Provinces &rarr;',
+            impact_points: [
+                "Fin de l'immunité débutant : les assauts et raids de clans rivaux sont déclarés.",
+                "Conquête des Oasis : soumettez la faune sauvage pour capter +25% à +50% de ressources.",
+                "Fondation de nouveaux fiefs secondaires et essor des grandes coalitions."
+            ]
+        },
+        3: {
+            image: '/public/assets/castles/himeji.jpg',
+            badge: "Ère III • Guerre des 12 Châteaux",
+            title: "🏯 Dépêche Impériale : Avènement de l'Ère III — La Guerre des 12 Châteaux",
+            subtitle: "Chronique Officielle du Shōgunat :",
+            message: "Les portes des 12 Forteresses Authentiques du Japon viennent de s'ouvrir sur l'Archipel ! Daimyōs et Alliances, marchez sur les donjons sacrés et emparez-vous de leurs Reliques séculaires !",
+            action_url: '?page=castle&code=himeji',
+            action_label: 'Marcher sur les Forteresses &rarr;',
+            impact_points: [
+                "Déploiement des 12 Donjons Historiques à 360° sur toute la carte de l'Archipel.",
+                "Capture des Reliques Ancestrales accordant de puissants bonus passifs à l'Alliance.",
+                "Posséder au moins 2 châteaux est obligatoire pour prétendre au Dōjō Impérial [0:0]."
+            ]
+        },
+        4: {
+            image: '/public/assets/map/tile_imperial_dojo.jpg',
+            badge: "Ère IV • Dōjō Impérial [0 : 0]",
+            title: "⛩️ Proclamation Shōgunale : Avènement de l'Ère IV — Le Dōjō Impérial [0:0]",
+            subtitle: "Chronique Officielle du Shōgunat :",
+            message: "La brume mystique se dissipe sur la Terre Sacrée [0 : 0] (Tenchi no Seichi) ! Les Alliances détenant au moins 2 châteaux sont appelées à revendiquer le sanctuaire suprême et acheminer des convois titanesques pour ériger la Merveille.",
+            action_url: '?page=imperial_dojo',
+            action_label: 'Rejoindre le Sanctuaire [0:0] &rarr;',
+            impact_points: [
+                "Ouverture de la tuile centrale [0 : 0] : convois titanesques et armes de siège autorisés.",
+                "Chantier des 10 Niveaux de la Merveille accessible aux alliances éligibles.",
+                "Attaques de siège massives au bélier et à la catapulte pour raser le Dōjō adverse."
+            ]
+        },
+        5: {
+            image: '/public/assets/shogun_castle_city_bg.jpg',
+            badge: "Ère V • Shōgunat Immortel",
+            title: "👑 Triomphe Impérial : Avènement de l'Ère V — L'Unification du Shōgunat",
+            subtitle: "Chronique Officielle du Shōgunat :",
+            message: "Le Sanctuaire Céleste du Dōjō Impérial [0:0] a atteint le Palier 10 Suprême ! Les cloches de la paix résonnent sur tout l'Archipel. Le Japon est réunifié sous la bannière éternelle du nouveau Shōgun !",
+            action_url: '?page=ranking',
+            action_label: 'Consulter le Panthéon du Monde &rarr;',
+            impact_points: [
+                "Victoire mondiale proclamée suite à l'achèvement du Palier 10 du Dōjō.",
+                "Le suzerain de l'alliance bâtisseuse est proclamé Shōgun suprême du Japon.",
+                "Entrée définitive des champions dans les Chroniques éternelles d'OpenShogun."
+            ]
+        }
+    };
+
+    window.populateImperialModalStudio = function(data) {
+        if (!data) return;
+        const imgEl = document.getElementById('imperialStudioModalImage');
+        const badgeEl = document.getElementById('imperialStudioModalBadge');
+        const titleEl = document.getElementById('imperialStudioModalTitle');
+        const subEl = document.getElementById('imperialStudioModalSubtitle');
+        const msgEl = document.getElementById('imperialStudioModalMessage');
+        const boxEl = document.getElementById('imperialStudioModalImpactsBox');
+        const listEl = document.getElementById('imperialStudioModalImpactList');
+        const btnEl = document.getElementById('imperialStudioModalActionBtn');
+
+        if (imgEl && data.image) imgEl.src = data.image;
+        if (badgeEl && data.badge) badgeEl.innerHTML = '<i class="fa-solid fa-crown me-1"></i>' + data.badge;
+        if (titleEl && data.title) titleEl.textContent = data.title;
+        if (subEl && data.subtitle) subEl.textContent = data.subtitle;
+        if (msgEl && data.message) msgEl.textContent = data.message;
+
+        if (listEl) {
+            listEl.innerHTML = '';
+            const points = data.impact_points || [];
+            if (points.length > 0) {
+                if (boxEl) boxEl.style.display = 'block';
+                points.forEach(function(pt) {
+                    const li = document.createElement('li');
+                    li.textContent = pt;
+                    listEl.appendChild(li);
+                });
+            } else {
+                if (boxEl) boxEl.style.display = 'none';
+            }
+        }
+
+        if (btnEl) {
+            btnEl.href = data.action_url || '?page=resources';
+            btnEl.innerHTML = '<i class="fa-solid fa-arrow-right me-1"></i>' + (data.action_label || 'Compris, Excellence');
+        }
+    };
+
+    window.previewEraProclamationModal = function(eraId) {
+        const data = window.eraProclamationsData[eraId];
+        if (!data) return;
+        window.populateImperialModalStudio(data);
+        const modalEl = document.getElementById('modalImperialProclamationStudio');
+        if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
+    };
+
+    window.openActiveBroadcastModal = function() {
+        if (window.activeBroadcastData) {
+            window.populateImperialModalStudio(window.activeBroadcastData);
+        } else {
+            const currentEra = <?= (int)($worldConfig['lifecycle']['currentEra'] ?? 1) ?>;
+            window.populateImperialModalStudio(window.eraProclamationsData[currentEra] || window.eraProclamationsData[1]);
+        }
+        const modalEl = document.getElementById('modalImperialProclamationStudio');
+        if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
     };
 
     updateStarterSimulator();

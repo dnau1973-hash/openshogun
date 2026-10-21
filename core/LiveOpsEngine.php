@@ -387,9 +387,9 @@ class LiveOpsEngine {
         return $data;
     }
 
-    public function setBroadcast(string $title, string $message, string $type = 'info', int $durationMinutes = 60, bool $isActive = true): bool {
+    public function setBroadcast(string $title, string $message, string $type = 'info', int $durationMinutes = 60, bool $isActive = true, array $extra = []): bool {
         $now = time();
-        $payload = [
+        $basePayload = [
             'id'          => uniqid('bc_'),
             'title'       => trim($title ?: 'Dépêche Impériale'),
             'message'     => trim($message),
@@ -400,10 +400,16 @@ class LiveOpsEngine {
                 'success' => 'fa-circle-check text-success',
                 default   => 'fa-bullhorn text-info'
             },
+            'image'       => '/public/assets/shogun_castle_city_bg.jpg',
+            'badge'       => 'Proclamation Impériale',
+            'action_url'  => '?page=resources',
+            'action_label'=> 'Compris, Excellence',
+            'impact_points' => [],
             'is_active'   => $isActive,
             'created_at'  => date('Y-m-d H:i:s', $now),
             'expires_at'  => date('Y-m-d H:i:s', $now + max(60, $durationMinutes * 60))
         ];
+        $payload = array_merge($basePayload, $extra);
         return (bool)file_put_contents($this->broadcastPath, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 

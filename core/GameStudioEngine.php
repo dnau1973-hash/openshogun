@@ -1383,36 +1383,89 @@ class GameStudioEngine {
                     'title'   => "🌱 Décret Impérial : Avènement de l'Ère I — L'Aube des Clans",
                     'message' => "Par décret du Shōgun, l'Archipel s'éveille ! Les daimyōs fondent leurs premiers fiefs sous la protection impériale. Développez vos parcelles de riz, de bois, de pierre et de fer dans la concorde et la paix débutante.",
                     'type'    => 'success',
-                    'duration'=> 1440
+                    'duration'=> 1440,
+                    'image'   => '/public/assets/shogun_rural_terroir_panorama.jpg',
+                    'badge'   => 'Ère I • L\'Aube des Clans',
+                    'action_url'   => '?page=resources',
+                    'action_label' => 'Bâtir mon Fief Rural &rarr;',
+                    'impact_points'=> [
+                        'Immunité débutant garantie sous la bienveillance impériale du Shōgun.',
+                        'Essor des 18 parcelles économiques (Forêt, Carrière, Rizières, Fonderies).',
+                        'Entraînement des premiers fantassins et archers de garnison au Dojo.'
+                    ]
                 ],
                 2 => [
                     'title'   => "🧭 Proclamation Impériale : Avènement de l'Ère II — L'Expansion Territoriale",
                     'message' => "La paix débutante est levée ! Le Shōgun ouvre la grande conquête féodale. Que les daimyōs soumettent les bêtes sauvages des oasis, forgent de puissantes alliances et étendent leurs frontières à travers tout l'Archipel.",
                     'type'    => 'warning',
-                    'duration'=> 1440
+                    'duration'=> 1440,
+                    'image'   => '/public/assets/nav_map.jpg',
+                    'badge'   => 'Ère II • Expansion Territoriale',
+                    'action_url'   => '?page=map',
+                    'action_label' => 'Explorer la Carte des Provinces &rarr;',
+                    'impact_points'=> [
+                        'Fin de l\'immunité débutant : les assauts et raids de clans rivaux sont déclarés.',
+                        'Conquête des Oasis : soumettez la faune sauvage pour capter +25% à +50% de ressources.',
+                        'Fondation de nouveaux fiefs secondaires et essor des grandes coalitions.'
+                    ]
                 ],
                 3 => [
                     'title'   => "🏯 Dépêche Impériale : Avènement de l'Ère III — La Guerre des 12 Châteaux",
                     'message' => "Les portes des 12 Forteresses Authentiques du Japon viennent de s'ouvrir sur l'Archipel ! Daimyōs et Alliances, marchez sur les donjons sacrés et emparez-vous de leurs Reliques séculaires !",
                     'type'    => 'warning',
-                    'duration'=> 2880
+                    'duration'=> 2880,
+                    'image'   => '/public/assets/castles/himeji.jpg',
+                    'badge'   => 'Ère III • Guerre des 12 Châteaux',
+                    'action_url'   => '?page=castle&code=himeji',
+                    'action_label' => 'Marcher sur les Forteresses &rarr;',
+                    'impact_points'=> [
+                        'Déploiement des 12 Donjons Historiques à 360° sur toute la carte de l\'Archipel.',
+                        'Capture des Reliques Ancestrales accordant de puissants bonus passifs à l\'Alliance.',
+                        'Posséder au moins 2 châteaux est obligatoire pour prétendre au Dōjō Impérial [0:0].'
+                    ]
                 ],
                 4 => [
                     'title'   => "⛩️ Proclamation Shōgunale : Avènement de l'Ère IV — Le Dōjō Impérial [0:0]",
                     'message' => "La brume mystique se dissipe sur la Terre Sacrée [0 : 0] (Tenchi no Seichi) ! Les Alliances détenant au moins 2 châteaux sont appelées à revendiquer le sanctuaire suprême et acheminer des convois titanesques pour ériger la Merveille.",
                     'type'    => 'danger',
-                    'duration'=> 4320
+                    'duration'=> 4320,
+                    'image'   => '/public/assets/map/tile_imperial_dojo.jpg',
+                    'badge'   => 'Ère IV • Dōjō Impérial [0 : 0]',
+                    'action_url'   => '?page=imperial_dojo',
+                    'action_label' => 'Rejoindre le Sanctuaire [0:0] &rarr;',
+                    'impact_points'=> [
+                        'Ouverture de la tuile centrale [0 : 0] : convois titanesques et armes de siège autorisés.',
+                        'Chantier des 10 Niveaux de la Merveille accessible aux alliances éligibles.',
+                        'Attaques de siège massives au bélier et à la catapulte pour raser le Dōjō adverse.'
+                    ]
                 ],
                 5 => [
                     'title'   => "👑 Triomphe Impérial : Avènement de l'Ère V — L'Unification du Shōgunat",
                     'message' => "Le Sanctuaire Céleste du Dōjō Impérial [0:0] a atteint le Palier 10 Suprême ! Les cloches de la paix résonnent sur tout l'Archipel. Le Japon est réunifié sous la bannière éternelle du nouveau Shōgun !",
                     'type'    => 'primary',
-                    'duration'=> 10080
+                    'duration'=> 10080,
+                    'image'   => '/public/assets/shogun_castle_city_bg.jpg',
+                    'badge'   => 'Ère V • Shōgunat Immortel',
+                    'action_url'   => '?page=ranking',
+                    'action_label' => 'Consulter le Panthéon du Monde &rarr;',
+                    'impact_points'=> [
+                        'Victoire mondiale proclamée suite à l\'achèvement du Palier 10 du Dōjō.',
+                        'Le suzerain de l\'alliance bâtisseuse est proclamé Shōgun suprême du Japon.',
+                        'Entrée définitive des champions dans les Chroniques éternelles d\'OpenShogun.'
+                    ]
                 ],
             ];
 
             $d = $dispatches[$era] ?? $dispatches[1];
-            return $liveOps->setBroadcast($d['title'], $d['message'], $d['type'], $d['duration'], true);
+            $extra = [
+                'image'         => $d['image'],
+                'badge'         => $d['badge'],
+                'era'           => $era,
+                'action_url'    => $d['action_url'],
+                'action_label'  => $d['action_label'],
+                'impact_points' => $d['impact_points']
+            ];
+            return $liveOps->setBroadcast($d['title'], $d['message'], $d['type'], $d['duration'], true, $extra);
         } catch (Throwable $e) {
             return false;
         }

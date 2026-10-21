@@ -250,6 +250,15 @@ if ($currentTab === 'dashboard') {
             ];
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
             exit;
+        } elseif ($_POST['action'] === 'broadcast_era_decree') {
+            $era = (int)($_POST['world_era'] ?? GameConfig::getServerCurrentEra());
+            $res = $gameStudioEngine->broadcastEraTransition($era);
+            $_SESSION['general_flash'] = [
+                'type' => $res ? 'success' : 'danger',
+                'msg'  => $res ? "Dépêche Impériale officielle de l'Ère {$era} diffusée avec succès à l'ensemble des joueurs !" : "Échec de diffusion de la dépêche."
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
+            exit;
 
         } elseif ($_POST['action'] === 'trigger_castles_war') {
             $broadcast = !empty($_POST['broadcast_announcement']);
@@ -257,6 +266,15 @@ if ($currentTab === 'dashboard') {
             $_SESSION['general_flash'] = [
                 'type' => !empty($res['success']) ? 'success' : 'danger',
                 'msg'  => $res['message'] ?? 'Guerre des 12 Châteaux déclenchée avec succès !'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
+            exit;
+        } elseif ($_POST['action'] === 'broadcast_era_decree') {
+            $era = (int)($_POST['world_era'] ?? GameConfig::getServerCurrentEra());
+            $res = $gameStudioEngine->broadcastEraTransition($era);
+            $_SESSION['general_flash'] = [
+                'type' => $res ? 'success' : 'danger',
+                'msg'  => $res ? "Dépêche Impériale officielle de l'Ère {$era} diffusée avec succès à l'ensemble des joueurs !" : "Échec de diffusion de la dépêche."
             ];
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
             exit;
@@ -270,6 +288,15 @@ if ($currentTab === 'dashboard') {
             ];
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
             exit;
+        } elseif ($_POST['action'] === 'broadcast_era_decree') {
+            $era = (int)($_POST['world_era'] ?? GameConfig::getServerCurrentEra());
+            $res = $gameStudioEngine->broadcastEraTransition($era);
+            $_SESSION['general_flash'] = [
+                'type' => $res ? 'success' : 'danger',
+                'msg'  => $res ? "Dépêche Impériale officielle de l'Ère {$era} diffusée avec succès à l'ensemble des joueurs !" : "Échec de diffusion de la dépêche."
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
+            exit;
 
         } elseif ($_POST['action'] === 'set_world_era') {
             $era = (int)($_POST['world_era'] ?? 1);
@@ -278,6 +305,15 @@ if ($currentTab === 'dashboard') {
             $_SESSION['general_flash'] = [
                 'type' => !empty($res['success']) ? 'success' : 'danger',
                 'msg'  => $res['message'] ?? 'Ère active du monde mise à jour.'
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
+            exit;
+        } elseif ($_POST['action'] === 'broadcast_era_decree') {
+            $era = (int)($_POST['world_era'] ?? GameConfig::getServerCurrentEra());
+            $res = $gameStudioEngine->broadcastEraTransition($era);
+            $_SESSION['general_flash'] = [
+                'type' => $res ? 'success' : 'danger',
+                'msg'  => $res ? "Dépêche Impériale officielle de l'Ère {$era} diffusée avec succès à l'ensemble des joueurs !" : "Échec de diffusion de la dépêche."
             ];
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-timeline-config');
             exit;

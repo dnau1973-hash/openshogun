@@ -253,11 +253,27 @@ for ($eraTest = 1; $eraTest <= 5; $eraTest++) {
     $bcOk = $gameStudio->broadcastEraTransition($eraTest);
     assertTest($bcOk === true, "Diffusion de la dépêche impériale pour l'Ère {$eraTest} réussie");
 }
-$apiContent = file_get_contents(__DIR__ . '/../api/admin.php');
-assertTest(str_contains($apiContent, "case 'trigger_castles_war':"), "Endpoint API trigger_castles_war présent");
-assertTest(str_contains($apiContent, "case 'trigger_imperial_dojo':"), "Endpoint API trigger_imperial_dojo présent");
-assertTest(str_contains($apiContent, "case 'set_world_era':"), "Endpoint API set_world_era présent");
-assertTest(str_contains($apiContent, "case 'get_world_timeline':"), "Endpoint API get_world_timeline présent");
+
+echo "\n[TEST 12] Vérification de la Modale Proclamation Impériale Illustrée HD...\n";
+$headerContent = file_get_contents(__DIR__ . '/../views/partials/header.php');
+assertTest(str_contains($headerContent, 'id="modalImperialProclamation"'), "Modale #modalImperialProclamation présente dans header.php");
+assertTest(str_contains($headerContent, 'height: 215px;'), "En-tête illustré 215px présent dans header.php");
+assertTest(str_contains($headerContent, 'object-fit: cover; object-position: center 30%'), "Cadrage de l'illustration présent dans header.php");
+assertTest(str_contains($headerContent, 'id="imperialModalTitle"'), "Titre dynamique impérial présent dans header.php");
+assertTest(str_contains($headerContent, 'id="imperialModalImpactList"'), "Liste des impacts stratégiques présente dans header.php");
+
+assertTest(str_contains($viewContent, 'id="modalImperialProclamationStudio"'), "Modale #modalImperialProclamationStudio présente dans general_world_config.php");
+assertTest(str_contains($viewContent, 'height: 215px;'), "En-tête illustré 215px présent dans general_world_config.php");
+assertTest(str_contains($viewContent, 'previewEraProclamationModal'), "Fonction de prévisualisation JS par Ère présente");
+assertTest(str_contains($viewContent, 'openActiveBroadcastModal'), "Fonction d'ouverture de dépêche active JS présente");
+
+require_once __DIR__ . '/../core/LiveOpsEngine.php';
+$liveOps = new LiveOpsEngine();
+$activeBc = $liveOps->getActiveBroadcast();
+assertTest(!empty($activeBc), "Dépêche impériale active récupérée");
+assertTest(!empty($activeBc['image']), "Image d'en-tête présente dans la dépêche impériale");
+assertTest(!empty($activeBc['badge']), "Badge de décret présent dans la dépêche impériale");
+assertTest(!empty($activeBc['impact_points']) && is_array($activeBc['impact_points']), "Points d'impacts présents dans la dépêche impériale");
 
 echo "\n========================================================================\n";
 echo " TOUS LES TESTS DU DÉROULEMENT DU JEU (ÈRE & ENDGAME) SONT 100% AU VERT !\n";

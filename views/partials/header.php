@@ -207,7 +207,7 @@ $navItems = [
     <div class="page-wrapper">
 
         <?php
-        // Bannière Flash Flottante LiveOps Broadcast (si active)
+        // Bannière Flash Flottante LiveOps Broadcast & Modale Illustrée HD
         if (file_exists(__DIR__ . '/../../core/LiveOpsEngine.php')) {
             require_once __DIR__ . '/../../core/LiveOpsEngine.php';
             $liveOpsEngineHeader = new LiveOpsEngine();
@@ -217,8 +217,14 @@ $navItems = [
                 $bcIcon = htmlspecialchars($activeBroadcastHeader['icon'] ?? 'fa-bullhorn');
                 $bcTitle = htmlspecialchars($activeBroadcastHeader['title'] ?? 'Dépêche Impériale');
                 $bcMsg = htmlspecialchars($activeBroadcastHeader['message'] ?? '');
+                $bcImg = !empty($activeBroadcastHeader['image']) ? htmlspecialchars($activeBroadcastHeader['image']) : '/public/assets/shogun_castle_city_bg.jpg';
+                $bcBadge = htmlspecialchars($activeBroadcastHeader['badge'] ?? 'Proclamation Impériale');
+                $bcActionUrl = htmlspecialchars($activeBroadcastHeader['action_url'] ?? '?page=resources');
+                $bcActionLabel = htmlspecialchars($activeBroadcastHeader['action_label'] ?? 'Compris, Excellence');
+                $bcImpactPoints = is_array($activeBroadcastHeader['impact_points'] ?? null) ? $activeBroadcastHeader['impact_points'] : [];
+                $bcId = htmlspecialchars($activeBroadcastHeader['id'] ?? 'bc_default');
                 ?>
-                <div class="alert alert-<?= $bcType ?> alert-dismissible mb-0 rounded-0 border-0 border-bottom d-flex align-items-center justify-content-between px-3 py-2 shadow-sm d-print-none" role="alert" style="z-index: 1060; font-size: 0.9rem;">
+                <div class="alert alert-<?= $bcType ?> alert-dismissible mb-0 rounded-0 border-0 border-bottom d-flex align-items-center justify-content-between px-3 py-2 shadow-sm d-print-none flex-wrap gap-2" role="alert" style="z-index: 1060; font-size: 0.9rem;">
                     <div class="d-flex align-items-center gap-2">
                         <span class="fs-3"><i class="fa-solid <?= $bcIcon ?>"></i></span>
                         <div>
@@ -226,8 +232,145 @@ $navItems = [
                             <span><?= $bcMsg ?></span>
                         </div>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding:0.75rem;"></button>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-sm btn-light text-dark fw-bold px-3 py-1 shadow-sm d-flex align-items-center gap-1.5" onclick="openImperialProclamationModal()">
+                            <i class="fa-solid fa-scroll text-warning"></i>
+                            <span>Lire la Proclamation</span>
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding:0.75rem; position:static;"></button>
+                    </div>
                 </div>
+
+                <!-- ========================================================
+                     MODALE OFFICIELLE : PROCLAMATION & DÉCRET IMPÉRIAL
+                     (Modèle Haute Définition avec Illustration Supérieure Style Pêcheur / Mineur / Héros)
+                     ======================================================== -->
+                <div class="modal fade" id="modalImperialProclamation" tabindex="-1" aria-labelledby="imperialModalTitle" aria-hidden="true" style="z-index: 1070;">
+                    <div class="modal-dialog modal-dialog-centered" style="max-width: 560px;">
+                        <div class="modal-content shadow-lg border-0 overflow-hidden" style="border-radius: 14px;">
+                            <!-- Illustration d'en-tête (215px) avec overlay dégradé sombre (Style Pêcheur / Mineur) -->
+                            <div style="position: relative; width: 100%; height: 215px; overflow: hidden; background: #0f172a;">
+                                <img id="imperialModalImage" src="<?= $bcImg ?>" alt="Illustration Impériale" style="width: 100%; height: 100%; object-fit: cover; object-position: center 30%;">
+                                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
+                                <div style="position: absolute; bottom: 14px; left: 16px; right: 16px;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                                    <div style="max-width: 75%;">
+                                        <span id="imperialModalBadge" class="badge bg-warning text-dark fw-bold px-2.5 py-1 mb-1.5 shadow-sm" style="font-size:0.75rem;">
+                                            <i class="fa-solid fa-crown me-1"></i><?= $bcBadge ?>
+                                        </span>
+                                        <h3 class="m-0 fw-bold text-white shadow-sm" id="imperialModalTitle" style="font-size: 1.25rem; line-height: 1.25;">
+                                            <?= $bcTitle ?>
+                                        </h3>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-dark bg-opacity-75 border border-light text-warning font-monospace fs-6 px-3 py-1 shadow-sm">
+                                            <i class="fa-solid fa-stamp me-1"></i>Sceau Impérial
+                                        </span>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+                            </div>
+
+                            <!-- Corps de la modale -->
+                            <div class="modal-body p-4 bg-white">
+                                <!-- Encart Parchemin du Message -->
+                                <div class="p-3.5 rounded border mb-3 shadow-sm" style="background: #fdfbf7; border-left: 4px solid #f59e0b !important;">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span style="font-size: 1.2rem;"><i class="fa-solid fa-scroll text-warning"></i></span>
+                                        <strong class="text-warning small" id="imperialModalSubtitle">Chronique Officielle du Shōgunat :</strong>
+                                    </div>
+                                    <p class="small text-secondary m-0" id="imperialModalMessage" style="line-height: 1.6; font-size: 0.925rem;">
+                                        <?= nl2br($bcMsg) ?>
+                                    </p>
+                                </div>
+
+                                <!-- Encart Impacts Stratégiques sur l'Archipel -->
+                                <div class="p-3 rounded border mb-3" style="background: #f8fafc; <?= empty($bcImpactPoints) ? 'display:none;' : '' ?>" id="imperialModalImpactsBox">
+                                    <div class="small fw-bold text-dark mb-2 d-flex align-items-center gap-1.5">
+                                        <i class="fa-solid fa-gavel text-primary"></i>
+                                        <span>Conséquences Stratégiques &amp; Directives Féodales :</span>
+                                    </div>
+                                    <ul class="small text-secondary ps-3 mb-0" id="imperialModalImpactList" style="line-height: 1.55;">
+                                        <?php foreach ($bcImpactPoints as $pt): ?>
+                                            <li><?= htmlspecialchars($pt) ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+
+                                <!-- Sceau et signature -->
+                                <div class="d-flex justify-content-between align-items-center text-muted small pt-2 border-top">
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <i class="fa-solid fa-certificate text-warning"></i>
+                                        <span>Décret authentifié par la Chambre Céleste</span>
+                                    </div>
+                                    <span class="font-monospace text-secondary" style="font-size:0.75rem;"><?= date('d/m/Y H:i') ?></span>
+                                </div>
+                            </div>
+
+                            <!-- Pied de modale -->
+                            <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">
+                                    <i class="fa-solid fa-xmark me-1"></i>Fermer
+                                </button>
+                                <a href="<?= $bcActionUrl ?>" class="btn btn-warning text-dark fw-bold px-4 shadow-sm" id="imperialModalActionBtn">
+                                    <i class="fa-solid fa-arrow-right me-1"></i><?= $bcActionLabel ?>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                function openImperialProclamationModal(customData) {
+                    if (customData) {
+                        const imgEl = document.getElementById('imperialModalImage');
+                        const badgeEl = document.getElementById('imperialModalBadge');
+                        const titleEl = document.getElementById('imperialModalTitle');
+                        const msgEl = document.getElementById('imperialModalMessage');
+                        const actionBtn = document.getElementById('imperialModalActionBtn');
+                        const impactsBox = document.getElementById('imperialModalImpactsBox');
+                        const impactsList = document.getElementById('imperialModalImpactList');
+
+                        if (imgEl && customData.image) imgEl.src = customData.image;
+                        if (badgeEl && customData.badge) badgeEl.innerHTML = '<i class="fa-solid fa-crown me-1"></i>' + customData.badge;
+                        if (titleEl && customData.title) titleEl.textContent = customData.title;
+                        if (msgEl && customData.message) msgEl.innerHTML = customData.message.replace(/\n/g, '<br>');
+                        if (actionBtn && customData.action_url) {
+                            actionBtn.href = customData.action_url;
+                            actionBtn.innerHTML = '<i class="fa-solid fa-arrow-right me-1"></i>' + (customData.action_label || 'Consulter');
+                        }
+                        if (impactsBox && impactsList) {
+                            if (customData.impact_points && customData.impact_points.length > 0) {
+                                impactsBox.style.display = 'block';
+                                impactsList.innerHTML = customData.impact_points.map(pt => '<li>' + pt + '</li>').join('');
+                            } else {
+                                impactsBox.style.display = 'none';
+                            }
+                        }
+                    }
+
+                    const modalEl = document.getElementById('modalImperialProclamation');
+                    if (!modalEl) return;
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    } else if (typeof $ !== 'undefined' && $.fn && $.fn.modal) {
+                        $(modalEl).modal('show');
+                    } else {
+                        modalEl.classList.add('show');
+                        modalEl.style.display = 'block';
+                    }
+                }
+
+                // Ouverture automatique si le joueur ne l'a pas encore consultée dans sa session
+                document.addEventListener('DOMContentLoaded', function() {
+                    try {
+                        const bcId = <?= json_encode($bcId) ?>;
+                        if (bcId && !sessionStorage.getItem('seen_proclamation_' + bcId)) {
+                            sessionStorage.setItem('seen_proclamation_' + bcId, '1');
+                            setTimeout(openImperialProclamationModal, 600);
+                        }
+                    } catch (e) {}
+                });
+                </script>
                 <?php
             }
         }

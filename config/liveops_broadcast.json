@@ -1,10 +1,20 @@
 {
-    "id": "bc_6ad867f5280a8",
+    "id": "bc_6ad86aea350df",
     "title": "👑 Triomphe Impérial : Avènement de l'Ère V — L'Unification du Shōgunat",
     "message": "Le Sanctuaire Céleste du Dōjō Impérial [0:0] a atteint le Palier 10 Suprême ! Les cloches de la paix résonnent sur tout l'Archipel. Le Japon est réunifié sous la bannière éternelle du nouveau Shōgun !",
     "type": "primary",
     "icon": "fa-bullhorn text-info",
+    "image": "\/public\/assets\/shogun_castle_city_bg.jpg",
+    "badge": "Ère V • Shōgunat Immortel",
+    "action_url": "?page=ranking",
+    "action_label": "Consulter le Panthéon du Monde &rarr;",
+    "impact_points": [
+        "Victoire mondiale proclamée suite à l'achèvement du Palier 10 du Dōjō.",
+        "Le suzerain de l'alliance bâtisseuse est proclamé Shōgun suprême du Japon.",
+        "Entrée définitive des champions dans les Chroniques éternelles d'OpenShogun."
+    ],
     "is_active": true,
-    "created_at": "2026-10-21 07:21:25",
-    "expires_at": "2026-10-28 07:21:25"
+    "created_at": "2026-10-21 07:34:02",
+    "expires_at": "2026-10-28 07:34:02",
+    "era": 5
 }
