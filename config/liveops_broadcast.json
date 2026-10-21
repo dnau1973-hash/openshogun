@@ -1,5 +1,5 @@
 {
-    "id": "bc_6ad86aea350df",
+    "id": "bc_6ad86d8a51c2f",
     "title": "👑 Triomphe Impérial : Avènement de l'Ère V — L'Unification du Shōgunat",
     "message": "Le Sanctuaire Céleste du Dōjō Impérial [0:0] a atteint le Palier 10 Suprême ! Les cloches de la paix résonnent sur tout l'Archipel. Le Japon est réunifié sous la bannière éternelle du nouveau Shōgun !",
     "type": "primary",
@@ -14,7 +14,7 @@
         "Entrée définitive des champions dans les Chroniques éternelles d'OpenShogun."
     ],
     "is_active": true,
-    "created_at": "2026-10-21 07:34:02",
-    "expires_at": "2026-10-28 07:34:02",
+    "created_at": "2026-10-21 07:45:14",
+    "expires_at": "2026-10-28 07:45:14",
     "era": 5
 }

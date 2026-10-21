@@ -36,6 +36,9 @@ $sqlite->exec("CREATE TABLE users (
     points INTEGER DEFAULT 0,
     alliance_id INTEGER DEFAULT NULL,
     protection_until INTEGER DEFAULT NULL,
+    gold_coins INTEGER DEFAULT 100,
+    imperial_seal_until TEXT DEFAULT NULL,
+    last_daily_gold TEXT DEFAULT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     last_active TEXT DEFAULT CURRENT_TIMESTAMP
 )");
@@ -196,26 +199,26 @@ $passwordHashTakeda = password_hash('ShingenSecret123#', PASSWORD_BCRYPT);
 $passwordHashOda = password_hash('NobunagaPass456#', PASSWORD_BCRYPT);
 
 $sqlite->prepare("
-    INSERT INTO users (username, email, password_hash, faction, is_admin, is_bot, points, alliance_id)
-    VALUES ('shingen_takeda', 'shingen@kai.jp', ?, 'vorash', 0, 0, 15000, 2)
+    INSERT INTO users (username, email, password_hash, faction, is_admin, is_bot, points, alliance_id, gold_coins, imperial_seal_until)
+    VALUES ('shingen_takeda', 'shingen@kai.jp', ?, 'vorash', 0, 0, 15000, 2, 2500, '2026-12-31 23:59:59')
 ")->execute([$passwordHashTakeda]);
 $shingenId = (int)$sqlite->lastInsertId();
 
 $sqlite->prepare("
-    INSERT INTO users (username, email, password_hash, faction, is_admin, is_bot, points, alliance_id)
-    VALUES ('nobunaga_oda', 'nobunaga@owari.jp', ?, 'terran', 0, 0, 32000, 2)
+    INSERT INTO users (username, email, password_hash, faction, is_admin, is_bot, points, alliance_id, gold_coins)
+    VALUES ('nobunaga_oda', 'nobunaga@owari.jp', ?, 'terran', 0, 0, 32000, 2, 1200)
 ")->execute([$passwordHashOda]);
 $nobunagaId = (int)$sqlite->lastInsertId();
 
 // Insérer aussi un faux bot
 $sqlite->prepare("
-    INSERT INTO users (username, email, password_hash, faction, is_admin, is_bot, points)
-    VALUES ('Ancien_Bot_Oda', 'bot@bot.jp', 'xxx', 'terran', 0, 1, 5000)
+    INSERT INTO users (username, email, password_hash, faction, is_admin, is_bot, points, gold_coins)
+    VALUES ('Ancien_Bot_Oda', 'bot@bot.jp', 'xxx', 'terran', 0, 1, 5000, 0)
 ")->execute();
 
 echo "1. Utilisateurs créés avant reset :\n";
-echo "  - Compte 'shingen_takeda' (ID {$shingenId}, Vorash, 15 000 pts)\n";
-echo "  - Compte 'nobunaga_oda' (ID {$nobunagaId}, Terran, 32 000 pts)\n";
+echo "  - Compte 'shingen_takeda' (ID {$shingenId}, Vorash, 15 000 pts, 2 500 Kobars d'or, Sceau actif)\n";
+echo "  - Compte 'nobunaga_oda' (ID {$nobunagaId}, Terran, 32 000 pts, 1 200 Kobars d'or)\n";
 echo "  - Bot IA 'Ancien_Bot_Oda' (is_bot = 1)\n\n";
 
 // 4. Exécuter le Reset du Monde
@@ -253,11 +256,19 @@ if ((int)$shingen['points'] !== 0) {
     echo "[FAIL] Points de 'shingen_takeda' non réinitialisés (trouvé {$shingen['points']})\n";
     exit(1);
 }
+if ((int)$shingen['gold_coins'] !== 0) {
+    echo "[FAIL] Réserve de Kobars de 'shingen_takeda' non remise à zéro (trouvé {$shingen['gold_coins']})\n";
+    exit(1);
+}
+if ($shingen['imperial_seal_until'] !== null) {
+    echo "[FAIL] Sceau Impérial de 'shingen_takeda' non réinitialisé\n";
+    exit(1);
+}
 if ($shingen['alliance_id'] !== null) {
     echo "[FAIL] Alliance de 'shingen_takeda' non réinitialisée\n";
     exit(1);
 }
-echo "[OK] Compte 'shingen_takeda' intact, mot de passe préservé, points remis à 0\n";
+echo "[OK] Compte 'shingen_takeda' intact, identifiants préservés, points et Kobars remis à zéro\n";
 
 // Vérifier nobunaga_oda
 $nobunaga = $sqlite->query("SELECT * FROM users WHERE username = 'nobunaga_oda'")->fetch(PDO::FETCH_ASSOC);

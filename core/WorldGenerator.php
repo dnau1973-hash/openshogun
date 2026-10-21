@@ -277,9 +277,10 @@ class WorldGenerator {
                 error_log("WorldGenerator::resetUniverse - DELETE non-admin users notice: " . $e->getMessage());
             }
         } else {
-            // Option ACTIVÉE : Réinitialisation des statistiques, classements et appartenances pour TOUS les utilisateurs conservés
+            // Option ACTIVÉE : Réinitialisation stricte des statistiques, devises (kobars/gold_coins),
+            // privilèges impériaux et appartenances pour TOUS les utilisateurs conservés.
+            // L'identité, les identifiants et les accès des comptes joueurs sont intégralement préservés.
             $protectionDays = (int)GameConfig::get('beginner_protection_days', 7);
-            $starterGold    = (int)GameConfig::get('starter_gold_coins', 100);
             $protectionSql  = ($protectionDays > 0)
                 ? "DATE_ADD(NOW(), INTERVAL {$protectionDays} DAY)"
                 : "NULL";
@@ -289,9 +290,13 @@ class WorldGenerator {
             if ($driverName === 'sqlite') {
                 $protVal = ($protectionDays > 0) ? (time() + ($protectionDays * 86400)) : 'NULL';
                 try {
-                    $this->db->exec("UPDATE users SET points = 0, alliance_id = NULL, protection_until = {$protVal}, gold_coins = {$starterGold}");
-                } catch (Exception $eGold) {
-                    $this->db->exec("UPDATE users SET points = 0, alliance_id = NULL, protection_until = {$protVal}");
+                    $this->db->exec("UPDATE users SET points = 0, alliance_id = NULL, protection_until = {$protVal}, gold_coins = 0, imperial_seal_until = NULL, last_daily_gold = NULL");
+                } catch (Exception $eFull) {
+                    try {
+                        $this->db->exec("UPDATE users SET points = 0, alliance_id = NULL, protection_until = {$protVal}, gold_coins = 0");
+                    } catch (Exception $eGold) {
+                        $this->db->exec("UPDATE users SET points = 0, alliance_id = NULL, protection_until = {$protVal}");
+                    }
                 }
             } else {
                 try {
@@ -300,15 +305,27 @@ class WorldGenerator {
                         SET points = 0, 
                             alliance_id = NULL, 
                             protection_until = {$protectionSql},
-                            gold_coins = {$starterGold}
+                            gold_coins = 0,
+                            imperial_seal_until = NULL,
+                            last_daily_gold = NULL
                     ");
-                } catch (Exception $eGold) {
-                    $this->db->exec("
-                        UPDATE users 
-                        SET points = 0, 
-                            alliance_id = NULL, 
-                            protection_until = {$protectionSql}
-                    ");
+                } catch (Exception $eFull) {
+                    try {
+                        $this->db->exec("
+                            UPDATE users 
+                            SET points = 0, 
+                                alliance_id = NULL, 
+                                protection_until = {$protectionSql},
+                                gold_coins = 0
+                        ");
+                    } catch (Exception $eGold) {
+                        $this->db->exec("
+                            UPDATE users 
+                            SET points = 0, 
+                                alliance_id = NULL, 
+                                protection_until = {$protectionSql}
+                        ");
+                    }
                 }
             }
         }
@@ -350,9 +367,14 @@ class WorldGenerator {
         if ($existingAdmin) {
             $adminId = (int)$existingAdmin['id'];
             $adminFaction = !empty($existingAdmin['faction']) ? $existingAdmin['faction'] : 'terran';
-            // Mettre à jour le mot de passe de l'admin et garantir is_admin = 1
-            $stmtUpAdmin = $this->db->prepare("UPDATE users SET password_hash = ?, is_admin = 1, is_bot = 0, points = 0 WHERE id = ?");
-            $stmtUpAdmin->execute([$adminHash, $adminId]);
+            // Mettre à jour le mot de passe de l'admin et garantir is_admin = 1 avec remise à zéro des devises et points
+            try {
+                $stmtUpAdmin = $this->db->prepare("UPDATE users SET password_hash = ?, is_admin = 1, is_bot = 0, points = 0, gold_coins = 0, imperial_seal_until = NULL, last_daily_gold = NULL WHERE id = ?");
+                $stmtUpAdmin->execute([$adminHash, $adminId]);
+            } catch (Exception $eAdmUp) {
+                $stmtUpAdmin = $this->db->prepare("UPDATE users SET password_hash = ?, is_admin = 1, is_bot = 0, points = 0 WHERE id = ?");
+                $stmtUpAdmin->execute([$adminHash, $adminId]);
+            }
         } else {
             $stmtAdmin = $this->db->prepare("
                 INSERT INTO users (username, email, password_hash, faction, is_admin, is_bot, points, created_at, last_active)

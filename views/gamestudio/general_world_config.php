@@ -966,6 +966,99 @@ unset($_SESSION['general_flash']);
                             </div>
                         </div>
 
+                        <!-- Charte & Mise au Point Officielle : Réinitialisation du Monde Féodal -->
+                        <div class="card border border-primary-subtle shadow-sm mb-4 overflow-hidden" style="border-radius: 12px; background: #ffffff;">
+                            <div class="card-header bg-primary bg-opacity-10 py-3 px-4 border-bottom border-primary-subtle d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-3 text-primary"><i class="fa-solid fa-scale-balanced"></i></span>
+                                    <div>
+                                        <h5 class="m-0 fw-bold text-dark">Mise au Point : Protocole de Réinitialisation &amp; Nouveau Départ</h5>
+                                        <div class="text-muted small">Règles fondamentales d'équité lors de la transition vers un nouvel univers d'OpenShogun</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-primary text-white font-monospace px-3 py-1">Équité Féodale Garantie</span>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="text-secondary mb-3" style="font-size: 0.95rem; line-height: 1.6;">
+                                    Lors de la transition vers le nouveau monde, l'ensemble des joueurs humains <strong>conservent l'accès à leur compte</strong>, mais plusieurs réinitialisations majeures s'appliquent pour préserver l'équilibre stratégique :
+                                </div>
+
+                                <div class="row g-3">
+                                    <!-- 1. Identité du Compte -->
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="p-3 rounded border h-100 bg-light-subtle d-flex flex-column justify-content-between">
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-2">
+                                                    <span class="badge bg-teal text-white p-1.5 rounded"><i class="fa-solid fa-id-card"></i></span>
+                                                    <strong class="text-dark">Identité du Compte</strong>
+                                                </div>
+                                                <p class="small text-muted m-0" style="line-height: 1.5;">
+                                                    Vous <strong>conservez votre compte joueur</strong>, vos accès et vos <strong>identifiants d'origine</strong> (nom d'utilisateur, email et mot de passe).
+                                                </p>
+                                            </div>
+                                            <div class="mt-2 pt-2 border-top text-success small fw-bold d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-circle-check"></i> Comptes préservés
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. Capital & Ressources -->
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="p-3 rounded border h-100 bg-light-subtle d-flex flex-column justify-content-between">
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-2">
+                                                    <span class="badge bg-warning text-dark p-1.5 rounded"><i class="fa-solid fa-warehouse"></i></span>
+                                                    <strong class="text-dark">Capital &amp; Ressources</strong>
+                                                </div>
+                                                <p class="small text-muted m-0" style="line-height: 1.5;">
+                                                    Votre <strong>capital repart intégralement à zéro</strong>. Tous les anciens fiefs, parcelles, bâtiments et armées sont effacés pour ériger un domaine vierge.
+                                                </p>
+                                            </div>
+                                            <div class="mt-2 pt-2 border-top text-warning small fw-bold d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-arrows-rotate"></i> Remise à zéro
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. Devises Spécifiques & Kobars -->
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="p-3 rounded border h-100 bg-light-subtle d-flex flex-column justify-content-between">
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-2">
+                                                    <span class="badge bg-danger text-white p-1.5 rounded"><i class="fa-solid fa-coins"></i></span>
+                                                    <strong class="text-dark">Devises &amp; Kobars</strong>
+                                                </div>
+                                                <p class="small text-muted m-0" style="line-height: 1.5;">
+                                                    Les données associées à votre compte (notamment les <strong>réserves de kobars</strong>, points de classement, clans et configurations annexes) sont <strong>remises à zéro</strong>.
+                                                </p>
+                                            </div>
+                                            <div class="mt-2 pt-2 border-top text-danger small fw-bold d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-ban"></i> 0 Kobar / 0 Stat
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 4. Équité Féodale Absolue -->
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="p-3 rounded border h-100 bg-light-subtle d-flex flex-column justify-content-between">
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-2">
+                                                    <span class="badge bg-purple text-white p-1.5 rounded"><i class="fa-solid fa-users"></i></span>
+                                                    <strong class="text-dark">Pied d'Égalité</strong>
+                                                </div>
+                                                <p class="small text-muted m-0" style="line-height: 1.5;">
+                                                    <strong>Tout le monde repart ainsi sur un pied d'égalité</strong> pour ce nouveau départ : mêmes parcelles, même dotation de base, nouvelles coalitions.
+                                                </p>
+                                            </div>
+                                            <div class="mt-2 pt-2 border-top text-purple small fw-bold d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-handshake"></i> Compétition loyale
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Zone de Danger : Déclencheur du Reset -->
                         <div class="p-3 border border-danger rounded bg-danger-lt">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -1592,9 +1685,19 @@ unset($_SESSION['general_flash']);
                             <i class="fa-solid fa-triangle-exclamation fs-2 me-3"></i>
                             <div>
                                 <h6 class="fw-bold mb-1">Attention : Opération Irréversible !</h6>
-                                <p class="mb-1" id="modalRegenPreserveDescription">
-                                    <?= !empty($preserveHumanUsers) ? 'Les comptes des joueurs humains seront <strong>conservés</strong> avec remise à zéro de leurs fiefs.' : '⚠️ TOUS les comptes seront supprimés.' ?>
-                                </p>
+                                <div class="mb-1" id="modalRegenPreserveDescription">
+                                    <?php if (!empty($preserveHumanUsers)): ?>
+                                        <div class="fw-bold text-dark mb-1.5"><i class="fa-solid fa-shield-halved text-success me-1"></i>Transition avec Conservation des Comptes Joueurs :</div>
+                                        <ul class="mb-0 ps-3 text-secondary small" style="line-height: 1.5;">
+                                            <li><strong>Identité du compte :</strong> Tous les joueurs conservent leur compte, leurs accès et leurs identifiants d'origine.</li>
+                                            <li><strong>Capital et ressources :</strong> Le capital (bâtiments, parcelles, armées) repart intégralement à zéro sur un nouveau domaine de départ.</li>
+                                            <li><strong>Devises et paramètres :</strong> Les données du compte (notamment les réserves de kobars, statistiques, clans et configurations) sont également remises à zéro.</li>
+                                            <li><strong>Équité féodale :</strong> Tout le monde repart sur un pied d'égalité pour ce nouveau départ.</li>
+                                        </ul>
+                                    <?php else: ?>
+                                        <strong class="text-danger">⚠️ TOUS les comptes de joueurs humains seront IRRÉVOCABLEMENT SUPPRIMÉS</strong> de la base de données ! Seul le compte administrateur sera conservé.
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2231,7 +2334,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 badgeHeader.className = 'badge bg-primary-lt font-monospace fs-5 px-3 py-1.5';
             }
             if (modalDesc) {
-                modalDesc.innerHTML = '<strong>Option active :</strong> Les comptes des joueurs humains déjà présents dans le monde seront <strong>conservés</strong>. Leurs anciens fiefs sont remis à zéro et ils recevront un nouveau départ avec Héros et dotation.';
+                modalDesc.innerHTML = `
+                    <div class="fw-bold text-dark mb-1.5"><i class="fa-solid fa-shield-halved text-success me-1"></i>Transition avec Conservation des Comptes Joueurs :</div>
+                    <ul class="mb-0 ps-3 text-secondary small" style="line-height: 1.5;">
+                        <li><strong>Identité du compte :</strong> Tous les joueurs conservent leur compte, leurs accès et leurs identifiants d'origine.</li>
+                        <li><strong>Capital et ressources :</strong> Le capital (bâtiments, parcelles, armées) repart intégralement à zéro sur un nouveau domaine de départ.</li>
+                        <li><strong>Devises et paramètres :</strong> Les données du compte (notamment les réserves de kobars, statistiques, clans et configurations) sont également remises à zéro.</li>
+                        <li><strong>Équité féodale :</strong> Tout le monde repart sur un pied d'égalité pour ce nouveau départ.</li>
+                    </ul>
+                `;
             }
         } else {
             if (badgeState) {
@@ -2243,7 +2354,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 badgeHeader.className = 'badge bg-danger-lt font-monospace fs-5 px-3 py-1.5';
             }
             if (modalDesc) {
-                modalDesc.innerHTML = '<strong>⚠️ ATTENTION CRITIQUE :</strong> L\'option de conservation est désactivée. <strong>TOUS les comptes de joueurs humains seront IRRÉVOCABLEMENT SUPPRIMÉS</strong> !';
+                modalDesc.innerHTML = '<strong class="text-danger">⚠️ ATTENTION CRITIQUE :</strong> L\'option de conservation est désactivée. <strong>TOUS les comptes de joueurs humains seront IRRÉVOCABLEMENT SUPPRIMÉS</strong> de la base de données ! Seul le compte administrateur sera conservé.';
             }
         }
     };
