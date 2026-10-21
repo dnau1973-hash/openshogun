@@ -1,7 +1,7 @@
 /**
  * Moteur de Carte des Provinces et Fiefs du Japon Féodal (OpenShogun)
- * Déplacement fluide (Drag & Drop), tuiles de terrain illustrées (plaines, forêts, montagnes, lacs, collines),
- * donjons authentiques et navigation par quadrants (Nord-Ouest, Nord-Est, Sud-Ouest, Sud-Est).
+ * Système de navigation fluide avec caméra continue au pixel, inertie cinétique (momentum),
+ * anneaux de tuiles tampons (overscan sans bord vide), zéro rebond snap-back et contrôles tactiles / clavier.
  */
 
 class GalaxyMapController {
@@ -9,34 +9,47 @@ class GalaxyMapController {
         this.container = document.getElementById(containerId);
         if (!this.container) return;
 
-        this.centerX = options.initialX || 0;
-        this.centerY = options.initialY || 0;
+        // Position de la caméra en coordonnées continues (flottantes)
+        this.cameraX = Number(options.initialX) || 0;
+        this.cameraY = Number(options.initialY) || 0;
+        this.gridCenterX = Math.round(this.cameraX);
+        this.gridCenterY = Math.round(this.cameraY);
+
         this.playerX = options.playerX || 0;
         this.playerY = options.playerY || 0;
         this.currentUserId = options.userId || 0;
 
-        this.tileSize = 80; // pixels par case (Travian style)
-        this.gap = 0; // Grille continue et jointive sans coupure
+        this.tileSize = 80; // pixels par case
+        this.gap = 0;       // Grille continue sans séparation
         this.stepSize = this.tileSize;
 
-        // Calcul dynamique du rayon pour occuper toute la largeur d'écran disponible
+        // Anneau de tuiles de débordement hors écran (overscan) pour éliminer les bords vides
+        this.overscan = 2;
+
+        // Calcul dynamique du rayon pour occuper toute la surface disponible
         if (options.radius && options.radius > 0) {
-            this.radius = options.radius;
+            this.baseRadius = options.radius;
         } else {
             const availW = Math.max(window.innerWidth, this.container.clientWidth || 1200);
-            const neededCols = Math.ceil(availW / this.stepSize) + 2;
-            this.radius = Math.min(13, Math.max(5, Math.ceil((neededCols - 1) / 2)));
+            const neededCols = Math.ceil(availW / this.tileSize) + 2;
+            this.baseRadius = Math.min(11, Math.max(5, Math.ceil((neededCols - 1) / 2)));
         }
+        this.radius = this.baseRadius + this.overscan;
 
-        // État du Drag
+        // État de glissement et physique de déplacement
         this.isDragging = false;
         this.dragStartX = 0;
         this.dragStartY = 0;
-        this.dragOffsetX = 0;
-        this.dragOffsetY = 0;
+        this.lastPointerX = 0;
+        this.lastPointerY = 0;
         this.totalDistanceMoved = 0;
+        this.pointerSamples = [];
+        this.momentumId = null;
+        this.snapAnimationId = null;
+        this.fetchDebounceTimer = null;
+        this.wheelSnapTimer = null;
 
-        // Cache des secteurs planétaires et paysages naturels
+        // Caches locaux
         this.planetsCache = {};
         this.terrainsCache = {};
         this.currentQuadrant = null;
@@ -44,8 +57,16 @@ class GalaxyMapController {
 
         this.initDOM();
         this.bindEvents();
-        this.loadSector(this.centerX, this.centerY);
+        this.renderGrid();
+        this.applyTransform();
+        this.loadSector(this.gridCenterX, this.gridCenterY);
     }
+
+    // Propriétés de compatibilité
+    get centerX() { return Math.round(this.cameraX); }
+    set centerX(val) { this.cameraX = val; }
+    get centerY() { return Math.round(this.cameraY); }
+    set centerY(val) { this.cameraY = val; }
 
     initDOM() {
         this.container.innerHTML = `
@@ -53,6 +74,14 @@ class GalaxyMapController {
                 <div class="hud-coords-badge">
                     <span id="hudQuadrantDisplay"><i class="fa-solid fa-compass me-1"></i>Provinces</span>
                     <strong id="hudCoordsDisplay">[${this.centerX} : ${this.centerY}]</strong>
+                </div>
+
+                <!-- Pad de Navigation Directionnelle au Pas à Pas -->
+                <div class="hud-dpad-nav d-none d-md-flex align-items-center gap-1">
+                    <button class="hud-btn" id="btnArrowLeft" title="Déplacer vers l'Ouest (Gauche / Q / A)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="hud-btn" id="btnArrowUp" title="Déplacer vers le Nord (Haut / Z / W)"><i class="fa-solid fa-chevron-up"></i></button>
+                    <button class="hud-btn" id="btnArrowDown" title="Déplacer vers le Sud (Bas / S)"><i class="fa-solid fa-chevron-down"></i></button>
+                    <button class="hud-btn" id="btnArrowRight" title="Déplacer vers l'Est (Droite / D)"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
 
                 <div class="hud-quadrants-nav">
@@ -64,18 +93,18 @@ class GalaxyMapController {
                 </div>
 
                 <div class="hud-controls-group">
-                    <button class="hud-btn" id="btnRecenterColony" title="Centrer sur mon fief"><i class="fa-solid fa-chess-rook me-1"></i>Mon Fief</button>
-                    <button class="hud-btn" id="btnZoomIn" title="Zoom avant">+</button>
-                    <button class="hud-btn" id="btnZoomOut" title="Zoom arrière">&minus;</button>
+                    <button class="hud-btn" id="btnRecenterColony" title="Recentrer doucement sur mon fief seigneurial"><i class="fa-solid fa-chess-rook me-1"></i>Mon Fief</button>
+                    <button class="hud-btn" id="btnZoomIn" title="Zoom avant (plus grand)">+</button>
+                    <button class="hud-btn" id="btnZoomOut" title="Zoom arrière (plus large)">&minus;</button>
                 </div>
             </div>
 
             <div class="galaxy-viewport" id="galaxyViewport">
                 <div class="galaxy-canvas" id="galaxyCanvas">
-                    <!-- Les tuiles seront générées dynamiquement -->
+                    <!-- Grille générée dynamiquement -->
                 </div>
-                <div class="galaxy-drag-hint">
-                    <span><i class="fa-solid fa-hand me-1"></i>Glissez (Drag &amp; Drop) pour explorer le Japon féodal</span>
+                <div class="galaxy-drag-hint" id="galaxyDragHint">
+                    <span><i class="fa-solid fa-hand me-1"></i>Glissez librement pour explorer l'Archipel (Flèches, ZQSD ou souris)</span>
                 </div>
             </div>
         `;
@@ -83,106 +112,149 @@ class GalaxyMapController {
         this.viewport = document.getElementById('galaxyViewport');
         this.canvas = document.getElementById('galaxyCanvas');
         this.coordsDisplay = document.getElementById('hudCoordsDisplay');
+        this.dragHint = document.getElementById('galaxyDragHint');
     }
 
     bindEvents() {
-        // Drag-and-Drop avec Pointer Events (support souris + touch mobile)
+        // Événements pointeur continus (souris, stylet et tactile smartphone/tablette)
         this.viewport.addEventListener('pointerdown', (e) => this.onPointerDown(e));
         window.addEventListener('pointermove', (e) => this.onPointerMove(e));
         window.addEventListener('pointerup', (e) => this.onPointerUp(e));
         window.addEventListener('pointercancel', (e) => this.onPointerUp(e));
 
-        // Empêcher le glisser d'image natif
+        // Empêcher le glisser d'image natif du navigateur
         this.viewport.addEventListener('dragstart', (e) => e.preventDefault());
 
-        // Boutons de navigation des 4 Quadrants & Centre
+        // Navigation molette souris douce
+        this.viewport.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
+
+        // Navigation Quadrants
         document.getElementById('btnQuadrantNO').onclick = () => this.moveTo(-16, 16);
         document.getElementById('btnQuadrantNE').onclick = () => this.moveTo(16, 16);
         document.getElementById('btnQuadrantSO').onclick = () => this.moveTo(-16, -16);
         document.getElementById('btnQuadrantSE').onclick = () => this.moveTo(16, -16);
         document.getElementById('btnQuadrantKyoto').onclick = () => this.moveTo(0, 0);
 
-        // Boutons de contrôle HUD
+        // Pad directionnel HUD
+        const btnUp = document.getElementById('btnArrowUp');
+        const btnDown = document.getElementById('btnArrowDown');
+        const btnLeft = document.getElementById('btnArrowLeft');
+        const btnRight = document.getElementById('btnArrowRight');
+        if (btnUp) btnUp.onclick = () => this.smoothMoveBy(0, 1);
+        if (btnDown) btnDown.onclick = () => this.smoothMoveBy(0, -1);
+        if (btnLeft) btnLeft.onclick = () => this.smoothMoveBy(-1, 0);
+        if (btnRight) btnRight.onclick = () => this.smoothMoveBy(1, 0);
+
+        // Recentrage sur la capitale du joueur
         document.getElementById('btnRecenterColony').onclick = () => {
             this.moveTo(this.playerX, this.playerY);
         };
 
+        // Boutons de Zoom
         document.getElementById('btnZoomIn').onclick = () => {
-            if (this.tileSize < 110) {
+            if (this.tileSize < 112) {
                 this.tileSize += 12;
-                this.stepSize = this.tileSize + this.gap;
+                this.stepSize = this.tileSize;
                 this.renderGrid();
+                this.applyTransform();
             }
         };
 
         document.getElementById('btnZoomOut').onclick = () => {
-            if (this.tileSize > 54) {
+            if (this.tileSize > 52) {
                 this.tileSize -= 12;
-                this.stepSize = this.tileSize + this.gap;
+                this.stepSize = this.tileSize;
                 this.renderGrid();
+                this.applyTransform();
             }
         };
 
-        // Navigation clavier (Flèches directionnelles)
+        // Navigation Clavier fluide (Flèches, ZQSD et WASD)
         window.addEventListener('keydown', (e) => {
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+
+            let deltaX = 0;
+            let deltaY = 0;
+
+            if (e.key === 'ArrowUp' || e.code === 'KeyW' || e.code === 'KeyZ') deltaY = 1;
+            else if (e.key === 'ArrowDown' || e.code === 'KeyS') deltaY = -1;
+            else if (e.key === 'ArrowLeft' || e.code === 'KeyA' || e.code === 'KeyQ') deltaX = -1;
+            else if (e.key === 'ArrowRight' || e.code === 'KeyD') deltaX = 1;
+
+            if (deltaX !== 0 || deltaY !== 0) {
                 e.preventDefault();
-                if (e.key === 'ArrowUp') this.moveTo(this.centerX, this.centerY + 1);
-                if (e.key === 'ArrowDown') this.moveTo(this.centerX, this.centerY - 1);
-                if (e.key === 'ArrowLeft') this.moveTo(this.centerX - 1, this.centerY);
-                if (e.key === 'ArrowRight') this.moveTo(this.centerX + 1, this.centerY);
+                this.smoothMoveBy(deltaX, deltaY);
             }
         });
 
-        // Redimensionnement automatique pour couvrir toute la largeur de l'écran
+        // Redimensionnement automatique de la grille selon la taille de fenêtre
         let resizeTimer = null;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 const availW = Math.max(window.innerWidth, this.container.clientWidth || 1200);
-                const neededCols = Math.ceil(availW / this.stepSize) + 2;
-                const newRadius = Math.min(13, Math.max(5, Math.ceil((neededCols - 1) / 2)));
+                const neededCols = Math.ceil(availW / this.tileSize) + 2;
+                const newBaseRadius = Math.min(11, Math.max(5, Math.ceil((neededCols - 1) / 2)));
+                const newRadius = newBaseRadius + this.overscan;
                 if (newRadius !== this.radius) {
                     this.radius = newRadius;
-                    this.loadSector(this.centerX, this.centerY);
+                    this.renderGrid();
+                    this.applyTransform();
+                    this.loadSector(this.gridCenterX, this.gridCenterY);
                 }
-            }, 300);
+            }, 250);
         });
     }
 
     onPointerDown(e) {
         if (e.button !== 0 && e.pointerType === 'mouse') return;
 
+        // Interrompre tout mouvement d'inertie ou calage en cours
+        if (this.momentumId) {
+            cancelAnimationFrame(this.momentumId);
+            this.momentumId = null;
+        }
+        if (this.snapAnimationId) {
+            cancelAnimationFrame(this.snapAnimationId);
+            this.snapAnimationId = null;
+        }
+
         this.isDragging = true;
         this.dragStartX = e.clientX;
         this.dragStartY = e.clientY;
-        this.dragOffsetX = 0;
-        this.dragOffsetY = 0;
+        this.lastPointerX = e.clientX;
+        this.lastPointerY = e.clientY;
         this.totalDistanceMoved = 0;
-        this.canvas.style.transition = 'none';
+
+        const now = performance.now();
+        this.pointerSamples = [{ x: e.clientX, y: e.clientY, time: now }];
 
         this.viewport.classList.add('grabbing');
+        this.canvas.style.transition = 'none';
     }
 
     onPointerMove(e) {
         if (!this.isDragging) return;
 
-        const dx = e.clientX - this.dragStartX;
-        const dy = e.clientY - this.dragStartY;
-        this.dragOffsetX = dx;
-        this.dragOffsetY = dy;
-        this.totalDistanceMoved += Math.hypot(e.movementX, e.movementY);
+        const dx = e.clientX - this.lastPointerX;
+        const dy = e.clientY - this.lastPointerY;
+        this.lastPointerX = e.clientX;
+        this.lastPointerY = e.clientY;
+        this.totalDistanceMoved += Math.hypot(dx, dy);
 
-        // Fluidité 60fps pure : translation GPU sans rechargement ni reconstruction du DOM pendant le geste
-        this.canvas.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
-
-        // Prévisualisation des coordonnées centrales dans le HUD
-        const coordDeltaX = -Math.round(dx / this.stepSize);
-        const coordDeltaY = Math.round(dy / this.stepSize);
-        if (this.coordsDisplay) {
-            this.coordsDisplay.innerText = `[${this.centerX + coordDeltaX} : ${this.centerY + coordDeltaY}]`;
+        // Masquer l'aide de glissement une fois que le joueur a compris le geste
+        if (this.totalDistanceMoved > 14 && this.dragHint) {
+            this.dragHint.style.opacity = '0';
         }
+
+        // Échantillonnage pour calculer la vitesse de lancer (momentum)
+        const now = performance.now();
+        this.pointerSamples.push({ x: e.clientX, y: e.clientY, time: now });
+        while (this.pointerSamples.length > 5 || (this.pointerSamples.length > 2 && now - this.pointerSamples[0].time > 100)) {
+            this.pointerSamples.shift();
+        }
+
+        this.panByDelta(dx, dy);
     }
 
     onPointerUp(e) {
@@ -190,44 +262,261 @@ class GalaxyMapController {
         this.isDragging = false;
         this.viewport.classList.remove('grabbing');
 
-        // Calcul du nombre de tuiles déplacées
-        const coordDeltaX = -Math.round(this.dragOffsetX / this.stepSize);
-        const coordDeltaY = Math.round(this.dragOffsetY / this.stepSize);
-
-        if (coordDeltaX !== 0 || coordDeltaY !== 0) {
-            this.centerX += coordDeltaX;
-            this.centerY += coordDeltaY;
-            this.updateCoordsDisplay();
+        // Calcul de la vélocité sur les derniers points d'échantillonnage
+        let vx = 0;
+        let vy = 0;
+        if (this.pointerSamples.length >= 2) {
+            const oldest = this.pointerSamples[0];
+            const newest = this.pointerSamples[this.pointerSamples.length - 1];
+            const dt = newest.time - oldest.time;
+            if (dt > 10 && dt < 140) {
+                vx = (newest.x - oldest.x) / dt;
+                vy = (newest.y - oldest.y) / dt;
+            }
         }
 
-        // Réinitialisation douce de la transformation
-        this.canvas.style.transition = 'transform 0.15s cubic-bezier(0.2, 0.9, 0.4, 1)';
-        this.canvas.style.transform = 'translate3d(0, 0, 0)';
-
-        setTimeout(() => {
-            this.canvas.style.transition = 'none';
-            if (coordDeltaX !== 0 || coordDeltaY !== 0) {
-                this.loadSector(this.centerX, this.centerY);
-            }
-        }, 160);
+        const speed = Math.hypot(vx, vy);
+        if (speed > 0.18) {
+            // Lancer la glisse inertielle (momentum)
+            this.startMomentum(vx * 16, vy * 16);
+        } else {
+            // Calage doux et magnétique sur la tuile la plus proche
+            this.smoothSnapToCenter();
+        }
     }
 
-    moveTo(x, y) {
-        this.centerX = x;
-        this.centerY = y;
+    /**
+     * Déplacement relatif en pixels (utilisé lors du drag, du momentum et de la molette)
+     */
+    panByDelta(dx, dy) {
+        // Translation continue de la caméra
+        this.cameraX -= dx / this.tileSize;
+        this.cameraY += dy / this.tileSize;
+
+        // Détection du décalage de tuiles entières pour le recyclage transparent de la grille
+        const shiftX = Math.round(this.cameraX - this.gridCenterX);
+        const shiftY = Math.round(this.cameraY - this.gridCenterY);
+
+        if (shiftX !== 0 || shiftY !== 0) {
+            this.gridCenterX += shiftX;
+            this.gridCenterY += shiftY;
+            // Rendu instantané depuis le cache local (zéro latence)
+            this.renderGrid();
+            this.scheduleSectorFetch(this.gridCenterX, this.gridCenterY);
+        }
+
+        this.applyTransform();
         this.updateCoordsDisplay();
-        this.loadSector(this.centerX, this.centerY);
+    }
+
+    /**
+     * Applique la transformation GPU exacte au sous-pixel près
+     */
+    applyTransform() {
+        const pixelShiftX = -(this.cameraX - this.gridCenterX) * this.tileSize;
+        const pixelShiftY = (this.cameraY - this.gridCenterY) * this.tileSize;
+        this.canvas.style.transform = `translate3d(${pixelShiftX.toFixed(2)}px, ${pixelShiftY.toFixed(2)}px, 0)`;
+    }
+
+    /**
+     * Glisse cinétique avec décélération exponentielle (Momentum Scrolling)
+     */
+    startMomentum(vx, vy) {
+        if (this.momentumId) cancelAnimationFrame(this.momentumId);
+        let curVx = vx;
+        let curVy = vy;
+        const friction = 0.925; // Facteur de glisse organique
+
+        const step = () => {
+            if (this.isDragging) return;
+            curVx *= friction;
+            curVy *= friction;
+
+            if (Math.hypot(curVx, curVy) < 0.25) {
+                this.smoothSnapToCenter();
+                return;
+            }
+
+            this.panByDelta(curVx, curVy);
+            this.momentumId = requestAnimationFrame(step);
+        };
+        this.momentumId = requestAnimationFrame(step);
+    }
+
+    /**
+     * Alignement magnétique doux sur la tuile entière la plus proche sans aucun rebond
+     */
+    smoothSnapToCenter() {
+        if (this.snapAnimationId) cancelAnimationFrame(this.snapAnimationId);
+
+        const targetX = Math.round(this.cameraX);
+        const targetY = Math.round(this.cameraY);
+        const dist = Math.hypot(targetX - this.cameraX, targetY - this.cameraY);
+
+        if (dist < 0.005) {
+            this.cameraX = targetX;
+            this.cameraY = targetY;
+            this.applyTransform();
+            this.updateCoordsDisplay();
+            this.scheduleSectorFetch(targetX, targetY);
+            return;
+        }
+
+        const startX = this.cameraX;
+        const startY = this.cameraY;
+        const startTime = performance.now();
+        const duration = Math.min(220, Math.max(120, dist * 180));
+
+        const snapStep = (now) => {
+            if (this.isDragging) return;
+            const elapsed = now - startTime;
+            const progress = Math.min(1, elapsed / duration);
+            // Courbe d'atténuation cubique (ease out)
+            const ease = 1 - Math.pow(1 - progress, 3);
+
+            this.cameraX = startX + (targetX - startX) * ease;
+            this.cameraY = startY + (targetY - startY) * ease;
+
+            const shiftX = Math.round(this.cameraX - this.gridCenterX);
+            const shiftY = Math.round(this.cameraY - this.gridCenterY);
+            if (shiftX !== 0 || shiftY !== 0) {
+                this.gridCenterX += shiftX;
+                this.gridCenterY += shiftY;
+                this.renderGrid();
+            }
+
+            this.applyTransform();
+            this.updateCoordsDisplay();
+
+            if (progress < 1) {
+                this.snapAnimationId = requestAnimationFrame(snapStep);
+            } else {
+                this.cameraX = targetX;
+                this.cameraY = targetY;
+                this.applyTransform();
+                this.updateCoordsDisplay();
+                this.scheduleSectorFetch(targetX, targetY);
+            }
+        };
+        this.snapAnimationId = requestAnimationFrame(snapStep);
+    }
+
+    /**
+     * Déplacement relatif d'un pas (ex: touches clavier ou boutons de direction)
+     */
+    smoothMoveBy(deltaX, deltaY) {
+        this.moveTo(Math.round(this.cameraX) + deltaX, Math.round(this.cameraY) + deltaY, 180);
+    }
+
+    /**
+     * Déplacement panoramique fluide vers des coordonnées cibles (moveTo)
+     */
+    moveTo(targetX, targetY, customDuration = null) {
+        if (this.momentumId) cancelAnimationFrame(this.momentumId);
+        if (this.snapAnimationId) cancelAnimationFrame(this.snapAnimationId);
+
+        targetX = parseInt(targetX, 10);
+        targetY = parseInt(targetY, 10);
+        if (isNaN(targetX) || isNaN(targetY)) return;
+
+        const startX = this.cameraX;
+        const startY = this.cameraY;
+        const dist = Math.hypot(targetX - startX, targetY - startY);
+
+        // Si la distance est immense (> 45 tuiles), téléportation directe plus véloce
+        if (dist > 45) {
+            this.cameraX = targetX;
+            this.cameraY = targetY;
+            this.gridCenterX = targetX;
+            this.gridCenterY = targetY;
+            this.renderGrid();
+            this.applyTransform();
+            this.updateCoordsDisplay();
+            this.loadSector(targetX, targetY);
+            return;
+        }
+
+        const startTime = performance.now();
+        const duration = customDuration !== null ? customDuration : Math.min(420, Math.max(180, dist * 28));
+
+        const moveStep = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(1, elapsed / duration);
+            const ease = 1 - Math.pow(1 - progress, 3); // Cubic ease out
+
+            this.cameraX = startX + (targetX - startX) * ease;
+            this.cameraY = startY + (targetY - startY) * ease;
+
+            const shiftX = Math.round(this.cameraX - this.gridCenterX);
+            const shiftY = Math.round(this.cameraY - this.gridCenterY);
+            if (shiftX !== 0 || shiftY !== 0) {
+                this.gridCenterX += shiftX;
+                this.gridCenterY += shiftY;
+                this.renderGrid();
+            }
+
+            this.applyTransform();
+            this.updateCoordsDisplay();
+
+            if (progress < 1) {
+                this.snapAnimationId = requestAnimationFrame(moveStep);
+            } else {
+                this.cameraX = targetX;
+                this.cameraY = targetY;
+                this.applyTransform();
+                this.updateCoordsDisplay();
+                this.loadSector(targetX, targetY);
+            }
+        };
+        this.snapAnimationId = requestAnimationFrame(moveStep);
+    }
+
+    /**
+     * Molette de la souris : glissement fluide ou zoom si Ctrl est pressé
+     */
+    onWheel(e) {
+        e.preventDefault();
+        if (this.momentumId) cancelAnimationFrame(this.momentumId);
+        if (this.snapAnimationId) cancelAnimationFrame(this.snapAnimationId);
+
+        if (e.ctrlKey) {
+            // Zoom in / out
+            if (e.deltaY < 0 && this.tileSize < 112) {
+                this.tileSize += 8;
+                this.stepSize = this.tileSize;
+                this.renderGrid();
+                this.applyTransform();
+            } else if (e.deltaY > 0 && this.tileSize > 52) {
+                this.tileSize -= 8;
+                this.stepSize = this.tileSize;
+                this.renderGrid();
+                this.applyTransform();
+            }
+        } else {
+            // Déplacement fluide à la molette
+            const deltaX = -e.deltaX * 0.7;
+            const deltaY = -e.deltaY * 0.7;
+            this.panByDelta(deltaX, deltaY);
+
+            clearTimeout(this.wheelSnapTimer);
+            this.wheelSnapTimer = setTimeout(() => {
+                this.smoothSnapToCenter();
+            }, 120);
+        }
     }
 
     updateCoordsDisplay() {
+        const curX = Math.round(this.cameraX);
+        const curY = Math.round(this.cameraY);
+
         if (this.coordsDisplay) {
-            this.coordsDisplay.innerText = `[${this.centerX} : ${this.centerY}]`;
+            this.coordsDisplay.innerText = `[${curX} : ${curY}]`;
         }
         const inputX = document.getElementById('inputCoordX');
         const inputY = document.getElementById('inputCoordY');
-        if (inputX && inputY) {
-            inputX.value = this.centerX;
-            inputY.value = this.centerY;
+        if (inputX && inputY && document.activeElement !== inputX && document.activeElement !== inputY) {
+            inputX.value = curX;
+            inputY.value = curY;
         }
     }
 
@@ -239,6 +528,16 @@ class GalaxyMapController {
         }
     }
 
+    /**
+     * Planification asynchrone non-bloquante du chargement réseau d'un secteur
+     */
+    scheduleSectorFetch(cx, cy) {
+        clearTimeout(this.fetchDebounceTimer);
+        this.fetchDebounceTimer = setTimeout(() => {
+            this.loadSector(cx, cy);
+        }, 110);
+    }
+
     async loadSector(cx, cy) {
         if (this.isLoading) return;
         this.isLoading = true;
@@ -247,7 +546,6 @@ class GalaxyMapController {
             const res = await fetch(`/api/galaxy.php?x=${cx}&y=${cy}&radius=${this.radius}`);
             const json = await res.json();
             if (json.success && json.data) {
-                // Fusionner dans les caches
                 Object.assign(this.planetsCache, json.data.planets || {});
                 if (json.data.terrains) {
                     Object.assign(this.terrainsCache, json.data.terrains);
@@ -256,10 +554,12 @@ class GalaxyMapController {
                     this.currentQuadrant = json.data.quadrant;
                     this.updateQuadrantDisplay();
                 }
+                // Mise à jour discrète des tuiles sans saut visuel
                 this.renderGrid();
+                this.applyTransform();
             }
         } catch (e) {
-            console.error("Erreur de chargement du secteur galactique:", e);
+            console.error("Erreur de chargement du secteur féodal:", e);
         } finally {
             this.isLoading = false;
         }
@@ -272,10 +572,10 @@ class GalaxyMapController {
         this.canvas.style.gap = `${this.gap}px`;
 
         let html = '';
-        const maxY = this.centerY + this.radius;
-        const minY = this.centerY - this.radius;
-        const minX = this.centerX - this.radius;
-        const maxX = this.centerX + this.radius;
+        const maxY = this.gridCenterY + this.radius;
+        const minY = this.gridCenterY - this.radius;
+        const minX = this.gridCenterX - this.radius;
+        const maxX = this.gridCenterX + this.radius;
 
         for (let y = maxY; y >= minY; y--) {
             for (let x = minX; x <= maxX; x++) {
@@ -287,7 +587,7 @@ class GalaxyMapController {
                     img: '/public/assets/map/tile_plains.jpg?v=3'
                 };
                 const isCurrent = (x === this.playerX && y === this.playerY);
-                const isCenter = (x === this.centerX && y === this.centerY);
+                const isCenter = (x === this.gridCenterX && y === this.gridCenterY);
 
                 const isDojoActive = (planet && planet.is_imperial_dojo && planet.dojo_unlocked);
                 const isDojoSealed = ((planet && planet.is_sealed_dojo) || (x === 0 && y === 0 && !isDojoActive));
@@ -448,10 +748,10 @@ class GalaxyMapController {
 
         this.canvas.innerHTML = html;
 
-        // Attacher les événements de clic sur les tuiles (seulement si ce n'était pas un drag)
+        // Attacher les événements de clic sur les tuiles (seulement si ce n'était pas un glissement)
         this.canvas.querySelectorAll('.galaxy-tile').forEach(tile => {
             tile.onclick = (e) => {
-                if (this.totalDistanceMoved > 8) return; // C'était un drag, pas un clic
+                if (this.totalDistanceMoved > 8) return; // C'était un glissement, pas un clic
                 const x = parseInt(tile.dataset.x, 10);
                 const y = parseInt(tile.dataset.y, 10);
                 const rawData = tile.dataset.planet;
