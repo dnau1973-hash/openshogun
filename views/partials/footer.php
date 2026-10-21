@@ -3,36 +3,6 @@
     </div><!-- /page-wrapper -->
 </div><!-- /page -->
 
-<!-- Modale Universelle d'Amélioration (Bâtiments et Parcelles) -->
-<div class="modal-overlay" id="upgradeModal">
-    <div class="modal-card">
-        <div class="card-header">
-            <h3 class="card-title" id="modalTitle">Amélioration</h3>
-            <button onclick="closeUpgradeModal()" class="modal-close-btn">&times;</button>
-        </div>
-        <div class="card-body">
-            <p id="modalTargetLevel" style="font-weight:700; color:#dc2626; margin-bottom:1rem;"></p>
-            
-            <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">Ressources requises :</div>
-            <div class="cost-row">
-                <div class="cost-item"><span style="color:var(--res-metal);"><i class="fa-solid fa-tree text-success me-1"></i></span> <span id="modalCostMetal">0</span></div>
-                <div class="cost-item"><span style="color:var(--res-crystal);"><i class="fa-solid fa-mountain text-secondary me-1"></i></span> <span id="modalCostCrystal">0</span></div>
-                <div class="cost-item"><span style="color:var(--res-deut);"><i class="fa-solid fa-wheat-awn text-warning me-1"></i></span> <span id="modalCostDeut">0</span></div>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin:1rem 0; font-size:0.9rem;">
-                <span style="color:var(--text-muted);">Temps de travaux :</span>
-                <span id="modalDuration" style="font-weight:700; color:#fff; font-family:monospace;">00:00:00</span>
-            </div>
-
-            <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1.5rem;">
-                <button class="btn btn-secondary" onclick="closeUpgradeModal()">Fermer</button>
-                <button class="btn btn-primary" id="modalConfirmBtn">Lancer les travaux</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Modale Personnalisée pour Messages, Alertes & Confirmations (Remplace alert/confirm) -->
 <div class="modal-overlay" id="customAlertModal">
     <div class="modal-card alert-modal-card" id="customAlertCard">

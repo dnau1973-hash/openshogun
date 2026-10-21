@@ -1724,13 +1724,33 @@
 }
 
 /* ==========================================================
-   MODALES UNIFIÉES STYLE TABLER
+   MODALES UNIFIÉES STYLE TABLER & ARRIÈRE-PLAN OPAQUE
    ========================================================== */
+.modal-backdrop {
+    --bs-backdrop-bg: #090d16;
+    --bs-backdrop-opacity: 0.96;
+    --tblr-backdrop-bg: #090d16;
+    --tblr-backdrop-opacity: 0.96;
+    background-color: #090d16 !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: opacity 0.2s ease-in-out !important;
+}
+
+.modal-backdrop.fade {
+    opacity: 0 !important;
+}
+
+.modal-backdrop.show {
+    opacity: 0.96 !important;
+}
+
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(9, 13, 22, 0.96) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -3182,7 +3202,7 @@
 
 /* ========================================================
    EFFET DE PARALLAXE PROFONDEUR 2.5D & RESPIRATION CINÉMATIQUE
-   Sans assujettissement au scroll de page (Modales & Carrousel)
+   Sans assujettissement au scroll de page (Modales Féodales)
    ======================================================== */
 .depth-parallax-scene {
     position: relative;

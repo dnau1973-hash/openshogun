@@ -414,30 +414,6 @@ function formatTime(seconds) {
     return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
 }
 
-// 3. Gestion des modales d'amélioration
-function openUpgradeModal(category, targetId, name, level, costMetal, costCrystal, costDeut, duration) {
-    const modal = document.getElementById('upgradeModal');
-    if (!modal) return;
-
-    document.getElementById('modalTitle').innerText = `Améliorer : ${name}`;
-    document.getElementById('modalTargetLevel').innerText = `Niveau supérieur : ${parseInt(level, 10) + 1}`;
-    document.getElementById('modalCostMetal').innerText = costMetal.toLocaleString();
-    document.getElementById('modalCostCrystal').innerText = costCrystal.toLocaleString();
-    document.getElementById('modalCostDeut').innerText = costDeut.toLocaleString();
-    document.getElementById('modalDuration').innerText = formatTime(duration);
-
-    const confirmBtn = document.getElementById('modalConfirmBtn');
-    confirmBtn.onclick = () => submitUpgrade(category, targetId);
-
-    modal.style.display = 'flex';
-}
-
-function closeUpgradeModal() {
-    const modal = document.getElementById('upgradeModal');
-    if (modal) modal.style.display = 'none';
-}
-
-// ==========================================================
 // ==========================================================
 // SYSTÈME DE TOAST TABLER.IO (CONFIRMATIONS D'ACTIONS & ALERTES)
 // ==========================================================
@@ -632,37 +608,6 @@ window.alert = function(message) {
     showModalAlert(message, type);
 };
 
-// Actions asynchrones avec la nouvelle modale
-async function submitUpgrade(category, targetId) {
-    const btn = document.getElementById('modalConfirmBtn');
-    btn.disabled = true;
-    btn.innerText = 'Initialisation...';
-
-    const formData = new FormData();
-    formData.append('action', 'upgrade');
-    formData.append('category', category);
-    formData.append('target_id', targetId);
-
-    try {
-        const res = await fetch('/api/build.php', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success) {
-            window.location.reload();
-        } else {
-            showModalAlert(data.error || 'Impossible de lancer la construction.', 'error');
-            btn.disabled = false;
-            btn.innerText = 'Lancer la construction';
-        }
-    } catch (e) {
-        showModalAlert('Erreur de communication avec le serveur.', 'error');
-        btn.disabled = false;
-        btn.innerText = 'Lancer la construction';
-    }
-}
-
 async function cancelBuild(queueId) {
     const confirmed = await showModalConfirm('Voulez-vous vraiment suspendre ces travaux ? 80% des matériaux investis vous seront restitués.', 'Interruption de Chantier');
     if (!confirmed) return;
@@ -722,7 +667,7 @@ window.instantFinishBuild = instantFinishBuild;
 
 // ========================================================
 // SYSTÈME DE PARALLAXE 2.5D & RESPIRATION CINÉMATIQUE (HORS SCROLL)
-// Modales Féodales & Carrousel Castral
+// Modales Féodales (Cité, Terroirs, Garnison, Chroniques)
 // ========================================================
 function initDepthParallax() {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -874,7 +819,7 @@ function initDepthParallax() {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // Réinitialisation lors de l'ouverture de modales Bootstrap
+    // Réinitialisation lors de l'ouverture et fermeture de modales Bootstrap
     document.addEventListener('shown.bs.modal', e => {
         if (!e.target) return;
         const modalScenes = e.target.querySelectorAll('.depth-parallax-scene');
@@ -884,6 +829,22 @@ function initDepthParallax() {
             if (img) {
                 img.style.transform = '';
             }
+        });
+    });
+
+    document.addEventListener('hidden.bs.modal', e => {
+        if (!e.target) return;
+        const modalScenes = e.target.querySelectorAll('.depth-parallax-scene');
+        modalScenes.forEach(scene => {
+            scene.classList.remove('is-interacting');
+            const img = scene.querySelector('.depth-parallax-img');
+            if (img) {
+                img.style.transform = '';
+            }
+            const foregroundEls = scene.querySelectorAll('.depth-parallax-foreground');
+            foregroundEls.forEach(fg => {
+                fg.style.transform = '';
+            });
         });
     });
 

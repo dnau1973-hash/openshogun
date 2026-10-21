@@ -175,7 +175,7 @@ $tab = $_GET['tab'] ?? (($action ?? '') === 'register' ? 'register' : 'login');
             bottom: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(10, 8, 7, 0.82);
+            background: rgba(10, 8, 7, 0.96);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             z-index: 1000;
