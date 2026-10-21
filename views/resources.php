@@ -11,12 +11,15 @@ require_once __DIR__ . '/../core/VillageGeneratorService.php';
 require_once __DIR__ . '/../core/OasisEngine.php';
 require_once __DIR__ . '/../core/PopulationEngine.php';
 require_once __DIR__ . '/../core/AiPromptHelper.php';
+require_once __DIR__ . '/../core/EnvironmentThemeEngine.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $buildingEngine = new BuildingEngine();
 $planetEngine = new PlanetEngine();
 $oasisEngine = new OasisEngine();
 $ruralPlotEngine = new RuralPlotEngine();
+$envTheme = EnvironmentThemeEngine::getThemeData();
+$terroirBgUrl = $envTheme['terroir_url'];
 
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
 $hqLevel = $buildings['hq'] ?? 1;
@@ -49,7 +52,7 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
-    background-image: url('/public/assets/shogun_rural_terroir_9plots.jpg');
+    background-image: url('<?= htmlspecialchars($terroirBgUrl, ENT_QUOTES, 'UTF-8') ?>');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -218,7 +221,13 @@ ob_start();
                         <?php endif; ?>
                     </div>
                 </div>
-                <div style="display:flex; gap:0.5rem; align-items:center;">
+                <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                    <span class="badge bg-dark bg-opacity-75 border border-secondary text-light font-monospace py-1.5 px-2.5 shadow-sm" style="font-size:0.75rem;" title="<?= htmlspecialchars($envTheme['season_name'] . ' • ' . $envTheme['theme_label']) ?>">
+                        <span class="me-1"><?= $envTheme['season_icon'] ?></span>
+                        <strong><?= htmlspecialchars($envTheme['season_name']) ?></strong>
+                        <span class="mx-1 text-muted">&bull;</span>
+                        <span><?= $envTheme['time_icon'] ?> <?= htmlspecialchars($envTheme['theme_label']) ?></span>
+                    </span>
                     <a href="?page=city" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;">
                         <i class="fa-solid fa-chess-rook me-1"></i>Vers la Cité Castrale &rarr;
                     </a>

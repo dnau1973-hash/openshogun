@@ -9,6 +9,7 @@ require_once __DIR__ . '/../core/BarracksEngine.php';
 require_once __DIR__ . '/../core/ShipyardEngine.php';
 require_once __DIR__ . '/../core/ResearchEngine.php';
 require_once __DIR__ . '/../core/AllianceEngine.php';
+require_once __DIR__ . '/../core/EnvironmentThemeEngine.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $buildingEngine = new BuildingEngine();
@@ -17,6 +18,8 @@ $barracksEngine = new BarracksEngine();
 $shipyardEngine = new ShipyardEngine();
 $researchEngine = new ResearchEngine();
 $allianceEngine = new AllianceEngine();
+$envTheme = EnvironmentThemeEngine::getThemeData();
+$cityBgUrl = $envTheme['city_url'];
 
 $buildings = $planetEngine->getBuildings((int)$planet['id']);
 $fields = $planetEngine->getFields((int)$planet['id']);
@@ -368,7 +371,7 @@ foreach ($citySlots as $s => $sd) {
 
 <style>
 .fields-viewport.rts-city-surface {
-    background-image: url('/public/assets/shogun_castle_city_bg.jpg?v=<?= $bgVersion ?>') !important;
+    background-image: url('<?= htmlspecialchars($cityBgUrl, ENT_QUOTES, 'UTF-8') ?>') !important;
 }
 
 /* Hotspots interactifs de la Cité Castrale intégrée (sans cadre jaune au survol) */
@@ -534,7 +537,13 @@ ob_start();
                     <?php endif; ?>
                 </div>
             </div>
-            <div style="display:flex; gap:0.5rem; align-items:center;">
+            <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                <span class="badge bg-dark bg-opacity-75 border border-secondary text-light font-monospace py-1.5 px-2.5 shadow-sm" style="font-size:0.75rem;" title="<?= htmlspecialchars($envTheme['season_name'] . ' • ' . $envTheme['theme_label']) ?>">
+                    <span class="me-1"><?= $envTheme['season_icon'] ?></span>
+                    <strong><?= htmlspecialchars($envTheme['season_name']) ?></strong>
+                    <span class="mx-1 text-muted">&bull;</span>
+                    <span><?= $envTheme['time_icon'] ?> <?= htmlspecialchars($envTheme['theme_label']) ?></span>
+                </span>
                 <button class="btn btn-secondary" onclick="toggleCityViewMode()" id="btn-toggle-view" style="font-size:0.8rem; padding:0.35rem 0.75rem;"><i class="fa-solid fa-clipboard-list me-1"></i>Fiches Détaillées</button>
                 <a href="?page=resources" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;"><i class="fa-solid fa-wheat-awn me-1"></i>Vers les Terroirs Ruraux &rarr;</a>
             </div>
