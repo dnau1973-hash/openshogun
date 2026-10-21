@@ -275,6 +275,22 @@ assertTest(!empty($activeBc['image']), "Image d'en-tête présente dans la dép�
 assertTest(!empty($activeBc['badge']), "Badge de décret présent dans la dépêche impériale");
 assertTest(!empty($activeBc['impact_points']) && is_array($activeBc['impact_points']), "Points d'impacts présents dans la dépêche impériale");
 
+echo "\n[TEST 13] Vérification de l'auto-synchronisation de la Proclamation avec l'Ère active (Ère 4)...\n";
+GameConfig::set('server_current_era', 4);
+assertTest(GameConfig::getServerCurrentEra() === 4, "Monde positionné sur l'Ère 4");
+
+// Simulation d'une dépêche désynchronisée (ex: Ère 1 ou 5 résiduelle)
+$liveOps->setBroadcast("Ancienne Proclamation Désynchronisée", "Message obsolète", "info", 60, true, ['era' => 1]);
+$desyncBc = $liveOps->getActiveBroadcast();
+assertTest((int)$desyncBc['era'] === 1, "Dépêche initialement désynchronisée (Ère 1)");
+
+// Appel de getWorldLifecycleData() : doit détecter l'incohérence et resynchroniser vers l'Ère 4
+$lifecycleSync = $gameStudio->getWorldLifecycleData();
+assertTest(!empty($lifecycleSync['activeBroadcast']), "Dépêche resynchronisée présente dans le cycle de vie");
+assertTest((int)$lifecycleSync['activeBroadcast']['era'] === 4, "La proclamation a été auto-corrigée vers l'Ère 4");
+assertTest(str_contains($lifecycleSync['activeBroadcast']['title'], 'Ère IV'), "Le titre de la proclamation reflète fidèlement l'Ère IV");
+assertTest(str_contains($lifecycleSync['activeBroadcast']['badge'], 'Ère IV'), "Le badge reflète l'Ère IV • Dōjō Impérial");
+
 echo "\n========================================================================\n";
 echo " TOUS LES TESTS DU DÉROULEMENT DU JEU (ÈRE & ENDGAME) SONT 100% AU VERT !\n";
 echo "========================================================================\n";

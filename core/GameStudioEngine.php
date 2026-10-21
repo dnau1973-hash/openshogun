@@ -1017,7 +1017,13 @@ class GameStudioEngine {
         require_once __DIR__ . '/WorldGenerator.php';
         GameConfig::set('preserve_human_users_on_reset', $preserveHumanUsers ? 1 : 0);
         $worldGen = new WorldGenerator($this->db);
-        return $worldGen->resetUniverse($adminPassword, $neutralCount, $deployBots, $preserveHumanUsers);
+        $res = $worldGen->resetUniverse($adminPassword, $neutralCount, $deployBots, $preserveHumanUsers);
+
+        // Post-reset : Synchroniser immédiatement la proclamation impériale avec l'Ère active du monde
+        $currentEra = GameConfig::getServerCurrentEra();
+        $this->broadcastEraTransition($currentEra);
+
+        return $res;
     }
 
     /**
@@ -1214,6 +1220,14 @@ class GameStudioEngine {
             require_once __DIR__ . '/LiveOpsEngine.php';
             $liveOps = new LiveOpsEngine();
             $activeBroadcast = $liveOps->getActiveBroadcast();
+
+            // Auto-synchronisation de sécurité :
+            // Si la proclamation active est une dépêche d'Ère mais ne correspond pas à l'Ère active du monde,
+            // on resynchronise immédiatement la dépêche officielle avec l'Ère réelle.
+            if ($activeBroadcast && !empty($activeBroadcast['era']) && (int)$activeBroadcast['era'] !== (int)$currentEra) {
+                $this->broadcastEraTransition($currentEra);
+                $activeBroadcast = $liveOps->getActiveBroadcast();
+            }
         } catch (Throwable $e) {}
 
         return [

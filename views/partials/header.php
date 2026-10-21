@@ -210,8 +210,21 @@ $navItems = [
         // Bannière Flash Flottante LiveOps Broadcast & Modale Illustrée HD
         if (file_exists(__DIR__ . '/../../core/LiveOpsEngine.php')) {
             require_once __DIR__ . '/../../core/LiveOpsEngine.php';
+            require_once __DIR__ . '/../../core/GameConfig.php';
             $liveOpsEngineHeader = new LiveOpsEngine();
             $activeBroadcastHeader = $liveOpsEngineHeader->getActiveBroadcast();
+
+            // Auto-synchronisation d'Ère : si la proclamation en cours est liée à une Ère différente de l'Ère active du monde
+            $currentServerEra = GameConfig::getServerCurrentEra();
+            if ($activeBroadcastHeader && !empty($activeBroadcastHeader['era']) && (int)$activeBroadcastHeader['era'] !== (int)$currentServerEra) {
+                if (file_exists(__DIR__ . '/../../core/GameStudioEngine.php')) {
+                    require_once __DIR__ . '/../../core/GameStudioEngine.php';
+                    $gseHeader = new GameStudioEngine();
+                    $gseHeader->broadcastEraTransition($currentServerEra);
+                    $activeBroadcastHeader = $liveOpsEngineHeader->getActiveBroadcast();
+                }
+            }
+
             if ($activeBroadcastHeader) {
                 $bcType = htmlspecialchars($activeBroadcastHeader['type'] ?? 'info');
                 $bcIcon = htmlspecialchars($activeBroadcastHeader['icon'] ?? 'fa-bullhorn');

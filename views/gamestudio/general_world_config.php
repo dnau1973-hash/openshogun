@@ -2565,10 +2565,10 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     window.openActiveBroadcastModal = function() {
-        if (window.activeBroadcastData) {
+        const currentEra = <?= (int)($worldConfig['lifecycle']['currentEra'] ?? 1) ?>;
+        if (window.activeBroadcastData && (!window.activeBroadcastData.era || parseInt(window.activeBroadcastData.era) === currentEra)) {
             window.populateImperialModalStudio(window.activeBroadcastData);
         } else {
-            const currentEra = <?= (int)($worldConfig['lifecycle']['currentEra'] ?? 1) ?>;
             window.populateImperialModalStudio(window.eraProclamationsData[currentEra] || window.eraProclamationsData[1]);
         }
         const modalEl = document.getElementById('modalImperialProclamationStudio');
