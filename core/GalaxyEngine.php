@@ -33,35 +33,35 @@ class GalaxyEngine {
                 'type' => 'plains',
                 'name' => 'Plaines Fertiles',
                 'desc' => 'Prairies verdoyantes et terres arables favorables au développement agricole.',
-                'img' => '/public/assets/map/tile_plains.jpg?v=2'
+                'img' => '/public/assets/map/tile_plains.jpg?v=3'
             ];
         } elseif ($seed < 750) {
             return [
                 'type' => 'forest',
                 'name' => 'Forêt de Cèdres (Sugi)',
                 'desc' => 'Bois denses de cèdres centenaires et bambouseraies sauvages.',
-                'img' => '/public/assets/map/tile_forest.jpg?v=2'
+                'img' => '/public/assets/map/tile_forest.jpg?v=3'
             ];
         } elseif ($seed < 870) {
             return [
                 'type' => 'mountain',
                 'name' => 'Pics Rocheux & Montagnes',
                 'desc' => 'Crêtes granitiques escarpées et falaises abruptes des monts de l\'archipel.',
-                'img' => '/public/assets/map/tile_mountain.jpg?v=2'
+                'img' => '/public/assets/map/tile_mountain.jpg?v=3'
             ];
         } elseif ($seed < 950) {
             return [
                 'type' => 'hills',
                 'name' => 'Collines & Coteaux',
                 'desc' => 'Reliefs vallonnés parsemés de cultures en terrasses et vergers.',
-                'img' => '/public/assets/map/tile_hills.jpg?v=2'
+                'img' => '/public/assets/map/tile_hills.jpg?v=3'
             ];
         } else {
             return [
                 'type' => 'lake',
                 'name' => 'Lac & Eaux Calmes',
                 'desc' => 'Étendue d\'eau limpide bordée de roseaux et rivières sinueuses.',
-                'img' => '/public/assets/map/tile_lake.jpg?v=2'
+                'img' => '/public/assets/map/tile_lake.jpg?v=3'
             ];
         }
     }
@@ -199,7 +199,7 @@ class GalaxyEngine {
             $isVillage = !empty($p['user_id']);
             $p['terrain_type'] = $isVillage ? 'village' : 'unoccupied';
             $p['terrain_name'] = $isVillage ? ('Fief de ' . ($p['username'] ?? 'Daimyō')) : ($p['planet_name'] ?? 'Terres Libres');
-            $p['terrain_img'] = $isVillage ? '/public/assets/map/tile_village.jpg?v=2' : '/public/assets/map/tile_plains.jpg?v=2';
+            $p['terrain_img'] = $isVillage ? '/public/assets/map/tile_village.jpg?v=3' : '/public/assets/map/tile_plains.jpg?v=3';
             
             if ($isVillage) {
                 $isProt = Auth::isUserProtected($p);
@@ -289,7 +289,7 @@ class GalaxyEngine {
                     'castle_icon' => $c['icon'],
                     'terrain_type' => 'authentic_castle',
                     'terrain_name' => $c['castle_name'],
-                    'terrain_img' => '/public/assets/map/tile_authentic_castle.jpg?v=2'
+                    'terrain_img' => '/public/assets/map/tile_authentic_castle.jpg?v=3'
                 ];
 
                 if (isset($gridMap[$k])) {
@@ -333,7 +333,7 @@ class GalaxyEngine {
                     $tt = self::getTerrainType((int)$gItem['coord_x'], (int)$gItem['coord_y']);
                     if ($tt['type'] === 'lake' || ($gItem['planet_type'] ?? '') === 'oceanic') {
                         $gItem['terrain_type'] = 'lake';
-                        $gItem['terrain_img'] = '/public/assets/map/tile_lake.jpg?v=2';
+                        $gItem['terrain_img'] = '/public/assets/map/tile_lake.jpg?v=3';
                         $gItem['terrain_name'] = $tt['name'];
                         $gItem['is_lake'] = 1;
                         $ls = $lakeStocks[$k] ?? ($lakeEngine ? $lakeEngine->getStock((int)$gItem['coord_x'], (int)$gItem['coord_y']) : null);
@@ -370,7 +370,7 @@ class GalaxyEngine {
                     $tt = self::getTerrainType((int)$gItem['coord_x'], (int)$gItem['coord_y']);
                     if ($tt['type'] === 'mountain') {
                         $gItem['terrain_type'] = 'mountain';
-                        $gItem['terrain_img'] = '/public/assets/map/tile_mountain.jpg?v=2';
+                        $gItem['terrain_img'] = '/public/assets/map/tile_mountain.jpg?v=3';
                         $gItem['terrain_name'] = $tt['name'];
                         $gItem['is_mountain'] = 1;
                         $ms = $mountainStocks[$k] ?? ($mountainEngine ? $mountainEngine->getStock((int)$gItem['coord_x'], (int)$gItem['coord_y']) : null);
@@ -397,13 +397,13 @@ class GalaxyEngine {
                 $isLakeOasis = (strpos($o['oasis_type'], 'lake') !== false);
                 
                 // Déterminer l'image de terrain de l'oasis selon son type
-                $oasisImg = '/public/assets/map/tile_lake.jpg?v=2';
+                $oasisImg = '/public/assets/map/tile_lake.jpg?v=3';
                 if (strpos($o['oasis_type'], 'forest') !== false) {
-                    $oasisImg = '/public/assets/map/tile_forest.jpg?v=2';
+                    $oasisImg = '/public/assets/map/tile_forest.jpg?v=3';
                 } elseif (strpos($o['oasis_type'], 'mountain') !== false) {
-                    $oasisImg = '/public/assets/map/tile_mountain.jpg?v=2';
+                    $oasisImg = '/public/assets/map/tile_mountain.jpg?v=3';
                 } elseif (strpos($o['oasis_type'], 'hills') !== false) {
-                    $oasisImg = '/public/assets/map/tile_hills.jpg?v=2';
+                    $oasisImg = '/public/assets/map/tile_hills.jpg?v=3';
                 }
 
                 $bonusLabel = '';
@@ -499,7 +499,7 @@ class GalaxyEngine {
                         'alliance_tag' => !empty($dojoState['alliance_tag']) ? $dojoState['alliance_tag'] : 'TENCHI',
                         'terrain_type' => 'imperial_dojo',
                         'terrain_name' => 'Dōjō Impérial (Niv. ' . $dojoState['current_level'] . ')',
-                        'terrain_img' => '/public/assets/map/tile_imperial_dojo.jpg?v=1',
+                        'terrain_img' => '/public/assets/map/tile_imperial_dojo.jpg?v=3',
                         'dojo_level' => (int)$dojoState['current_level'],
                         'dojo_target_level' => (int)$dojoState['target_level'],
                         'dojo_status' => $dojoState['status'],
@@ -529,7 +529,7 @@ class GalaxyEngine {
                         'alliance_tag' => null,
                         'terrain_type' => 'sacred_ground',
                         'terrain_name' => 'Terre Sacrée Scellée [0 : 0]',
-                        'terrain_img' => '/public/assets/map/tile_mountain.jpg?v=2',
+                        'terrain_img' => '/public/assets/map/tile_mountain.jpg?v=3',
                         'is_annexable' => 0
                     ];
                     $gridMap[$kZero] = array_merge($gridMap[$kZero] ?? [], $sealedData);

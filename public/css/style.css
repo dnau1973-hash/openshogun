@@ -2043,7 +2043,7 @@
     cursor: grab;
     user-select: none;
     touch-action: none;
-    background: #b9d580;
+    background: #b0cb78;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2057,7 +2057,7 @@
     display: grid;
     will-change: transform;
     transform: translate3d(0, 0, 0);
-    background: #b9d580;
+    background: #b0cb78;
 }
 
 .galaxy-drag-hint {
@@ -2078,8 +2078,8 @@
 }
 
 .galaxy-tile {
-    background: #b9d580;
-    border: 1px dashed rgba(135, 170, 75, 0.45);
+    background: #b0cb78;
+    border: 0.5px solid rgba(0, 0, 0, 0.04);
     border-radius: 0;
     display: flex;
     flex-direction: column;
@@ -2087,7 +2087,7 @@
     justify-content: center;
     cursor: pointer;
     position: relative;
-    transition: outline 0.12s ease-in-out;
+    transition: outline 0.12s ease-in-out, box-shadow 0.12s ease-in-out, transform 0.12s ease-in-out;
     font-size: 0.75rem;
     user-select: none;
     box-shadow: none;
@@ -2109,30 +2109,54 @@
 .galaxy-tile:hover {
     outline: 2px solid #c2252b;
     outline-offset: -2px;
-    z-index: 4;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.18);
+    z-index: 10;
 }
 
 .galaxy-tile:hover .tile-inner-overlay {
-    background: rgba(194, 37, 43, 0.06);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .galaxy-tile.village-tile {
-    outline: 2px solid #2563eb;
-    outline-offset: -2px;
+    outline: 1.5px solid #2563eb;
+    outline-offset: -1.5px;
+}
+
+.galaxy-tile.village-tile:hover {
+    outline: 2.5px solid #1d4ed8;
+    outline-offset: -2.5px;
 }
 
 .galaxy-tile.current-planet {
     outline: 2px solid #c2252b;
     outline-offset: -2px;
+    box-shadow: inset 0 0 8px rgba(194, 37, 43, 0.35);
     z-index: 3;
 }
 
+.galaxy-tile.current-planet:hover {
+    outline: 2.5px solid #dc2626;
+    outline-offset: -2.5px;
+}
+
 .galaxy-tile.tile-center {
-    outline: 2px solid rgba(194, 37, 43, 0.5);
-    outline-offset: -2px;
+    outline: 1.5px solid rgba(194, 37, 43, 0.5);
+    outline-offset: -1.5px;
 }
 
 .galaxy-tile.authentic-castle-tile {
+    outline: 2px solid #d97706;
+    outline-offset: -2px;
+    box-shadow: inset 0 0 8px rgba(217, 119, 6, 0.35);
+    z-index: 3;
+}
+
+.galaxy-tile.authentic-castle-tile:hover {
+    outline: 2.5px solid #b45309;
+    outline-offset: -2.5px;
+    box-shadow: inset 0 0 12px rgba(217, 119, 6, 0.6), 0 4px 14px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+}
     outline: 2px solid #d97706;
     outline-offset: -2px;
     z-index: 3;
@@ -2165,19 +2189,21 @@
 
 .tile-authentic-badge {
     position: absolute;
-    top: 2px;
+    top: 3px;
     left: 50%;
     transform: translateX(-50%);
-    background: #d97706;
+    background: rgba(217, 119, 6, 0.92);
     color: #ffffff;
-    font-size: 0.5rem;
-    font-weight: 900;
+    font-size: 0.50rem;
+    font-weight: 800;
     letter-spacing: 0.5px;
-    padding: 1px 4px;
-    border-radius: 2px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid rgba(254, 240, 138, 0.4);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
     white-space: nowrap;
     line-height: 1.1;
+    z-index: 2;
 }
 
 .tile-planet-icon {
@@ -2195,12 +2221,22 @@
     position: absolute;
     bottom: 2px;
     right: 3px;
-    font-size: 0.55rem;
+    font-size: 0.50rem;
     font-family: monospace;
-    font-weight: 700;
-    color: rgba(55, 80, 25, 0.7);
+    font-weight: 600;
+    color: rgba(30, 45, 10, 0.4);
     pointer-events: none;
     line-height: 1;
+    transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.galaxy-tile:hover .tile-coords {
+    opacity: 0.95;
+    color: #1e293b;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 1px 3px;
+    border-radius: 3px;
 }
 
 .tile-owner {
@@ -2209,35 +2245,36 @@
     left: 50%;
     transform: translateX(-50%);
     font-weight: 700;
-    color: #1c1917;
+    color: #1e293b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 90%;
-    font-size: 0.56rem;
-    background: rgba(255, 255, 255, 0.88);
-    padding: 1px 4px;
-    border-radius: 3px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-    line-height: 1.1;
+    font-size: 0.54rem;
+    background: rgba(255, 255, 255, 0.90);
+    padding: 1px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    line-height: 1.15;
+    z-index: 2;
 }
 
 .tile-owner.castle-label {
-    background: rgba(217, 119, 6, 0.92);
+    background: rgba(180, 83, 9, 0.92);
     color: #ffffff;
-    border-color: #b45309;
+    border-color: #d97706;
 }
 
 .tile-owner.village-label {
-    background: rgba(37, 99, 235, 0.92);
+    background: rgba(30, 58, 138, 0.90);
     color: #ffffff;
-    border-color: #1d4ed8;
+    border-color: #2563eb;
 }
 
 .tile-oasis-res-group {
     position: absolute;
-    top: 2px;
+    top: 3px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -2249,41 +2286,41 @@
 }
 
 .tile-res-badge {
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(15, 23, 42, 0.85);
     color: #ffffff;
-    font-size: 0.52rem;
+    font-size: 0.48rem;
     font-weight: 800;
-    padding: 1px 3px;
-    border-radius: 3px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    padding: 0.5px 4px;
+    border-radius: 999px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     white-space: nowrap;
     line-height: 1.15;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     display: inline-flex;
     align-items: center;
     gap: 1px;
 }
 
 .tile-res-badge.res-rice {
-    background: rgba(161, 98, 7, 0.95);
-    border-color: #facc15;
+    background: rgba(161, 98, 7, 0.92);
+    border-color: rgba(250, 204, 21, 0.6);
     color: #fef08a;
 }
 
 .tile-res-badge.res-wood {
-    background: rgba(22, 101, 52, 0.95);
-    border-color: #4ade80;
+    background: rgba(22, 101, 52, 0.92);
+    border-color: rgba(74, 222, 128, 0.6);
     color: #bbf7d0;
 }
 
 .tile-res-badge.res-stone {
-    background: rgba(51, 65, 85, 0.95);
-    border-color: #cbd5e1;
+    background: rgba(51, 65, 85, 0.92);
+    border-color: rgba(203, 213, 225, 0.6);
     color: #f8fafc;
 }
 
 .galaxy-tile.oasis-tile {
-    outline: 1.5px solid rgba(34, 197, 94, 0.6);
+    outline: 1.5px solid rgba(34, 197, 94, 0.5);
     outline-offset: -1.5px;
 }
 
@@ -2293,7 +2330,7 @@
 }
 
 .galaxy-tile.oasis-tile.oasis-wild {
-    outline: 1.5px dashed rgba(234, 179, 8, 0.7);
+    outline: 1.5px solid rgba(234, 179, 8, 0.45);
     outline-offset: -1.5px;
 }
 

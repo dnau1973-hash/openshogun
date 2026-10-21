@@ -1,5 +1,5 @@
 {
-    "id": "bc_6ad9069be0dbb",
+    "id": "bc_6ad91044c0337",
     "title": "🌱 Décret Impérial : Avènement de l'Ère I — L'Aube des Clans",
     "message": "Par décret suprême de la Cour Impériale et du Shōgunat, les brumes ancestrales qui voilaient l'Archipel se dissipent sous la clarté d'une aurore nouvelle. Du nord enneigé aux rivages méridionaux baignés d'écume, la terre sacrée d'OpenShogun s'ouvre à nouveau aux pas des pionniers.\n\nLes daimyōs de chaque lignée reçoivent le mandat sacré d'établir leur premier fief. Sous la protection de la Trêve Impériale inviolable, le sang ne saurait encore souiller l'herbe des clairières : l'heure est au travail laborieux de la terre et à l'ingéniosité des bâtisseurs. Les haches résonnent dans les forêts de cèdres millénaires, les pioches entaillent les filons des carrières de granit, l'eau des rivières nourrit les premiers sillons de riz et les fourneaux de forge s'embrasent pour fondre le premier fer de l'Archipel.\n\nÉrigez vos 18 parcelles économiques, fondez votre Dōjō et initiez vos premiers disciples aux arts de la lance et de l'arc court. Que chaque seigneur pose dès aujourd'hui les fondations inébranlables d'une dynastie promise à la gloire éternelle.",
     "type": "success",
@@ -15,8 +15,8 @@
         "Préparation Logistique : Accumulez vivres et matériaux en prévision de l'ouverture prochaine des frontières et des pistes marchandes."
     ],
     "is_active": true,
-    "created_at": "2026-10-21 18:38:19",
-    "expires_at": "2026-10-22 18:38:19",
+    "created_at": "2026-10-21 19:19:32",
+    "expires_at": "2026-10-22 19:19:32",
     "subtitle": "Chronique Sacrée du Renouveau & de l'Éclosion Rurale",
     "era": 1
 }

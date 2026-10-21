@@ -284,7 +284,7 @@ class GalaxyMapController {
                 const terrain = this.terrainsCache[key] || {
                     type: 'plains',
                     name: 'Plaines Fertiles',
-                    img: '/public/assets/map/tile_plains.jpg?v=2'
+                    img: '/public/assets/map/tile_plains.jpg?v=3'
                 };
                 const isCurrent = (x === this.playerX && y === this.playerY);
                 const isCenter = (x === this.centerX && y === this.centerY);
