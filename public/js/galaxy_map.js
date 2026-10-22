@@ -76,14 +76,6 @@ class GalaxyMapController {
                     <strong id="hudCoordsDisplay">[${this.centerX} : ${this.centerY}]</strong>
                 </div>
 
-                <!-- Pad de Navigation Directionnelle au Pas à Pas -->
-                <div class="hud-dpad-nav d-none d-md-flex align-items-center gap-1">
-                    <button class="hud-btn" id="btnArrowLeft" title="Déplacer vers l'Ouest (Gauche / Q / A)"><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="hud-btn" id="btnArrowUp" title="Déplacer vers le Nord (Haut / Z / W)"><i class="fa-solid fa-chevron-up"></i></button>
-                    <button class="hud-btn" id="btnArrowDown" title="Déplacer vers le Sud (Bas / S)"><i class="fa-solid fa-chevron-down"></i></button>
-                    <button class="hud-btn" id="btnArrowRight" title="Déplacer vers l'Est (Droite / D)"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-
                 <div class="hud-quadrants-nav">
                     <button class="hud-btn" id="btnQuadrantNO" title="Sauter vers les Terres du Nord-Ouest [- / +]">N-O</button>
                     <button class="hud-btn" id="btnQuadrantNE" title="Sauter vers les Terres du Nord-Est [+ / +]">N-E</button>
@@ -105,6 +97,15 @@ class GalaxyMapController {
                 </div>
                 <div class="galaxy-drag-hint" id="galaxyDragHint">
                     <span><i class="fa-solid fa-hand me-1"></i>Glissez librement pour explorer l'Archipel (Flèches, ZQSD ou souris)</span>
+                </div>
+
+                <!-- Croix Directionnelle Féodale en Bas à Droite (D-Pad) -->
+                <div class="map-dpad-cross" id="mapDpadCross" title="Croix de navigation directionnelle">
+                    <button type="button" class="dpad-btn dpad-up" id="btnArrowUp" title="Nord (Haut / Z / Flèche Haut)"><i class="fa-solid fa-caret-up"></i></button>
+                    <button type="button" class="dpad-btn dpad-left" id="btnArrowLeft" title="Ouest (Gauche / Q / Flèche Gauche)"><i class="fa-solid fa-caret-left"></i></button>
+                    <button type="button" class="dpad-btn dpad-center" id="btnRecenterColonyDpad" title="Recentrer sur mon Fief seigneurial"><i class="fa-solid fa-chess-rook"></i></button>
+                    <button type="button" class="dpad-btn dpad-right" id="btnArrowRight" title="Est (Droite / D / Flèche Droite)"><i class="fa-solid fa-caret-right"></i></button>
+                    <button type="button" class="dpad-btn dpad-down" id="btnArrowDown" title="Sud (Bas / S / Flèche Bas)"><i class="fa-solid fa-caret-down"></i></button>
                 </div>
             </div>
         `;
@@ -135,20 +136,60 @@ class GalaxyMapController {
         document.getElementById('btnQuadrantSE').onclick = () => this.moveTo(16, -16);
         document.getElementById('btnQuadrantKyoto').onclick = () => this.moveTo(0, 0);
 
-        // Pad directionnel HUD
+        // Croix Directionnelle Féodale en Bas à Droite (D-Pad)
         const btnUp = document.getElementById('btnArrowUp');
         const btnDown = document.getElementById('btnArrowDown');
         const btnLeft = document.getElementById('btnArrowLeft');
         const btnRight = document.getElementById('btnArrowRight');
-        if (btnUp) btnUp.onclick = () => this.smoothMoveBy(0, 1);
-        if (btnDown) btnDown.onclick = () => this.smoothMoveBy(0, -1);
-        if (btnLeft) btnLeft.onclick = () => this.smoothMoveBy(-1, 0);
-        if (btnRight) btnRight.onclick = () => this.smoothMoveBy(1, 0);
+        const btnCenterDpad = document.getElementById('btnRecenterColonyDpad');
+
+        const bindDpad = (btn, dx, dy) => {
+            if (!btn) return;
+            let holdTimeout = null;
+            let holdInterval = null;
+
+            const clearHold = () => {
+                if (holdTimeout) { clearTimeout(holdTimeout); holdTimeout = null; }
+                if (holdInterval) { clearInterval(holdInterval); holdInterval = null; }
+            };
+
+            btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.smoothMoveBy(dx, dy);
+                clearHold();
+                holdTimeout = setTimeout(() => {
+                    holdInterval = setInterval(() => {
+                        this.smoothMoveBy(dx, dy);
+                    }, 110);
+                }, 280);
+            });
+
+            btn.addEventListener('pointerup', clearHold);
+            btn.addEventListener('pointerleave', clearHold);
+            btn.addEventListener('pointercancel', clearHold);
+        };
+
+        bindDpad(btnUp, 0, 1);
+        bindDpad(btnDown, 0, -1);
+        bindDpad(btnLeft, -1, 0);
+        bindDpad(btnRight, 1, 0);
+
+        if (btnCenterDpad) {
+            btnCenterDpad.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.moveTo(this.playerX, this.playerY);
+            });
+        }
 
         // Recentrage sur la capitale du joueur
-        document.getElementById('btnRecenterColony').onclick = () => {
-            this.moveTo(this.playerX, this.playerY);
-        };
+        const btnRecenter = document.getElementById('btnRecenterColony');
+        if (btnRecenter) {
+            btnRecenter.onclick = () => {
+                this.moveTo(this.playerX, this.playerY);
+            };
+        }
 
         // Boutons de Zoom
         document.getElementById('btnZoomIn').onclick = () => {
@@ -208,6 +249,7 @@ class GalaxyMapController {
 
     onPointerDown(e) {
         if (e.button !== 0 && e.pointerType === 'mouse') return;
+        if (e.target.closest('.map-dpad-cross') || e.target.closest('.galaxy-hud-overlay')) return;
 
         // Interrompre tout mouvement d'inertie ou calage en cours
         if (this.momentumId) {

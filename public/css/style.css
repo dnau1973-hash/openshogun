@@ -1992,30 +1992,90 @@
     pointer-events: auto;
 }
 
-.hud-dpad-nav {
-    display: flex;
-    pointer-events: auto;
+/* ========================================================
+   CROIX DIRECTIONNELLE (D-PAD) EN FORME DE CROIX (BAS À DROITE)
+   ======================================================== */
+.map-dpad-cross {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(3, 34px);
+    grid-template-rows: repeat(3, 34px);
+    gap: 4px;
     background: rgba(253, 251, 247, 0.94);
-    padding: 3px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 8px rgba(60, 45, 30, 0.06);
+    backdrop-filter: blur(4px);
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(194, 37, 43, 0.25);
+    box-shadow: 0 4px 16px rgba(60, 45, 30, 0.16);
+    user-select: none;
+    pointer-events: auto;
 }
 
-.hud-dpad-nav .hud-btn {
-    width: 28px;
-    height: 28px;
+.map-dpad-cross .dpad-btn {
+    width: 34px;
+    height: 34px;
     padding: 0;
-    display: inline-flex;
+    margin: 0;
+    display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
-    border: 1px solid transparent;
+    background: #ffffff;
+    border: 1px solid var(--border-color, #e2d9cc);
+    border-radius: 6px;
+    color: #1c1917;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.12s ease-in-out;
+    box-shadow: 0 1px 3px rgba(60, 45, 30, 0.08);
 }
 
-.hud-dpad-nav .hud-btn:hover {
+.map-dpad-cross .dpad-btn:hover {
+    background: #c2252b;
+    color: #ffffff;
     border-color: #c2252b;
+    box-shadow: 0 2px 8px rgba(194, 37, 43, 0.35);
+    transform: scale(1.08);
+}
+
+.map-dpad-cross .dpad-btn:active {
+    transform: scale(0.92);
+}
+
+.map-dpad-cross .dpad-up {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.map-dpad-cross .dpad-left {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.map-dpad-cross .dpad-center {
+    grid-column: 2;
+    grid-row: 2;
     background: rgba(194, 37, 43, 0.08);
+    color: #c2252b;
+    border-color: rgba(194, 37, 43, 0.3);
+    font-size: 0.85rem;
+}
+
+.map-dpad-cross .dpad-center:hover {
+    background: #c2252b;
+    color: #ffffff;
+}
+
+.map-dpad-cross .dpad-right {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.map-dpad-cross .dpad-down {
+    grid-column: 2;
+    grid-row: 3;
 }
 
 .hud-quadrants-nav {
