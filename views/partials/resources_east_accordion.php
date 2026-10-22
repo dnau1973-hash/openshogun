@@ -160,6 +160,18 @@ if (!empty($eventPlayerStatus['all_completed']) && empty($eventPlayerStatus['fin
     $hasClaimableEvent = true;
 }
 
+// Données du Marché en cours & Commerce (Offres actives, convois, routes)
+require_once __DIR__ . '/../../core/MarketEngine.php';
+$marketEngineSummary = new MarketEngine();
+try {
+    $marketSummaryData = ($user && $planet) ? $marketEngineSummary->getOngoingMarketSummary((int)$planet['id'], (int)$user['id']) : null;
+} catch (Throwable $e) {
+    $marketSummaryData = null;
+}
+$totalMarketActivities = (int)($marketSummaryData['total_active'] ?? 0);
+$isMarketBuiltAccordion = !empty($marketSummaryData['is_market_built']);
+$marketLevelAccordion = (int)($marketSummaryData['market_level'] ?? 0);
+
 // Détermination de l'élément ouvert par défaut : Didacticiel si quête active, sinon Chantiers
 $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
 ?>
@@ -473,7 +485,54 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
         </div>
     </div>
 
-    <!-- ── 4. MAIN-D'ŒUVRE & DÉMOGRAPHIE ── -->
+    <!-- ── 4. MARCHÉ EN COURS & COMMERCE ── -->
+    <div class="accordion-item bg-white">
+        <h3 class="accordion-header" id="heading-east-market">
+            <button class="accordion-button collapsed" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#east-item-market" 
+                    aria-expanded="false" 
+                    aria-controls="east-item-market">
+                <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate pe-2">
+                    <i class="fa-solid fa-scale-balanced text-warning"></i>
+                    <span class="fw-bold">Marché en cours</span>
+                    <?php if ($totalMarketActivities > 0): ?>
+                        <span class="badge bg-warning-lt text-warning fw-bold ms-auto font-monospace" style="font-size:0.68rem;">
+                            <?= $totalMarketActivities ?> actif(s)
+                        </span>
+                    <?php elseif ($isMarketBuiltAccordion): ?>
+                        <span class="badge bg-secondary-lt text-secondary ms-auto font-monospace" style="font-size:0.68rem;">
+                            Niv. <?= $marketLevelAccordion ?>
+                        </span>
+                    <?php else: ?>
+                        <span class="badge bg-secondary-lt text-muted ms-auto" style="font-size:0.65rem;">
+                            Non bâti
+                        </span>
+                    <?php endif; ?>
+                </div>
+                <span class="accordion-button-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon"><path d="M6 9l6 6l6 -6" /></svg>
+                </span>
+            </button>
+        </h3>
+        <div id="east-item-market" 
+             class="accordion-collapse collapse" 
+             aria-labelledby="heading-east-market" 
+             data-bs-parent="#resourcesEastAccordion">
+            <div class="accordion-body">
+                <?php 
+                    try {
+                        require __DIR__ . '/market_panel.php'; 
+                    } catch (Throwable $e) {
+                        echo '<div class="alert alert-warning py-1 px-2 small mb-0">Chargement du marché indisponible.</div>';
+                    }
+                ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 5. MAIN-D'ŒUVRE & DÉMOGRAPHIE ── -->
     <div class="accordion-item bg-white">
         <h3 class="accordion-header" id="heading-east-workforce">
             <button class="accordion-button collapsed" 
@@ -510,7 +569,7 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
         </div>
     </div>
 
-    <!-- ── 5. GARNISON DU DOMAINE ── -->
+    <!-- ── 6. GARNISON DU DOMAINE ── -->
     <div class="accordion-item bg-white">
         <h3 class="accordion-header" id="heading-east-troops">
             <button class="accordion-button collapsed" 

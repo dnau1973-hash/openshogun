@@ -546,5 +546,219 @@ class MarketEngine {
         ");
         return $st->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Récupère les offres de troc actives déposées par un fief
+     */
+    public function getActiveOffersForPlanet(int $planetId): array {
+        $st = $this->db->prepare("
+            SELECT mo.*, p.name as planet_name
+            FROM market_offers mo
+            JOIN planets p ON mo.planet_id = p.id
+            WHERE mo.planet_id = ? AND mo.status = 'active'
+            ORDER BY mo.created_at DESC
+        ");
+        $st->execute([$planetId]);
+        $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+
+        $tradables = self::getTradableResources();
+        foreach ($rows as &$r) {
+            $r['offer_meta'] = $tradables[$r['offer_res']] ?? ['name' => $r['offer_res'], 'icon' => 'fa-solid fa-box text-secondary'];
+            $r['demand_meta'] = $tradables[$r['demand_res']] ?? ['name' => $r['demand_res'], 'icon' => 'fa-solid fa-box text-secondary'];
+            $r['offer_amount_formatted'] = number_format((int)$r['offer_amount']);
+            $r['demand_amount_formatted'] = number_format((int)$r['demand_amount']);
+        }
+        unset($r);
+        return $rows;
+    }
+
+    /**
+     * Récupère les missions de convoi / transport en transit (sortantes ou entrantes) pour un fief
+     */
+    public function getTransportConvoysForPlanet(int $planetId, int $userId): array {
+        $st = $this->db->prepare("
+            SELECT fm.*,
+                   p1.name as source_planet_name, p1.coord_x as sx, p1.coord_y as sy, u1.username as source_username,
+                   p2.name as target_planet_name, p2.coord_x as tx, p2.coord_y as ty, u2.username as target_username
+            FROM fleet_missions fm
+            JOIN planets p1 ON fm.source_planet_id = p1.id
+            JOIN users u1 ON fm.user_id = u1.id
+            LEFT JOIN planets p2 ON fm.target_planet_id = p2.id
+            LEFT JOIN users u2 ON p2.user_id = u2.id
+            WHERE fm.mission_type = 'transport'
+              AND fm.status IN ('en_route', 'returning')
+              AND (fm.source_planet_id = ? OR fm.target_planet_id = ?)
+            ORDER BY fm.arrival_time ASC
+        ");
+        $st->execute([$planetId, $planetId]);
+        $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+
+        $now = time();
+        $tradables = self::getTradableResources();
+
+        $convoys = [];
+        foreach ($rows as $r) {
+            $isSource = ((int)$r['source_planet_id'] === $planetId);
+            $status = $r['status']; // 'en_route' or 'returning'
+
+            $direction = 'outgoing'; // par défaut : convoi sortant du fief
+            $targetTime = (int)$r['arrival_time'];
+
+            if ($isSource && $status === 'returning') {
+                $direction = 'returning';
+                $targetTime = (int)$r['return_time'];
+            } elseif (!$isSource && $status === 'en_route') {
+                $direction = 'incoming';
+                $targetTime = (int)$r['arrival_time'];
+            } elseif (!$isSource && $status === 'returning') {
+                // Convoi d'un autre joueur qui repart de notre fief après livraison : non pertinent
+                continue;
+            }
+
+            $cargoData = json_decode($r['cargo_data'] ?? '[]', true) ?: [];
+            $fleetData = json_decode($r['fleet_data'] ?? '[]', true) ?: [];
+
+            $formattedCargo = [];
+            $totalCargo = 0;
+            foreach ($cargoData as $resKey => $amt) {
+                $intAmt = (int)$amt;
+                if ($intAmt > 0) {
+                    $totalCargo += $intAmt;
+                    $formattedCargo[$resKey] = [
+                        'amount' => $intAmt,
+                        'formatted' => number_format($intAmt),
+                        'meta' => $tradables[$resKey] ?? ['name' => ucfirst($resKey), 'icon' => 'fa-solid fa-box text-secondary']
+                    ];
+                }
+            }
+
+            $secRemaining = max(0, $targetTime - $now);
+
+            $convoys[] = [
+                'id' => (int)$r['id'],
+                'direction' => $direction, // 'outgoing', 'returning', 'incoming'
+                'status' => $status,
+                'source_planet_id' => (int)$r['source_planet_id'],
+                'source_planet_name' => $r['source_planet_name'],
+                'source_coords' => "[{$r['sx']}:{$r['sy']}]",
+                'source_username' => $r['source_username'],
+                'target_planet_id' => (int)$r['target_planet_id'],
+                'target_planet_name' => $r['target_planet_name'] ?? 'Fief voisin',
+                'target_coords' => "[{$r['tx']}:{$r['ty']}]",
+                'target_username' => $r['target_username'] ?? 'Seigneur',
+                'cargo' => $formattedCargo,
+                'total_cargo' => $totalCargo,
+                'total_cargo_formatted' => number_format($totalCargo),
+                'fleet' => $fleetData,
+                'target_time' => $targetTime,
+                'seconds_remaining' => $secRemaining,
+                'is_owner' => ((int)$r['user_id'] === $userId)
+            ];
+        }
+
+        return $convoys;
+    }
+
+    /**
+     * Récupère les routes commerciales programmées et actives associées à un fief
+     */
+    public function getActiveTradeRoutesForPlanet(int $planetId): array {
+        try {
+            $st = $this->db->prepare("
+                SELECT tr.*,
+                       p1.name as source_planet_name, p1.coord_x as sx, p1.coord_y as sy,
+                       p2.name as target_planet_name, p2.coord_x as tx, p2.coord_y as ty
+                FROM trade_routes tr
+                JOIN planets p1 ON tr.source_planet_id = p1.id
+                JOIN planets p2 ON tr.target_planet_id = p2.id
+                WHERE (tr.source_planet_id = ? OR tr.target_planet_id = ?)
+                  AND tr.is_active = 1
+                ORDER BY tr.next_run_at ASC
+            ");
+            $st->execute([$planetId, $planetId]);
+            $routes = $st->fetchAll(PDO::FETCH_ASSOC);
+
+            $now = time();
+            foreach ($routes as &$rt) {
+                $nextRunTs = !empty($rt['next_run_at']) ? strtotime($rt['next_run_at']) : $now;
+                $rt['seconds_until_next_run'] = max(0, $nextRunTs - $now);
+                $rt['total_cargo'] = (int)($rt['wood'] ?? 0) + (int)($rt['stone'] ?? 0) + (int)($rt['rice'] ?? 0);
+            }
+            unset($rt);
+            return $routes;
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Récupère les véhicules marchands stationnés dans le fief
+     */
+    public function getStationedTransporters(int $planetId): array {
+        try {
+            $st = $this->db->prepare("
+                SELECT ship_code, quantity 
+                FROM planet_ships 
+                WHERE planet_id = ? AND ship_code IN ('transporter_light', 'transporter_heavy')
+            ");
+            $st->execute([$planetId]);
+            $rows = $st->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            $light = (int)($rows['transporter_light'] ?? 0);
+            $heavy = (int)($rows['transporter_heavy'] ?? 0);
+            $totalCargoCap = ($light * 5000) + ($heavy * 25000);
+
+            return [
+                'transporter_light' => $light,
+                'transporter_heavy' => $heavy,
+                'total_count' => $light + $heavy,
+                'total_capacity' => $totalCargoCap,
+                'total_capacity_formatted' => number_format($totalCargoCap)
+            ];
+        } catch (Throwable $e) {
+            return [
+                'transporter_light' => 0,
+                'transporter_heavy' => 0,
+                'total_count' => 0,
+                'total_capacity' => 0,
+                'total_capacity_formatted' => '0'
+            ];
+        }
+    }
+
+    /**
+     * Bilan global en temps réel du Marché pour un fief donné
+     */
+    public function getOngoingMarketSummary(int $planetId, int $userId): array {
+        $marketLevel = $this->getMarketLevel($planetId);
+        $maxOfferSlots = $this->getMaxOfferSlots($marketLevel);
+
+        $activeOffers = $this->getActiveOffersForPlanet($planetId);
+        $activeOffersCount = count($activeOffers);
+
+        $convoys = $this->getTransportConvoysForPlanet($planetId, $userId);
+        $convoysCount = count($convoys);
+
+        $routes = $this->getActiveTradeRoutesForPlanet($planetId);
+        $routesCount = count($routes);
+
+        $transporters = $this->getStationedTransporters($planetId);
+
+        $totalActive = $activeOffersCount + $convoysCount + $routesCount;
+
+        return [
+            'market_level' => $marketLevel,
+            'is_market_built' => ($marketLevel > 0),
+            'max_offer_slots' => $maxOfferSlots,
+            'active_offers' => $activeOffers,
+            'active_offers_count' => $activeOffersCount,
+            'transport_convoys' => $convoys,
+            'transport_convoys_count' => $convoysCount,
+            'trade_routes' => $routes,
+            'trade_routes_count' => $routesCount,
+            'transporters' => $transporters,
+            'total_active' => $totalActive
+        ];
+    }
 }
 
