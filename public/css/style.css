@@ -2079,25 +2079,166 @@
 }
 
 .hud-quadrants-nav {
-    display: flex;
-    gap: 0.35rem;
+    display: none;
+}
+
+/* ========================================================
+   MINI-MAP FEODALE & COMMANDES DE ZOOM (COIN SUPERIEUR DROIT)
+   ======================================================== */
+.galaxy-minimap-widget {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 25;
     pointer-events: auto;
-    background: rgba(253, 251, 247, 0.94);
+    background: rgba(253, 251, 247, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(194, 37, 43, 0.28);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 4px 18px rgba(60, 45, 30, 0.16);
+    width: 142px;
+    user-select: none;
+}
+
+.minimap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    padding: 0 2px;
+}
+
+.minimap-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #1c1917;
+}
+
+.minimap-zoom-group {
+    display: flex;
+    gap: 3px;
+}
+
+.minimap-zoom-btn {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid var(--border-color, #e2d9cc);
+    border-radius: 4px;
+    color: #1c1917;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    box-shadow: 0 1px 3px rgba(60, 45, 30, 0.08);
+}
+
+.minimap-zoom-btn:hover {
+    background: #c2252b;
+    color: #ffffff;
+    border-color: #c2252b;
+    transform: scale(1.08);
+}
+
+.minimap-quadrants-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 38px 38px;
+    gap: 4px;
+    position: relative;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.04);
     padding: 3px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 8px rgba(60, 45, 30, 0.06);
 }
 
-.hud-quadrants-nav .hud-btn {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.8rem;
-    border: 1px solid transparent;
+.minimap-quadrant-btn {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    background: #ffffff;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    transition: all 0.15s ease;
+    text-decoration: none;
 }
 
-.hud-quadrants-nav .hud-btn:hover {
+.minimap-quadrant-btn .q-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.minimap-quadrant-btn .q-coords {
+    font-size: 0.58rem;
+    color: #64748b;
+    font-family: monospace;
+    line-height: 1;
+    margin-top: 2px;
+}
+
+.minimap-quadrant-btn:hover {
     border-color: #c2252b;
     background: rgba(194, 37, 43, 0.08);
+    transform: translateY(-1px);
+}
+
+.minimap-quadrant-btn.active {
+    border-color: #c2252b;
+    background: rgba(194, 37, 43, 0.15);
+    box-shadow: 0 0 0 1px #c2252b inset;
+}
+
+.minimap-quadrant-btn.active .q-label {
+    color: #c2252b;
+}
+
+.minimap-quadrant-btn.active .q-coords {
+    color: #991b1b;
+    font-weight: 700;
+}
+
+.minimap-center-node {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #c2252b;
+    color: #ffffff;
+    font-size: 0.65rem;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: transform 0.15s ease, background 0.15s ease;
+    padding: 0;
+}
+
+.minimap-center-node:hover {
+    transform: translate(-50%, -50%) scale(1.22);
+    background: #991b1b;
+}
+
+.minimap-center-node.active {
+    background: #e11d48;
+    box-shadow: 0 0 0 2px #f43f5e;
 }
 
 .hud-btn {

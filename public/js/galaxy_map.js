@@ -71,23 +71,42 @@ class GalaxyMapController {
     initDOM() {
         this.container.innerHTML = `
             <div class="galaxy-hud-overlay">
+                <!-- Badge Coordonnées (Haut Gauche) -->
                 <div class="hud-coords-badge">
                     <span id="hudQuadrantDisplay"><i class="fa-solid fa-compass me-1"></i>Provinces</span>
                     <strong id="hudCoordsDisplay">[${this.centerX} : ${this.centerY}]</strong>
                 </div>
 
-                <div class="hud-quadrants-nav">
-                    <button class="hud-btn" id="btnQuadrantNO" title="Sauter vers les Terres du Nord-Ouest [- / +]">N-O</button>
-                    <button class="hud-btn" id="btnQuadrantNE" title="Sauter vers les Terres du Nord-Est [+ / +]">N-E</button>
-                    <button class="hud-btn" id="btnQuadrantSO" title="Sauter vers les Terres du Sud-Ouest [- / -]">S-O</button>
-                    <button class="hud-btn" id="btnQuadrantSE" title="Sauter vers les Terres du Sud-Est [+ / -]">S-E</button>
-                    <button class="hud-btn" id="btnQuadrantKyoto" title="Sauter vers la Capitale Impériale [0 : 0]"><i class="fa-solid fa-torii-gate me-1"></i>Centre</button>
-                </div>
-
-                <div class="hud-controls-group">
-                    <button class="hud-btn" id="btnRecenterColony" title="Recentrer doucement sur mon fief seigneurial"><i class="fa-solid fa-chess-rook me-1"></i>Mon Fief</button>
-                    <button class="hud-btn" id="btnZoomIn" title="Zoom avant (plus grand)">+</button>
-                    <button class="hud-btn" id="btnZoomOut" title="Zoom arrière (plus large)">&minus;</button>
+                <!-- Mini-Map & Commandes Intégrées (Haut Droite) -->
+                <div class="galaxy-minimap-widget" id="galaxyMinimapWidget">
+                    <div class="minimap-header">
+                        <span class="minimap-title"><i class="fa-solid fa-compass me-1 text-danger"></i>Carte</span>
+                        <div class="minimap-zoom-group">
+                            <button type="button" class="minimap-zoom-btn" id="btnZoomIn" title="Zoom avant (agrandir)"><i class="fa-solid fa-plus"></i></button>
+                            <button type="button" class="minimap-zoom-btn" id="btnZoomOut" title="Zoom arrière (réduire)"><i class="fa-solid fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="minimap-quadrants-grid">
+                        <button type="button" class="minimap-quadrant-btn q-nw" id="btnQuadrantNO" title="Terres du Nord-Ouest [- / +]">
+                            <span class="q-label">N-O</span>
+                            <span class="q-coords">- / +</span>
+                        </button>
+                        <button type="button" class="minimap-quadrant-btn q-ne" id="btnQuadrantNE" title="Terres du Nord-Est [+ / +]">
+                            <span class="q-label">N-E</span>
+                            <span class="q-coords">+ / +</span>
+                        </button>
+                        <button type="button" class="minimap-quadrant-btn q-sw" id="btnQuadrantSO" title="Terres du Sud-Ouest [- / -]">
+                            <span class="q-label">S-O</span>
+                            <span class="q-coords">- / -</span>
+                        </button>
+                        <button type="button" class="minimap-quadrant-btn q-se" id="btnQuadrantSE" title="Terres du Sud-Est [+ / -]">
+                            <span class="q-label">S-E</span>
+                            <span class="q-coords">+ / -</span>
+                        </button>
+                        <button type="button" class="minimap-center-node" id="btnQuadrantKyoto" title="Capitale Impériale [0 : 0]">
+                            <i class="fa-solid fa-torii-gate"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -559,6 +578,31 @@ class GalaxyMapController {
         if (inputX && inputY && document.activeElement !== inputX && document.activeElement !== inputY) {
             inputX.value = curX;
             inputY.value = curY;
+        }
+
+        // Mise à jour visuelle du quadrant actif sur la Mini-Map
+        this.updateMinimapActiveQuadrant(curX, curY);
+    }
+
+    updateMinimapActiveQuadrant(x, y) {
+        const btnNO = document.getElementById('btnQuadrantNO');
+        const btnNE = document.getElementById('btnQuadrantNE');
+        const btnSO = document.getElementById('btnQuadrantSO');
+        const btnSE = document.getElementById('btnQuadrantSE');
+        const btnKyoto = document.getElementById('btnQuadrantKyoto');
+
+        [btnNO, btnNE, btnSO, btnSE, btnKyoto].forEach(b => { if (b) b.classList.remove('active'); });
+
+        if (Math.abs(x) <= 3 && Math.abs(y) <= 3) {
+            if (btnKyoto) btnKyoto.classList.add('active');
+        } else if (x < 0 && y >= 0) {
+            if (btnNO) btnNO.classList.add('active');
+        } else if (x >= 0 && y >= 0) {
+            if (btnNE) btnNE.classList.add('active');
+        } else if (x < 0 && y < 0) {
+            if (btnSO) btnSO.classList.add('active');
+        } else {
+            if (btnSE) btnSE.classList.add('active');
         }
     }
 

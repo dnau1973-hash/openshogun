@@ -57,8 +57,8 @@ ob_start();
             </div>
         </div>
 
-        <!-- Légende des Terroirs & Saut de Quadrants (Style Travian) -->
-        <div class="card-body bg-surface-secondary border-bottom py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2 small flex-shrink-0">
+        <!-- Légende des Terroirs du Japon Féodal -->
+        <div class="card-body bg-surface-secondary border-bottom py-2 px-3 d-flex align-items-center justify-content-between flex-wrap gap-2 small flex-shrink-0">
             <div class="d-flex align-items-center gap-3 flex-wrap">
                 <span class="font-weight-bold text-secondary text-uppercase" style="letter-spacing: 0.5px;"><i class="fa-solid fa-map me-1"></i>Terroirs :</span>
                 <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_plains.jpg?v=3" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Plaines</span>
@@ -71,14 +71,8 @@ ob_start();
                 <span class="d-inline-flex align-items-center gap-1"><img src="/public/assets/map/tile_imperial_dojo.jpg?v=3" style="width:18px; height:18px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.15);"> Dōjō Impérial</span>
                 <span class="d-inline-flex align-items-center gap-1"><span class="badge bg-success-lt" style="font-size:0.68rem; padding:2px 4px;"><i class="fa-solid fa-wheat-awn me-1"></i>+25%</span> Oasis</span>
             </div>
-
-            <div class="d-flex align-items-center gap-1">
-                <span class="font-weight-bold text-secondary me-1">Quadrants :</span>
-                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, 16)" title="Nord-Ouest [- / +]"><i class="fa-solid fa-arrow-trend-up me-1"></i>N-O</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, 16)" title="Nord-Est [+ / +]"><i class="fa-solid fa-arrow-trend-up me-1"></i>N-E</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(-16, -16)" title="Sud-Ouest [- / -]"><i class="fa-solid fa-arrow-trend-down me-1"></i>S-O</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(16, -16)" title="Sud-Est [+ / -]"><i class="fa-solid fa-arrow-trend-down me-1"></i>S-E</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="galaxyMap.moveTo(0, 0)" title="Centre Impérial [0 : 0]"><i class="fa-solid fa-torii-gate me-1"></i>Centre</button>
+            <div class="text-secondary small font-italic d-none d-md-block">
+                <i class="fa-solid fa-compass me-1"></i>Mini-map &amp; quadrants interactifs intégrés en haut à droite
             </div>
         </div>
 
