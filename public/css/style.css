@@ -1993,233 +1993,143 @@
 }
 
 /* ========================================================
-   CROIX DIRECTIONNELLE (D-PAD) EN FORME DE CROIX (BAS À DROITE)
+   BOÎTIER DE NAVIGATION FÉODALE UNIFIÉ (BAS À DROITE)
+   Mini-Map Centrale + Flèches Directionnelles Extérieures
    ======================================================== */
-.map-dpad-cross {
+.map-unified-nav-pad {
     position: absolute;
     bottom: 16px;
     right: 16px;
-    z-index: 20;
-    display: grid;
-    grid-template-columns: repeat(3, 34px);
-    grid-template-rows: repeat(3, 34px);
-    gap: 4px;
-    background: rgba(253, 251, 247, 0.94);
-    backdrop-filter: blur(4px);
-    padding: 6px;
-    border-radius: 12px;
-    border: 1px solid rgba(194, 37, 43, 0.25);
-    box-shadow: 0 4px 16px rgba(60, 45, 30, 0.16);
-    user-select: none;
-    pointer-events: auto;
-}
-
-.map-dpad-cross .dpad-btn {
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #ffffff;
-    border: 1px solid var(--border-color, #e2d9cc);
-    border-radius: 6px;
-    color: #1c1917;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.12s ease-in-out;
-    box-shadow: 0 1px 3px rgba(60, 45, 30, 0.08);
-}
-
-.map-dpad-cross .dpad-btn:hover {
-    background: #c2252b;
-    color: #ffffff;
-    border-color: #c2252b;
-    box-shadow: 0 2px 8px rgba(194, 37, 43, 0.35);
-    transform: scale(1.08);
-}
-
-.map-dpad-cross .dpad-btn:active {
-    transform: scale(0.92);
-}
-
-.map-dpad-cross .dpad-up {
-    grid-column: 2;
-    grid-row: 1;
-}
-
-.map-dpad-cross .dpad-left {
-    grid-column: 1;
-    grid-row: 2;
-}
-
-.map-dpad-cross .dpad-center {
-    grid-column: 2;
-    grid-row: 2;
-    background: rgba(194, 37, 43, 0.08);
-    color: #c2252b;
-    border-color: rgba(194, 37, 43, 0.3);
-    font-size: 0.85rem;
-}
-
-.map-dpad-cross .dpad-center:hover {
-    background: #c2252b;
-    color: #ffffff;
-}
-
-.map-dpad-cross .dpad-right {
-    grid-column: 3;
-    grid-row: 2;
-}
-
-.map-dpad-cross .dpad-down {
-    grid-column: 2;
-    grid-row: 3;
-}
-
-.hud-quadrants-nav {
-    display: none;
-}
-
-/* ========================================================
-   MINI-MAP FEODALE & COMMANDES DE ZOOM (COIN SUPERIEUR DROIT)
-   ======================================================== */
-.galaxy-minimap-widget {
-    position: absolute;
-    top: 12px;
-    right: 12px;
     z-index: 25;
     pointer-events: auto;
     background: rgba(253, 251, 247, 0.95);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(194, 37, 43, 0.28);
-    border-radius: 10px;
+    border-radius: 14px;
     padding: 6px;
-    box-shadow: 0 4px 18px rgba(60, 45, 30, 0.16);
-    width: 142px;
+    box-shadow: 0 4px 18px rgba(60, 45, 30, 0.18);
+    display: grid;
+    grid-template-columns: 28px 78px 28px;
+    grid-template-rows: 28px 78px 28px;
+    gap: 4px;
     user-select: none;
-}
-
-.minimap-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
-    padding: 0 2px;
+    justify-items: center;
 }
 
-.minimap-title {
-    font-size: 0.72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* 1. Flèches directionnelles extérieures (Nord, Sud, Ouest, Est) */
+.map-unified-nav-pad .nav-pad-arrow {
+    background: #ffffff;
+    border: 1px solid var(--border-color, #e2d9cc);
+    border-radius: 6px;
     color: #1c1917;
-}
-
-.minimap-zoom-group {
-    display: flex;
-    gap: 3px;
-}
-
-.minimap-zoom-btn {
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    margin: 0;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #ffffff;
-    border: 1px solid var(--border-color, #e2d9cc);
-    border-radius: 4px;
-    color: #1c1917;
-    font-size: 0.75rem;
-    font-weight: 800;
-    cursor: pointer;
+    font-size: 0.95rem;
     transition: all 0.12s ease;
     box-shadow: 0 1px 3px rgba(60, 45, 30, 0.08);
+    padding: 0;
+    margin: 0;
 }
 
-.minimap-zoom-btn:hover {
+.map-unified-nav-pad .nav-pad-arrow:hover {
     background: #c2252b;
     color: #ffffff;
     border-color: #c2252b;
-    transform: scale(1.08);
+    box-shadow: 0 2px 8px rgba(194, 37, 43, 0.35);
 }
 
-.minimap-quadrants-grid {
+.map-unified-nav-pad .nav-pad-arrow:active {
+    transform: scale(0.92);
+}
+
+.map-unified-nav-pad .arrow-up {
+    grid-column: 2;
+    grid-row: 1;
+    width: 78px;
+    height: 28px;
+}
+
+.map-unified-nav-pad .arrow-down {
+    grid-column: 2;
+    grid-row: 3;
+    width: 78px;
+    height: 28px;
+}
+
+.map-unified-nav-pad .arrow-left {
+    grid-column: 1;
+    grid-row: 2;
+    width: 28px;
+    height: 78px;
+}
+
+.map-unified-nav-pad .arrow-right {
+    grid-column: 3;
+    grid-row: 2;
+    width: 28px;
+    height: 78px;
+}
+
+/* 2. Cœur Mini-Map au centre (occupant la case [2, 2]) */
+.map-unified-nav-pad .nav-pad-minimap-core {
+    grid-column: 2;
+    grid-row: 2;
+    width: 78px;
+    height: 78px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 38px 38px;
-    gap: 4px;
+    grid-template-rows: 1fr 1fr;
+    gap: 3px;
     position: relative;
-    border-radius: 6px;
     background: rgba(0, 0, 0, 0.04);
-    padding: 3px;
+    border-radius: 6px;
+    padding: 2px;
 }
 
-.minimap-quadrant-btn {
+.map-unified-nav-pad .minimap-q-cell {
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
+    border-radius: 4px;
     background: #ffffff;
     cursor: pointer;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2px;
-    transition: all 0.15s ease;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #334155;
+    padding: 0;
+    margin: 0;
+    transition: all 0.12s ease;
     text-decoration: none;
 }
 
-.minimap-quadrant-btn .q-label {
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: #1e293b;
-    line-height: 1;
-}
-
-.minimap-quadrant-btn .q-coords {
-    font-size: 0.58rem;
-    color: #64748b;
-    font-family: monospace;
-    line-height: 1;
-    margin-top: 2px;
-}
-
-.minimap-quadrant-btn:hover {
+.map-unified-nav-pad .minimap-q-cell:hover {
     border-color: #c2252b;
     background: rgba(194, 37, 43, 0.08);
-    transform: translateY(-1px);
 }
 
-.minimap-quadrant-btn.active {
+.map-unified-nav-pad .minimap-q-cell.active {
     border-color: #c2252b;
-    background: rgba(194, 37, 43, 0.15);
+    background: rgba(194, 37, 43, 0.18);
+    color: #c2252b;
     box-shadow: 0 0 0 1px #c2252b inset;
 }
 
-.minimap-quadrant-btn.active .q-label {
-    color: #c2252b;
-}
-
-.minimap-quadrant-btn.active .q-coords {
-    color: #991b1b;
-    font-weight: 700;
-}
-
-.minimap-center-node {
+/* Pastille Torii centrale (Kyoto / Centre [0 : 0]) */
+.map-unified-nav-pad .minimap-center-torii {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: #c2252b;
     color: #ffffff;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     border: 2px solid #ffffff;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     display: flex;
@@ -2231,14 +2141,87 @@
     padding: 0;
 }
 
-.minimap-center-node:hover {
-    transform: translate(-50%, -50%) scale(1.22);
+.map-unified-nav-pad .minimap-center-torii:hover {
+    transform: translate(-50%, -50%) scale(1.25);
     background: #991b1b;
 }
 
-.minimap-center-node.active {
+.map-unified-nav-pad .minimap-center-torii.active {
     background: #e11d48;
     box-shadow: 0 0 0 2px #f43f5e;
+}
+
+/* 3. Angles extérieurs (Zoom +, Zoom -, Mon Fief, Boussole) */
+.map-unified-nav-pad .nav-pad-corner {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 1px 3px rgba(60, 45, 30, 0.08);
+    transition: all 0.12s ease;
+}
+
+.map-unified-nav-pad .corner-compass {
+    grid-column: 1;
+    grid-row: 1;
+    background: transparent;
+    border: 1px dashed rgba(194, 37, 43, 0.3);
+    font-size: 0.8rem;
+    box-shadow: none;
+}
+
+.map-unified-nav-pad .corner-zoom-in {
+    grid-column: 3;
+    grid-row: 1;
+    background: #ffffff;
+    border: 1px solid var(--border-color, #e2d9cc);
+    color: #1c1917;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.map-unified-nav-pad .corner-zoom-in:hover {
+    background: #c2252b;
+    color: #ffffff;
+    border-color: #c2252b;
+}
+
+.map-unified-nav-pad .corner-home {
+    grid-column: 1;
+    grid-row: 3;
+    background: rgba(194, 37, 43, 0.08);
+    border: 1px solid rgba(194, 37, 43, 0.3);
+    color: #c2252b;
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+
+.map-unified-nav-pad .corner-home:hover {
+    background: #c2252b;
+    color: #ffffff;
+    border-color: #c2252b;
+}
+
+.map-unified-nav-pad .corner-zoom-out {
+    grid-column: 3;
+    grid-row: 3;
+    background: #ffffff;
+    border: 1px solid var(--border-color, #e2d9cc);
+    color: #1c1917;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.map-unified-nav-pad .corner-zoom-out:hover {
+    background: #c2252b;
+    color: #ffffff;
+    border-color: #c2252b;
 }
 
 .hud-btn {

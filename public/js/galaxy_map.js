@@ -76,38 +76,6 @@ class GalaxyMapController {
                     <span id="hudQuadrantDisplay"><i class="fa-solid fa-compass me-1"></i>Provinces</span>
                     <strong id="hudCoordsDisplay">[${this.centerX} : ${this.centerY}]</strong>
                 </div>
-
-                <!-- Mini-Map & Commandes Intégrées (Haut Droite) -->
-                <div class="galaxy-minimap-widget" id="galaxyMinimapWidget">
-                    <div class="minimap-header">
-                        <span class="minimap-title"><i class="fa-solid fa-compass me-1 text-danger"></i>Carte</span>
-                        <div class="minimap-zoom-group">
-                            <button type="button" class="minimap-zoom-btn" id="btnZoomIn" title="Zoom avant (agrandir)"><i class="fa-solid fa-plus"></i></button>
-                            <button type="button" class="minimap-zoom-btn" id="btnZoomOut" title="Zoom arrière (réduire)"><i class="fa-solid fa-minus"></i></button>
-                        </div>
-                    </div>
-                    <div class="minimap-quadrants-grid">
-                        <button type="button" class="minimap-quadrant-btn q-nw" id="btnQuadrantNO" title="Terres du Nord-Ouest [- / +]">
-                            <span class="q-label">N-O</span>
-                            <span class="q-coords">- / +</span>
-                        </button>
-                        <button type="button" class="minimap-quadrant-btn q-ne" id="btnQuadrantNE" title="Terres du Nord-Est [+ / +]">
-                            <span class="q-label">N-E</span>
-                            <span class="q-coords">+ / +</span>
-                        </button>
-                        <button type="button" class="minimap-quadrant-btn q-sw" id="btnQuadrantSO" title="Terres du Sud-Ouest [- / -]">
-                            <span class="q-label">S-O</span>
-                            <span class="q-coords">- / -</span>
-                        </button>
-                        <button type="button" class="minimap-quadrant-btn q-se" id="btnQuadrantSE" title="Terres du Sud-Est [+ / -]">
-                            <span class="q-label">S-E</span>
-                            <span class="q-coords">+ / -</span>
-                        </button>
-                        <button type="button" class="minimap-center-node" id="btnQuadrantKyoto" title="Capitale Impériale [0 : 0]">
-                            <i class="fa-solid fa-torii-gate"></i>
-                        </button>
-                    </div>
-                </div>
             </div>
 
             <div class="galaxy-viewport" id="galaxyViewport">
@@ -118,13 +86,32 @@ class GalaxyMapController {
                     <span><i class="fa-solid fa-hand me-1"></i>Glissez librement pour explorer l'Archipel (Flèches, ZQSD ou souris)</span>
                 </div>
 
-                <!-- Croix Directionnelle Féodale en Bas à Droite (D-Pad) -->
-                <div class="map-dpad-cross" id="mapDpadCross" title="Croix de navigation directionnelle">
-                    <button type="button" class="dpad-btn dpad-up" id="btnArrowUp" title="Nord (Haut / Z / Flèche Haut)"><i class="fa-solid fa-caret-up"></i></button>
-                    <button type="button" class="dpad-btn dpad-left" id="btnArrowLeft" title="Ouest (Gauche / Q / Flèche Gauche)"><i class="fa-solid fa-caret-left"></i></button>
-                    <button type="button" class="dpad-btn dpad-center" id="btnRecenterColonyDpad" title="Recentrer sur mon Fief seigneurial"><i class="fa-solid fa-chess-rook"></i></button>
-                    <button type="button" class="dpad-btn dpad-right" id="btnArrowRight" title="Est (Droite / D / Flèche Droite)"><i class="fa-solid fa-caret-right"></i></button>
-                    <button type="button" class="dpad-btn dpad-down" id="btnArrowDown" title="Sud (Bas / S / Flèche Bas)"><i class="fa-solid fa-caret-down"></i></button>
+                <!-- Boîtier de Navigation Féodale Unifié en Bas à Droite (Mini-Map Centrale + Flèches Extérieures) -->
+                <div class="map-unified-nav-pad" id="mapUnifiedNavPad" title="Boîtier de navigation féodale">
+                    <!-- Ligne 1 : Haut -->
+                    <div class="nav-pad-corner corner-compass" title="Boussole féodale"><i class="fa-solid fa-compass text-danger"></i></div>
+                    <button type="button" class="nav-pad-arrow arrow-up" id="btnArrowUp" title="Nord (Haut / Z / Flèche Haut)"><i class="fa-solid fa-caret-up"></i></button>
+                    <button type="button" class="nav-pad-corner corner-zoom-in" id="btnZoomIn" title="Zoom avant (agrandir)"><i class="fa-solid fa-plus"></i></button>
+
+                    <!-- Ligne 2 : Milieu avec Flèches Extérieures & Cœur Mini-Map -->
+                    <button type="button" class="nav-pad-arrow arrow-left" id="btnArrowLeft" title="Ouest (Gauche / Q / Flèche Gauche)"><i class="fa-solid fa-caret-left"></i></button>
+                    
+                    <div class="nav-pad-minimap-core" id="minimapCoreGrid" title="Mini-Map des 4 Quadrants Féodaux">
+                        <button type="button" class="minimap-q-cell q-nw" id="btnQuadrantNO" title="Terres du Nord-Ouest [- / +]">N-O</button>
+                        <button type="button" class="minimap-q-cell q-ne" id="btnQuadrantNE" title="Terres du Nord-Est [+ / +]">N-E</button>
+                        <button type="button" class="minimap-q-cell q-sw" id="btnQuadrantSO" title="Terres du Sud-Ouest [- / -]">S-O</button>
+                        <button type="button" class="minimap-q-cell q-se" id="btnQuadrantSE" title="Terres du Sud-Est [+ / -]">S-E</button>
+                        <button type="button" class="minimap-center-torii" id="btnQuadrantKyoto" title="Capitale Impériale [0 : 0]">
+                            <i class="fa-solid fa-torii-gate"></i>
+                        </button>
+                    </div>
+
+                    <button type="button" class="nav-pad-arrow arrow-right" id="btnArrowRight" title="Est (Droite / D / Flèche Droite)"><i class="fa-solid fa-caret-right"></i></button>
+
+                    <!-- Ligne 3 : Bas -->
+                    <button type="button" class="nav-pad-corner corner-home" id="btnRecenterColonyDpad" title="Recentrer sur mon Fief seigneurial"><i class="fa-solid fa-chess-rook"></i></button>
+                    <button type="button" class="nav-pad-arrow arrow-down" id="btnArrowDown" title="Sud (Bas / S / Flèche Bas)"><i class="fa-solid fa-caret-down"></i></button>
+                    <button type="button" class="nav-pad-corner corner-zoom-out" id="btnZoomOut" title="Zoom arrière (réduire)"><i class="fa-solid fa-minus"></i></button>
                 </div>
             </div>
         `;
