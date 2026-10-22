@@ -81,6 +81,13 @@ if (!$targetPlanetId && !$targetOasisId && isset($_POST['target_x'], $_POST['tar
                     }
                     $stCreateLake->execute([$terrain['name'] . ' d\'Eaux Vives', (int)$_POST['target_x'], (int)$_POST['target_y']]);
                     $targetPlanetId = (int)$db->lastInsertId();
+                } elseif ($terrain['type'] === 'mountain') {
+                    $stCreateMountain = $db->prepare("
+                        INSERT INTO planets (name, coord_x, coord_y, planet_type, metal, crystal, deuterium, energy_used, energy_max, metal_max, crystal_max, deuterium_max, is_capital, last_resource_update)
+                        VALUES (?, ?, ?, 'mountain', 0, 0, 0, 0, 0, 0, 0, 0, 0, UNIX_TIMESTAMP())
+                    ");
+                    $stCreateMountain->execute([$terrain['name'] . ' des Cimes', (int)$_POST['target_x'], (int)$_POST['target_y']]);
+                    $targetPlanetId = (int)$db->lastInsertId();
                 }
             }
         }

@@ -17,6 +17,11 @@ $dbMap = Database::getConnection();
 $stPec = $dbMap->prepare("SELECT count FROM planet_units WHERE planet_id = ? AND unit_code = 'pecheur'");
 $stPec->execute([(int)$planet['id']]);
 $stationedPecheurs = (int)$stPec->fetchColumn() ?: 0;
+
+$stMin = $dbMap->prepare("SELECT count FROM planet_units WHERE planet_id = ? AND unit_code = 'mineur'");
+$stMin->execute([(int)$planet['id']]);
+$stationedMineurs = (int)$stMin->fetchColumn() ?: 0;
+
 $gameSpeedFactor = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
 
 $queueTitle = 'Mouvements & Chantiers';
@@ -262,6 +267,153 @@ ob_start();
     </div>
 </div>
 
+<!-- =====================================================
+     MODAL CARTE — Expédition Minière Directe (Mineurs des Cimes & Forage Fluide)
+     ===================================================== -->
+<div id="mapMiningModal" style="
+    display: none;
+    position: fixed; inset: 0; z-index: 9050;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+" onclick="if(event.target===this) closeQuickMiningModal();">
+
+    <div class="card shadow-lg" style="
+        background: #ffffff;
+        border: 1px solid #d97706;
+        border-radius: 12px;
+        width: 100%; max-width: 530px;
+        max-height: 90vh; overflow-y: auto;
+        position: relative;
+        animation: mapModalIn 0.2s ease;
+        color: #1e293b;
+    ">
+        <!-- En-tête -->
+        <div class="card-header d-flex justify-content-between align-items-center py-2.5 px-3 border-bottom bg-warning-lt" style="border-radius: 12px 12px 0 0;">
+            <div class="d-flex align-items-center gap-2 flex-fill min-w-0">
+                <span class="avatar avatar-xs bg-warning text-dark rounded-circle" style="width:26px; height:26px; font-size:0.75rem;">
+                    <i class="fa-solid fa-pickaxe"></i>
+                </span>
+                <h3 class="card-title m-0 text-warning-fg font-weight-bold" style="font-size: 1.05rem;" id="miningModalTitle">
+                    Dépêcher des Mineurs des Cimes (Kōfu ⛏️)
+                </h3>
+            </div>
+            <button type="button" class="btn-close ms-2" onclick="closeQuickMiningModal()" aria-label="Fermer"></button>
+        </div>
+
+        <!-- Corps -->
+        <div class="card-body p-3">
+            <!-- Illustration & Cible -->
+            <div class="position-relative overflow-hidden rounded mb-3 border border-warning-subtle shadow-2xs" style="height: 135px; background:#0f172a;">
+                <img src="/public/assets/units/mineur.jpg" alt="Mineur des Cimes" style="width:100%; height:100%; object-fit:cover; object-position: center 25%;">
+                <div style="position:absolute; inset:0; background: linear-gradient(to top, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.3) 55%, transparent 100%);"></div>
+                <div style="position:absolute; bottom:8px; left:12px; right:12px;" class="d-flex justify-content-between align-items-end text-white">
+                    <div class="min-w-0 me-2">
+                        <div class="fw-bold small text-truncate" id="miningModalDestName">Pics Rocheux & Montagnes</div>
+                        <div class="text-white-50 font-monospace" style="font-size:0.75rem;">
+                            <span id="miningModalDestCoords">[X : Y]</span> &bull; <span id="miningModalDist">--</span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-1 flex-wrap justify-content-end">
+                        <span class="badge bg-warning text-dark font-monospace shadow-2xs" id="miningModalSulfurBadge" style="font-size:0.7rem;">
+                            🟡 Soufre: --
+                        </span>
+                        <span class="badge bg-cyan text-white font-monospace shadow-2xs" id="miningModalNitrateBadge" style="font-size:0.7rem;">
+                            ⚪ Nitrate: --
+                        </span>
+                        <span class="badge bg-secondary text-white font-monospace shadow-2xs" id="miningModalIronSandBadge" style="font-size:0.7rem;">
+                            🟤 Fer: --
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="small text-secondary mb-3" style="line-height:1.45;">
+                Dépêchez vos <strong>Mineurs des Cimes (Kōfu ⛏️)</strong> pour gravir ces crêtes granitiques et volcaniques. Les cargaisons de <strong>Soufre</strong>, <strong>Nitrate (Salpêtre)</strong> et <strong>Sable de Fer (Satetsu)</strong> seront directement acheminées et stockées dans votre fief.
+            </p>
+
+            <!-- Disponibilité Garnison -->
+            <div class="d-flex justify-content-between align-items-center p-2 rounded bg-surface-secondary border mb-3 small">
+                <span class="fw-semibold text-dark">
+                    <i class="fa-solid fa-person-digging text-warning me-1"></i>Mineurs en garnison :
+                </span>
+                <span class="badge bg-warning text-dark font-monospace px-2 py-1" style="font-size:0.8rem;" id="miningModalAvailCount">
+                    <?= number_format($stationedMineurs) ?> Kōfu
+                </span>
+            </div>
+
+            <!-- Formulaire de saisie du nombre de mineurs -->
+            <div id="miningFormContainer">
+                <div class="bg-light p-3 rounded border mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1.5">
+                        <label class="form-label fw-bold small text-dark mb-0">Effectif de Mineurs à mobiliser :</label>
+                        <span class="badge bg-warning-lt text-dark font-monospace" style="font-size:0.72rem;">
+                            Disponible : <strong id="miningModalAvailNum"><?= $stationedMineurs ?></strong>
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 mb-2.5">
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-2.5" onclick="adjustMiningCount(-1)">-1</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-2" onclick="adjustMiningCount(-5)">-5</button>
+                        <input type="number" id="inputMiningCount" class="form-control text-center font-monospace fw-bold fs-4" 
+                               min="1" max="<?= $stationedMineurs ?>" value="<?= min($stationedMineurs, 1) ?>" 
+                               oninput="updateMiningEstimates()" style="max-width: 140px;">
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-2" onclick="adjustMiningCount(5)">+5</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-2.5" onclick="adjustMiningCount(1)">+1</button>
+                        <button type="button" class="btn btn-sm btn-outline-warning text-dark font-monospace px-2.5 ms-auto fw-bold" onclick="setMiningCountMax()">Max</button>
+                    </div>
+
+                    <!-- Métriques d'extraction estimée & capacité -->
+                    <div class="d-flex flex-column gap-1.5 p-2 rounded bg-white border font-monospace small" style="font-size:0.75rem;">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary"><i class="fa-solid fa-pickaxe text-warning me-1"></i>Minerais extraits estimés :</span>
+                            <strong class="text-dark" id="miningEstTotal">--</strong>
+                        </div>
+                        <div class="d-flex justify-content-between ps-3 text-muted" style="font-size:0.7rem;">
+                            <span id="miningEstBreakdown">🟡 Soufre: 0 &bull; ⚪ Nitrate: 0 &bull; 🟤 Fer: 0</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary"><i class="fa-solid fa-boxes-stacked text-primary me-1"></i>Capacité de fret totale :</span>
+                            <strong class="text-dark" id="miningEstCargo">-- unités</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary"><i class="fa-regular fa-clock text-info me-1"></i>Durée totale de l'expédition :</span>
+                            <strong class="text-dark" id="miningEstDuration">--</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message d'alerte si 0 mineur -->
+            <div id="miningNoUnitsAlert" class="alert alert-warning p-2.5 small mb-3 <?= ($stationedMineurs > 0) ? 'd-none' : '' ?>">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-warning fs-3"></i>
+                    <div>
+                        <strong>Aucun Mineur des Cimes en garnison !</strong><br>
+                        Pour dépêcher cette expédition minière, vous devez former des <strong>Mineurs des Cimes (Kōfu ⛏️)</strong> au Dojo Militaire.
+                        <div class="mt-2">
+                            <a href="/?page=barracks" class="btn btn-sm btn-warning text-dark font-monospace py-0.5 px-2">
+                                <i class="fa-solid fa-torii-gate me-1"></i>Former au Dojo &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutons de validation -->
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                <button type="button" class="btn btn-outline-secondary" onclick="closeQuickMiningModal()">Annuler</button>
+                <button type="button" class="btn btn-warning text-dark fw-bold shadow-sm" id="btnLaunchQuickMining" 
+                        onclick="submitQuickMining()" <?= ($stationedMineurs <= 0) ? 'disabled' : '' ?>>
+                    <i class="fa-solid fa-paper-plane me-1"></i>Dépêcher l'Expédition Minière
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 @keyframes mapModalIn {
     from { opacity:0; transform: scale(0.96) translateY(6px); }
@@ -275,8 +427,10 @@ let galaxyMap = null;
 const mapPlayerX = <?= (int)$planet['coord_x'] ?>;
 const mapPlayerY = <?= (int)$planet['coord_y'] ?>;
 let stationedPecheurs = <?= (int)$stationedPecheurs ?>;
+let stationedMineurs = <?= (int)$stationedMineurs ?>;
 const mapGameSpeed = <?= (float)$gameSpeedFactor ?>;
 let currentFishingTarget = null;
+let currentMiningTarget = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     galaxyMap = new GalaxyMapController('galaxyMapContainer', {
@@ -821,9 +975,9 @@ window.selectPlanetTile = function(data) {
                             <i class="fa-solid fa-ban me-1"></i>Filon Minéral Épuisé
                         </button>
                     ` : `
-                        <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=mining" class="btn btn-warning text-dark font-weight-bold">
+                        <button type="button" class="btn btn-warning text-dark font-weight-bold shadow-sm" onclick="openQuickMiningModal(${data.coord_x}, ${data.coord_y}, null, null, '${(data.terrain_name || 'Pics Rocheux & Montagnes').replace(/'/g, "\\'")}', ${sulfurStock}, ${nitrateStock}, ${ironSandStock})">
                             <i class="fa-solid fa-pickaxe me-1"></i>Dépêcher des Mineurs (Expédition Minière) &rarr;
-                        </a>
+                        </button>
                     `
                 ) : `
                     <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=colonize" class="btn btn-primary font-weight-bold">
@@ -1092,9 +1246,9 @@ window.selectPlanetTile = function(data) {
                                 <i class="fa-solid fa-ban me-1"></i>Filon Minéral Épuisé
                             </button>
                         ` : `
-                            <a href="?page=fleet&target_id=${data.planet_id || ''}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=mining" class="btn btn-warning text-dark font-weight-bold">
+                            <button type="button" class="btn btn-warning text-dark font-weight-bold shadow-sm" onclick="openQuickMiningModal(${data.coord_x}, ${data.coord_y}, ${data.planet_id || 'null'}, null, '${(data.planet_name || data.terrain_name || 'Pics Rocheux & Montagnes').replace(/'/g, "\\'")}', ${sulfurStock}, ${nitrateStock}, ${ironSandStock})">
                                 <i class="fa-solid fa-pickaxe me-1"></i>Dépêcher des Mineurs (Expédition Minière) &rarr;
-                            </a>
+                            </button>
                         `
                     ) : ((parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0) ? `
                         <button type="button" class="btn btn-secondary font-weight-bold" disabled>
@@ -1412,6 +1566,235 @@ window.submitQuickFishing = async function() {
             }
         } else {
             showModalAlert(data.error || data.message || "Erreur lors de l'envoi de l'expédition de pêche.", 'error', 'Expédition Refusée');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = prevHtml;
+            }
+        }
+    } catch (err) {
+        showModalAlert("Erreur de communication avec le serveur féodal.", 'error', 'Erreur Réseau');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = prevHtml;
+        }
+    }
+};
+
+// ── Fonctions Expédition Minière Rapide Directe depuis la Carte ────────────
+window.openQuickMiningModal = function(targetX, targetY, planetId, oasisId, targetName, sulfur, nitrate, ironSand) {
+    closeMapModal();
+    currentMiningTarget = {
+        x: parseInt(targetX, 10),
+        y: parseInt(targetY, 10),
+        planetId: planetId ? parseInt(planetId, 10) : null,
+        oasisId: oasisId ? parseInt(oasisId, 10) : null,
+        name: targetName || "Pics Rocheux & Montagnes",
+        sulfur: (sulfur !== null && sulfur !== undefined) ? parseInt(sulfur, 10) : 10000,
+        nitrate: (nitrate !== null && nitrate !== undefined) ? parseInt(nitrate, 10) : 10000,
+        ironSand: (ironSand !== null && ironSand !== undefined) ? parseInt(ironSand, 10) : 15000
+    };
+
+    // Remplir les informations textuelles
+    const nameEl = document.getElementById('miningModalDestName');
+    if (nameEl) nameEl.textContent = currentMiningTarget.name;
+
+    const coordsEl = document.getElementById('miningModalDestCoords');
+    if (coordsEl) coordsEl.textContent = `[${currentMiningTarget.x} : ${currentMiningTarget.y}]`;
+
+    const dx = currentMiningTarget.x - mapPlayerX;
+    const dy = currentMiningTarget.y - mapPlayerY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const distEl = document.getElementById('miningModalDist');
+    if (distEl) distEl.textContent = `${dist.toFixed(1)} lieue(s)`;
+
+    const sBadge = document.getElementById('miningModalSulfurBadge');
+    if (sBadge) sBadge.textContent = `🟡 Soufre: ${currentMiningTarget.sulfur.toLocaleString()}`;
+
+    const nBadge = document.getElementById('miningModalNitrateBadge');
+    if (nBadge) nBadge.textContent = `⚪ Nitrate: ${currentMiningTarget.nitrate.toLocaleString()}`;
+
+    const iBadge = document.getElementById('miningModalIronSandBadge');
+    if (iBadge) iBadge.textContent = `🟤 Fer: ${currentMiningTarget.ironSand.toLocaleString()}`;
+
+    const availCountEl = document.getElementById('miningModalAvailCount');
+    if (availCountEl) availCountEl.textContent = `${stationedMineurs.toLocaleString()} Kōfu`;
+
+    const availNumEl = document.getElementById('miningModalAvailNum');
+    if (availNumEl) availNumEl.textContent = stationedMineurs;
+
+    const inputCount = document.getElementById('inputMiningCount');
+    if (inputCount) {
+        inputCount.max = stationedMineurs;
+        inputCount.value = stationedMineurs > 0 ? Math.min(stationedMineurs, 5) : 0;
+    }
+
+    const noAlert = document.getElementById('miningNoUnitsAlert');
+    if (noAlert) {
+        if (stationedMineurs > 0) noAlert.classList.add('d-none');
+        else noAlert.classList.remove('d-none');
+    }
+
+    const launchBtn = document.getElementById('btnLaunchQuickMining');
+    if (launchBtn) {
+        launchBtn.disabled = (stationedMineurs <= 0);
+        launchBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>Dépêcher l\'Expédition Minière';
+    }
+
+    updateMiningEstimates();
+
+    const mModal = document.getElementById('mapMiningModal');
+    if (mModal) {
+        mModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeQuickMiningModal = function() {
+    const mModal = document.getElementById('mapMiningModal');
+    if (mModal) mModal.style.display = 'none';
+    document.body.style.overflow = '';
+};
+
+// Fermeture avec Échap aussi pour le modal des mineurs
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeQuickMiningModal();
+});
+
+window.adjustMiningCount = function(delta) {
+    const input = document.getElementById('inputMiningCount');
+    if (!input || stationedMineurs <= 0) return;
+    let val = (parseInt(input.value, 10) || 0) + delta;
+    val = Math.max(1, Math.min(val, stationedMineurs));
+    input.value = val;
+    updateMiningEstimates();
+};
+
+window.setMiningCountMax = function() {
+    const input = document.getElementById('inputMiningCount');
+    if (!input || stationedMineurs <= 0) return;
+    input.value = stationedMineurs;
+    updateMiningEstimates();
+};
+
+window.updateMiningEstimates = function() {
+    const input = document.getElementById('inputMiningCount');
+    if (!input) return;
+    let count = parseInt(input.value, 10) || 0;
+    if (stationedMineurs > 0) {
+        count = Math.max(1, Math.min(count, stationedMineurs));
+    } else {
+        count = 0;
+    }
+    input.value = count;
+
+    // Calculs d'extraction : base 15 Soufre, 15 Nitrate, 25 Fer par mineur
+    let estSulfur = count * 15;
+    let estNitrate = count * 15;
+    let estIronSand = count * 25;
+
+    if (currentMiningTarget) {
+        estSulfur = Math.min(estSulfur, currentMiningTarget.sulfur);
+        estNitrate = Math.min(estNitrate, currentMiningTarget.nitrate);
+        estIronSand = Math.min(estIronSand, currentMiningTarget.ironSand);
+    }
+    const totalHarvest = estSulfur + estNitrate + estIronSand;
+
+    const totEl = document.getElementById('miningEstTotal');
+    if (totEl) totEl.textContent = `${totalHarvest.toLocaleString()} minerais au total`;
+
+    const brkEl = document.getElementById('miningEstBreakdown');
+    if (brkEl) {
+        brkEl.innerHTML = `🟡 Soufre: <strong>${estSulfur.toLocaleString()}</strong> &bull; ⚪ Nitrate: <strong>${estNitrate.toLocaleString()}</strong> &bull; 🟤 Fer: <strong>${estIronSand.toLocaleString()}</strong>`;
+    }
+
+    // Fret mineur : 120 unités par mineur
+    const cargoCap = count * 120;
+    const cargoEl = document.getElementById('miningEstCargo');
+    if (cargoEl) cargoEl.textContent = `${cargoCap.toLocaleString()} unités (120/mineur)`;
+
+    const durEl = document.getElementById('miningEstDuration');
+    if (durEl && currentMiningTarget) {
+        const dx = currentMiningTarget.x - mapPlayerX;
+        const dy = currentMiningTarget.y - mapPlayerY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        // Durée aller : vitesse 12 km/h pour le mineur
+        const flightSec = Math.max(30, Math.round((10 + (3500 / 100) * Math.sqrt((10 * dist) / 12)) / mapGameSpeed));
+        const siteSec = Math.max(60, Math.round(3600 / mapGameSpeed));
+        const totalSec = (flightSec * 2) + siteSec;
+
+        const m = Math.floor(totalSec / 60);
+        const s = totalSec % 60;
+        const h = Math.floor(m / 60);
+        const remM = m % 60;
+        if (h > 0) {
+            durEl.textContent = `${h}h ${remM.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+        } else {
+            durEl.textContent = `${m}m ${s.toString().padStart(2, '0')}s`;
+        }
+    }
+};
+
+window.submitQuickMining = async function() {
+    if (!currentMiningTarget) return;
+    const input = document.getElementById('inputMiningCount');
+    const count = parseInt(input ? input.value : 0, 10);
+    if (!count || count <= 0) {
+        showModalAlert('Veuillez mobiliser au moins 1 Mineur des Cimes (Kōfu).', 'warning', 'Effectif Requis');
+        return;
+    }
+    if (count > stationedMineurs) {
+        showModalAlert('Votre garnison ne compte pas assez de mineurs disponibles.', 'warning', 'Garnison Insuffisante');
+        return;
+    }
+
+    const btn = document.getElementById('btnLaunchQuickMining');
+    const prevHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Dépêche en cours...';
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('target_x', currentMiningTarget.x);
+        formData.append('target_y', currentMiningTarget.y);
+        if (currentMiningTarget.planetId) {
+            formData.append('target_planet_id', currentMiningTarget.planetId);
+        }
+        if (currentMiningTarget.oasisId) {
+            formData.append('target_oasis_id', currentMiningTarget.oasisId);
+        }
+        formData.append('mission_type', 'mining');
+        formData.append('fleet[mineur]', count);
+        formData.append('cargo_metal', 0);
+        formData.append('cargo_crystal', 0);
+        formData.append('cargo_deuterium', 0);
+
+        const res = await fetch('/api/fleet.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data && data.success) {
+            stationedMineurs = Math.max(0, stationedMineurs - count);
+            const availCountEl = document.getElementById('miningModalAvailCount');
+            if (availCountEl) availCountEl.textContent = `${stationedMineurs.toLocaleString()} Kōfu`;
+            const availNumEl = document.getElementById('miningModalAvailNum');
+            if (availNumEl) availNumEl.textContent = stationedMineurs;
+
+            closeQuickMiningModal();
+            await showModalAlert(
+                `Expédition minière dépêchée avec succès ! ${count} Mineurs des Cimes (Kōfu ⛏️) font route vers la montagne [${currentMiningTarget.x} : ${currentMiningTarget.y}]. Les minerais extraits (Soufre, Nitrate, Satetsu) seront acheminés dans vos entrepôts de fief.`,
+                'success',
+                'Expédition Minière Dépêchée'
+            );
+
+            if (galaxyMap && typeof galaxyMap.fetchMapData === 'function') {
+                galaxyMap.fetchMapData();
+            }
+        } else {
+            showModalAlert(data.error || data.message || "Erreur lors de l'envoi de l'expédition minière.", 'error', 'Expédition Refusée');
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = prevHtml;
