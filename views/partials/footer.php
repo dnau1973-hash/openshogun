@@ -39,6 +39,8 @@
 <?php require_once __DIR__ . '/wisdom_learning_modal.php'; ?>
 <!-- Modale d'Alerte Tactique : Général Oda Nobunaga (Conquête & Guerre) -->
 <?php require_once __DIR__ . '/oda_alert_modal.php'; ?>
+<!-- Modale Universelle des Conseillers & Alertes du Sengoku (Style Classique) -->
+<?php require_once __DIR__ . '/feudal_advisor_modal.php'; ?>
 
 <!-- Modale Universelle de la Fiche Daimyō / Profil (Style Washi Féodal) -->
 <div class="modal-overlay" id="playerProfileModal">
