@@ -107,57 +107,63 @@ ob_start();
 ?>
 
 <!-- =====================================================
-     MODAL CARTE — Informations de la Zone Sélectionnée (Modal Blanc Simple)
+     MODAL CARTE — Informations de la Zone Sélectionnée
+     Présentation Scrupuleusement Identique au Modèle Pêcheur & Terroir (resources.php)
+     Illustration HD en haut (185px) avec overlay sombre, badges, titre & bouton fermer
      ===================================================== -->
 <div id="mapTileModal" style="
     display: none;
     position: fixed; inset: 0; z-index: 9000;
-    background: rgba(15, 23, 42, 0.5);
+    background: rgba(15, 23, 42, 0.55);
     backdrop-filter: blur(4px);
     align-items: center;
     justify-content: center;
     padding: 1rem;
 " onclick="if(event.target===this) closeMapModal();">
 
-    <div class="card shadow-lg" style="
+    <div class="card shadow-lg border-0 overflow-hidden" style="
         background: #ffffff;
-        border: 1px solid var(--tblr-border-color, #e6e7e9);
         border-radius: 12px;
-        width: 100%; max-width: 600px;
-        max-height: 85vh; overflow-y: auto;
+        width: 100%; max-width: 580px;
+        max-height: 90vh; overflow-y: auto;
         position: relative;
         animation: mapModalIn 0.2s ease;
-        color: var(--tblr-body-color, #1e293b);
+        color: #1e293b;
     ">
-        <!-- En-tête -->
-        <div class="card-header d-flex justify-content-between align-items-center py-3 px-3 border-bottom bg-white" style="border-radius: 12px 12px 0 0;">
-            <div class="d-flex align-items-center gap-2 flex-fill min-w-0">
-                <h3 id="mapModalTitle" class="card-title m-0 text-truncate font-weight-bold" style="font-size: 1.1rem; color: #1e293b;">Informations</h3>
-                <span id="mapModalCoords" class="badge bg-secondary text-white font-monospace" style="color: #fff !important;"></span>
-            </div>
-            <button type="button" class="btn-close ms-2" onclick="closeMapModal()" aria-label="Fermer"></button>
-        </div>
+        <!-- 1. Illustration en haut (Bandeau HD avec overlay dégradé, titre, badges et bouton fermer) -->
+        <div class="position-relative overflow-hidden" style="width: 100%; height: 185px; background: #0f172a; flex-shrink: 0;">
+            <img id="mapModalBannerImg" src="/public/assets/map/plaines.jpg?v=1" alt="Illustration Parcelle" style="width: 100%; height: 100%; object-fit: cover; object-position: center 35%;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
-        <!-- Corps -->
-        <div class="card-body p-3" style="color: #334155;">
-            <!-- Illustration en bandeau (même modèle que les modales Pêcheur / Ressources) -->
-            <div id="mapModalHero" class="position-relative overflow-hidden rounded mb-3 border shadow-2xs" style="height: 135px; background:#0f172a;">
-                <img id="mapModalHeroImg" src="/public/assets/map/plaines.jpg?v=1" alt="" style="width:100%; height:100%; object-fit:cover; object-position: center 40%;">
-                <div style="position:absolute; inset:0; background: linear-gradient(to top, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.25) 55%, transparent 100%);"></div>
-                <div style="position:absolute; bottom:8px; left:12px; right:12px;" class="d-flex justify-content-between align-items-end text-white">
-                    <div class="min-w-0 me-2">
-                        <div class="fw-bold small text-truncate" id="mapModalHeroName">Parcelle</div>
-                        <div class="text-white-50 font-monospace" style="font-size:0.75rem;" id="mapModalHeroCoords">[X : Y]</div>
+            <!-- Bouton fermer blanc en haut à droite -->
+            <button type="button" class="btn-close btn-close-white" onclick="closeMapModal()" aria-label="Fermer" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+
+            <!-- Titres et Badges superposés en bas du bandeau -->
+            <div style="position: absolute; bottom: 12px; left: 16px; right: 16px; z-index: 5;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                <div style="max-width: 72%;">
+                    <div id="mapModalCategoryBadge" class="mb-1">
+                        <span class="badge bg-primary text-white fw-bold px-2 py-1 shadow-sm" style="font-size: 0.75rem;">
+                            TERROIR FÉODAL
+                        </span>
                     </div>
-                    <span class="badge bg-dark text-white font-monospace shadow-2xs" id="mapModalHeroBadge" style="font-size:0.75rem; background:rgba(15,23,42,0.75) !important; border:1px solid rgba(255,255,255,0.25);">
-                        <i class="fa-solid fa-map-pin me-1"></i>Carte
+                    <h3 class="m-0 fw-bold text-white shadow-sm text-truncate" id="mapModalTitle" style="font-size: 1.25rem;">
+                        Nom de la Parcelle
+                    </h3>
+                    <div class="text-white-50 font-monospace small mt-0.5 text-truncate" id="mapModalSubtitle">
+                        Coordonnées &amp; Détails
+                    </div>
+                </div>
+                <div>
+                    <span id="mapModalCoords" class="badge bg-secondary text-white font-monospace fs-6 px-3 py-1 shadow-sm">
+                        [0 : 0]
                     </span>
                 </div>
             </div>
+        </div>
 
-            <div id="mapModalBody">
-                <!-- Rempli dynamiquement par JavaScript -->
-            </div>
+        <!-- 2. Corps de la Modale -->
+        <div id="mapModalBody" class="card-body p-3" style="color: #334155;">
+            <!-- Rempli dynamiquement par JavaScript -->
         </div>
     </div>
 </div>
@@ -175,48 +181,48 @@ ob_start();
     padding: 1rem;
 " onclick="if(event.target===this) closeQuickFishingModal();">
 
-    <div class="card shadow-lg" style="
+    <div class="card shadow-lg border-0 overflow-hidden" style="
         background: #ffffff;
-        border: 1px solid #06b6d4;
         border-radius: 12px;
-        width: 100%; max-width: 520px;
+        width: 100%; max-width: 540px;
         max-height: 90vh; overflow-y: auto;
         position: relative;
         animation: mapModalIn 0.2s ease;
         color: #1e293b;
     ">
-        <!-- En-tête -->
-        <div class="card-header d-flex justify-content-between align-items-center py-2.5 px-3 border-bottom bg-cyan-lt" style="border-radius: 12px 12px 0 0;">
-            <div class="d-flex align-items-center gap-2 flex-fill min-w-0">
-                <span class="avatar avatar-xs bg-cyan text-white rounded-circle" style="width:26px; height:26px; font-size:0.75rem;">
-                    <i class="fa-solid fa-fish"></i>
-                </span>
-                <h3 class="card-title m-0 text-cyan-fg font-weight-bold" style="font-size: 1.05rem;" id="fishingModalTitle">
-                    Dépêcher des Pêcheurs Féodaux
-                </h3>
-            </div>
-            <button type="button" class="btn-close ms-2" onclick="closeQuickFishingModal()" aria-label="Fermer"></button>
-        </div>
+        <!-- 1. Illustration en haut (Bandeau HD avec overlay dégradé, titre, badges et bouton fermer) -->
+        <div class="position-relative overflow-hidden" style="width: 100%; height: 185px; background: #0f172a; flex-shrink: 0;">
+            <img src="/public/assets/units/pecheur.jpg" alt="Pêcheurs Féodaux" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
-        <!-- Corps -->
-        <div class="card-body p-3">
-            <!-- Illustration & Cible -->
-            <div class="position-relative overflow-hidden rounded mb-3 border border-cyan-subtle shadow-2xs" style="height: 135px; background:#0f172a;">
-                <img src="/public/assets/units/pecheur.jpg" alt="Pêcheur Féodal" style="width:100%; height:100%; object-fit:cover; object-position: center 25%;">
-                <div style="position:absolute; inset:0; background: linear-gradient(to top, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.25) 55%, transparent 100%);"></div>
-                <div style="position:absolute; bottom:8px; left:12px; right:12px;" class="d-flex justify-content-between align-items-end text-white">
-                    <div class="min-w-0 me-2">
-                        <div class="fw-bold small text-truncate" id="fishingModalDestName">Lac d'Eaux Vives</div>
-                        <div class="text-white-50 font-monospace" style="font-size:0.75rem;">
-                            <span id="fishingModalDestCoords">[X : Y]</span> &bull; <span id="fishingModalDist">--</span>
-                        </div>
+            <!-- Bouton fermer blanc en haut à droite -->
+            <button type="button" class="btn-close btn-close-white" onclick="closeQuickFishingModal()" aria-label="Fermer" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+
+            <!-- Titres et Badges superposés en bas du bandeau -->
+            <div style="position: absolute; bottom: 12px; left: 16px; right: 16px; z-index: 5;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                <div style="max-width: 68%;">
+                    <div class="mb-1">
+                        <span class="badge bg-cyan text-white fw-bold px-2 py-1 shadow-sm" style="font-size: 0.75rem;">
+                            <i class="fa-solid fa-fish me-1"></i>PÊCHEURS FÉODAUX (RYŌSHI)
+                        </span>
                     </div>
-                    <span class="badge bg-cyan text-white font-monospace shadow-2xs" id="fishingModalStockBadge" style="font-size:0.75rem;">
+                    <h3 class="m-0 fw-bold text-white shadow-sm text-truncate" id="fishingModalDestName" style="font-size: 1.25rem;">
+                        Lac d'Eaux Vives
+                    </h3>
+                    <div class="text-white-50 font-monospace small mt-0.5 text-truncate">
+                        <span id="fishingModalDestCoords">[X : Y]</span> &bull; <span id="fishingModalDist">--</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge bg-cyan text-white font-monospace fs-6 px-3 py-1 shadow-sm" id="fishingModalStockBadge">
                         <i class="fa-solid fa-fish me-1"></i>Stock : --
                     </span>
                 </div>
             </div>
+        </div>
 
+        <!-- 2. Corps de la Modale -->
+        <div class="card-body p-3 p-md-4">
             <p class="small text-secondary mb-3" style="line-height:1.45;">
                 Dépêchez vos <strong>Pêcheurs Féodaux (Ryōshi 🐟)</strong> pour poser leurs nasses et filets sur ce sanctuaire d'eau douce. Les cargaisons de poisson frais seront directement acheminées et entreposées dans votre fief.
             </p>
@@ -311,57 +317,57 @@ ob_start();
     padding: 1rem;
 " onclick="if(event.target===this) closeQuickMiningModal();">
 
-    <div class="card shadow-lg" style="
+    <div class="card shadow-lg border-0 overflow-hidden" style="
         background: #ffffff;
-        border: 1px solid #d97706;
         border-radius: 12px;
-        width: 100%; max-width: 530px;
+        width: 100%; max-width: 540px;
         max-height: 90vh; overflow-y: auto;
         position: relative;
         animation: mapModalIn 0.2s ease;
         color: #1e293b;
     ">
-        <!-- En-tête -->
-        <div class="card-header d-flex justify-content-between align-items-center py-2.5 px-3 border-bottom bg-warning-lt" style="border-radius: 12px 12px 0 0;">
-            <div class="d-flex align-items-center gap-2 flex-fill min-w-0">
-                <span class="avatar avatar-xs bg-warning text-dark rounded-circle" style="width:26px; height:26px; font-size:0.75rem;">
-                    <i class="fa-solid fa-pickaxe"></i>
-                </span>
-                <h3 class="card-title m-0 text-warning-fg font-weight-bold" style="font-size: 1.05rem;" id="miningModalTitle">
-                    Dépêcher des Mineurs des Cimes (Kōfu ⛏️)
-                </h3>
-            </div>
-            <button type="button" class="btn-close ms-2" onclick="closeQuickMiningModal()" aria-label="Fermer"></button>
-        </div>
+        <!-- 1. Illustration en haut (Bandeau HD avec overlay dégradé, titre, badges et bouton fermer) -->
+        <div class="position-relative overflow-hidden" style="width: 100%; height: 185px; background: #0f172a; flex-shrink: 0;">
+            <img src="/public/assets/units/mineur.jpg" alt="Mineurs des Cimes" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
-        <!-- Corps -->
-        <div class="card-body p-3">
-            <!-- Illustration & Cible -->
-            <div class="position-relative overflow-hidden rounded mb-3 border border-warning-subtle shadow-2xs" style="height: 135px; background:#0f172a;">
-                <img src="/public/assets/units/mineur.jpg" alt="Mineur des Cimes" style="width:100%; height:100%; object-fit:cover; object-position: center 25%;">
-                <div style="position:absolute; inset:0; background: linear-gradient(to top, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.3) 55%, transparent 100%);"></div>
-                <div style="position:absolute; bottom:8px; left:12px; right:12px;" class="d-flex justify-content-between align-items-end text-white">
-                    <div class="min-w-0 me-2">
-                        <div class="fw-bold small text-truncate" id="miningModalDestName">Pics Rocheux & Montagnes</div>
-                        <div class="text-white-50 font-monospace" style="font-size:0.75rem;">
-                            <span id="miningModalDestCoords">[X : Y]</span> &bull; <span id="miningModalDist">--</span>
-                        </div>
+            <!-- Bouton fermer blanc en haut à droite -->
+            <button type="button" class="btn-close btn-close-white" onclick="closeQuickMiningModal()" aria-label="Fermer" style="position: absolute; top: 12px; right: 12px; z-index: 10;"></button>
+
+            <!-- Titres et Badges superposés en bas du bandeau -->
+            <div style="position: absolute; bottom: 12px; left: 16px; right: 16px; z-index: 5;" class="d-flex justify-content-between align-items-end flex-wrap gap-2 text-white">
+                <div style="max-width: 60%;">
+                    <div class="mb-1">
+                        <span class="badge bg-warning text-dark fw-bold px-2 py-1 shadow-sm" style="font-size: 0.75rem;">
+                            <i class="fa-solid fa-pickaxe me-1"></i>MINEURS DES CIMES (KŌFU)
+                        </span>
                     </div>
-                    <div class="d-flex gap-1 flex-wrap justify-content-end">
-                        <span class="badge bg-warning text-dark font-monospace shadow-2xs" id="miningModalSulfurBadge" style="font-size:0.7rem;">
-                            🟡 Soufre: --
-                        </span>
-                        <span class="badge bg-cyan text-white font-monospace shadow-2xs" id="miningModalNitrateBadge" style="font-size:0.7rem;">
-                            ⚪ Nitrate: --
-                        </span>
-                        <span class="badge bg-secondary text-white font-monospace shadow-2xs" id="miningModalIronSandBadge" style="font-size:0.7rem;">
-                            🟤 Fer: --
-                        </span>
+                    <h3 class="m-0 fw-bold text-white shadow-sm text-truncate" id="miningModalDestName" style="font-size: 1.25rem;">
+                        Pics Rocheux &amp; Montagnes
+                    </h3>
+                    <div class="text-white-50 font-monospace small mt-0.5 text-truncate">
+                        <span id="miningModalDestCoords">[X : Y]</span> &bull; <span id="miningModalDist">--</span>
                     </div>
                 </div>
+                <div class="d-flex gap-1 flex-wrap justify-content-end">
+                    <span class="badge bg-warning text-dark font-monospace shadow-sm" id="miningModalSulfurBadge" style="font-size:0.7rem;">
+                        🟡 Soufre: --
+                    </span>
+                    <span class="badge bg-cyan text-white font-monospace shadow-sm" id="miningModalNitrateBadge" style="font-size:0.7rem;">
+                        ⚪ Nitrate: --
+                    </span>
+                    <span class="badge bg-secondary text-white font-monospace shadow-sm" id="miningModalIronSandBadge" style="font-size:0.7rem;">
+                        🟤 Fer: --
+                    </span>
+                </div>
             </div>
+        </div>
 
+        <!-- 2. Corps de la Modale -->
+        <div class="card-body p-3 p-md-4">
             <p class="small text-secondary mb-3" style="line-height:1.45;">
+                Dépêchez vos <strong>Mineurs des Cimes (Kōfu ⛏️)</strong> pour gravir ces crêtes granitiques et volcaniques. Les cargaisons de <strong>Soufre</strong>, <strong>Nitrate (Salpêtre)</strong> et <strong>Sable de Fer (Satetsu)</strong> seront directement acheminées et stockées dans votre fief.
+            </p>
                 Dépêchez vos <strong>Mineurs des Cimes (Kōfu ⛏️)</strong> pour gravir ces crêtes granitiques et volcaniques. Les cargaisons de <strong>Soufre</strong>, <strong>Nitrate (Salpêtre)</strong> et <strong>Sable de Fer (Satetsu)</strong> seront directement acheminées et stockées dans votre fief.
             </p>
 
@@ -482,31 +488,27 @@ function jumpToCoords() {
     }
 }
 
-// Synchronise le bandeau illustré (image + nom + coordonnées) avant ouverture de la modale
-function refreshMapModalHero() {
-    const hero = window.__mapModalHero || {};
-    const img = document.getElementById('mapModalHeroImg');
-    const nameEl = document.getElementById('mapModalHeroName');
-    const coordsEl = document.getElementById('mapModalHeroCoords');
-    const badgeEl = document.getElementById('mapModalHeroBadge');
-    const titleEl = document.getElementById('mapModalTitle');
-    if (img) {
-        img.src = hero.img || '/public/assets/map/plaines.jpg?v=1';
-        img.alt = hero.name || '';
-    }
-    if (nameEl) {
-        const fallbackName = titleEl ? titleEl.textContent.replace(/\[[^\]]*\]/g, '').trim() : '';
-        nameEl.textContent = hero.name || fallbackName || 'Parcelle';
-    }
-    if (coordsEl) coordsEl.textContent = hero.coords || '';
-    if (badgeEl) badgeEl.innerHTML = `<i class="fa-solid ${hero.icon || 'fa-map-pin'} me-1"></i>${hero.label || 'Carte'}`;
+// Met à jour l'en-tête de la modale de carte (Illustration HD en haut, badges, titre, coordonnées)
+function setMapModalHeader(imgUrl, categoryHtml, titleHtml, subtitleHtml, coordsText) {
+    const bannerImg = document.getElementById('mapModalBannerImg');
+    const catBadge  = document.getElementById('mapModalCategoryBadge');
+    const titleEl   = document.getElementById('mapModalTitle');
+    const subEl     = document.getElementById('mapModalSubtitle');
+    const coordsEl  = document.getElementById('mapModalCoords');
+
+    if (bannerImg) bannerImg.src = imgUrl || '/public/assets/map/plaines.jpg?v=1';
+    if (catBadge)  catBadge.innerHTML = categoryHtml || '<span class="badge bg-primary text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;">CARTE</span>';
+    if (titleEl)   titleEl.innerHTML = titleHtml || 'Parcelle';
+    if (subEl)     subEl.innerHTML = subtitleHtml || '';
+    if (coordsEl)  coordsEl.textContent = coordsText || '';
 }
 
 function openMapModal() {
-    refreshMapModalHero();
     const modal = document.getElementById('mapTileModal');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeMapModal() {
@@ -831,45 +833,8 @@ function getMapModalIllustration(data) {
 
 // Fonction appelée lors du clic sur une tuile de la carte
 window.selectPlanetTile = function(data) {
-    const title  = document.getElementById('mapModalTitle');
-    const coords = document.getElementById('mapModalCoords');
-    const body   = document.getElementById('mapModalBody');
-
-    coords.innerText = `[${data.coord_x} : ${data.coord_y}]`;
+    const body = document.getElementById('mapModalBody');
     const modalImg = getMapModalIllustration(data);
-
-    // Données du bandeau illustré en haut de modale
-    (function () {
-        const isOrigin = parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0;
-        let name = '', label = 'Terres Libres', icon = 'fa-wheat-awn';
-        if (data.is_imperial_dojo || isOrigin) {
-            const unlocked = !!(data.dojo_unlocked || data.is_imperial_dojo);
-            name  = unlocked ? 'Dōjō Impérial — Tenchi no Seichi' : 'Terre Sacrée Inviolable de Kyōto';
-            label = unlocked ? 'Dōjō Impérial' : 'Terre Scellée';
-            icon  = 'fa-torii-gate';
-        } else if (data.is_authentic_castle) {
-            name = data.castle_name || 'Donjon Authentique'; label = 'Donjon Historique'; icon = 'fa-chess-rook';
-        } else if (data.user_id) {
-            name = (data.planet_name || 'Fief') + (data.username ? ' — ' + data.username : '');
-            label = 'Fief de Daimyō'; icon = 'fa-chess-rook';
-        } else if (data.is_oasis) {
-            name = data.oasis_name || 'Oasis Naturelle'; label = 'Oasis'; icon = 'fa-seedling';
-        } else {
-            name = data.terrain_name || data.planet_name || 'Domaine Libre';
-            const t = (data.terrain_type || '').toLowerCase();
-            if (t === 'lake' || data.is_lake)          { label = 'Lac';       icon = 'fa-water'; }
-            else if (t === 'mountain' || data.is_mountain) { label = 'Montagne'; icon = 'fa-mountain'; }
-            else if (t === 'forest')                   { label = 'Forêt';     icon = 'fa-tree'; }
-            else if (t === 'hills')                    { label = 'Collines';  icon = 'fa-mound'; }
-        }
-        window.__mapModalHero = {
-            img: modalImg,
-            name: name,
-            label: label,
-            icon: icon,
-            coords: `[${data.coord_x} : ${data.coord_y}]`
-        };
-    })();
 
     // ── Terre Sacrée [0 : 0] / Le Dōjō Impérial ──────────────────────────────
     if (data.is_imperial_dojo || (parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0)) {
@@ -877,38 +842,28 @@ window.selectPlanetTile = function(data) {
 
         if (!isDojoUnlocked) {
             // Dōjō NON ACTIVÉ : Terre Sacrée Scellée non-annexable
-            title.innerHTML = `<i class="fa-solid fa-torii-gate text-secondary me-1"></i> <span class="text-secondary">Terre Sacrée Inviolable [0 : 0] &bull; Tenchi no Seichi</span> <span class="badge bg-secondary font-monospace">[0 : 0]</span>`;
+            setMapModalHeader(
+                modalImg,
+                '<span class="badge bg-secondary text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-lock me-1"></i>TERRE SCELLÉE</span>',
+                'Terre Sacrée Inviolable de Kyōto',
+                'Sanctuaire Impérial scellé &bull; Enveloppé dans les brumes ancestrales',
+                `[${data.coord_x} : ${data.coord_y}]`
+            );
             body.innerHTML = `
-                <div style="background:#f8fafc; border:2px solid #cbd5e1; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <div>
-                            <div style="font-weight:800; color:#1e293b; font-size:1.15rem;">
-                                Terre Sacrée Inviolable de Kyōto
-                            </div>
-                            <div class="small text-secondary mt-0.5">
-                                Sanctuaire Impérial scellé &bull; Enveloppé dans les brumes ancestrales
-                            </div>
-                            <div class="mt-1">
-                                <span class="badge bg-secondary-lt text-secondary"><i class="fa-solid fa-lock me-1"></i>Dōjō Non Éveillé (Ères I à III)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-secondary py-2.5 px-3 mb-3 small d-flex align-items-center gap-2 rounded-2">
-                        <i class="fa-solid fa-ban text-danger fs-3 flex-shrink-0"></i>
-                        <div>
-                            <strong class="d-block text-dark">Sanctuaire Impérial &bull; Non Annexable :</strong>
-                            Aucun seigneur féodal ne peut coloniser, annexer ou attaquer le centre du monde [0 : 0]. Le Dōjō Impérial n'apparaîtra qu'à l'avènement de l'Ère IV, une fois la Guerre des 12 Châteaux remportée.
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-white rounded border small">
-                        <span class="text-secondary">Statut Foncier :</span>
-                        <strong class="text-danger"><i class="fa-solid fa-ban me-1"></i>Sanctuaire Impérial Inviolable &bull; Non Annexable</strong>
+                <div class="alert alert-secondary py-3 px-3 mb-3 d-flex align-items-center gap-3 rounded-2">
+                    <i class="fa-solid fa-ban text-danger fs-1 flex-shrink-0"></i>
+                    <div>
+                        <strong class="d-block text-dark mb-1">Sanctuaire Impérial &bull; Non Annexable :</strong>
+                        <span class="small text-secondary">Aucun seigneur féodal ne peut coloniser, annexer ou attaquer le centre du monde [0 : 0]. Le Dōjō Impérial n'apparaîtra qu'à l'avènement de l'Ère IV, une fois la Guerre des 12 Châteaux remportée.</span>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end">
+                <div class="d-flex justify-content-between align-items-center p-2 mb-3 bg-light rounded border small">
+                    <span class="text-secondary">Statut Foncier :</span>
+                    <strong class="text-danger"><i class="fa-solid fa-ban me-1"></i>Sanctuaire Impérial Inviolable &bull; Non Annexable</strong>
+                </div>
+
+                <div class="d-flex justify-content-end pt-2 border-top">
                     <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
                 </div>
             `;
@@ -928,8 +883,6 @@ window.selectPlanetTile = function(data) {
         const isCompleted = (data.dojo_status === 'completed' || dojoLvl >= 10);
         const progressPercent = parseInt(data.dojo_progress_percent, 10) || 0;
 
-        title.innerHTML = `<i class="fa-solid fa-torii-gate text-warning me-1"></i> <span style="color:#b45309;">Terre Sacrée [0 : 0] &bull; Dōjō Impérial</span> <span class="badge bg-warning text-dark font-monospace">[0 : 0]</span>`;
-
         let statusBadge = '<span class="badge bg-secondary">Terre Neutre Non Réclamée</span>';
         if (isFrozen) {
             statusBadge = '<span class="badge bg-danger"><i class="fa-solid fa-snowflake me-1"></i>Chantier Gelé (&lt; 2 Châteaux)</span>';
@@ -939,73 +892,71 @@ window.selectPlanetTile = function(data) {
             statusBadge = `<span class="badge bg-success"><i class="fa-solid fa-hammer me-1"></i>Chantier Actif [${escapeHtml(allianceTag)}]</span>`;
         }
 
+        setMapModalHeader(
+            modalImg,
+            '<span class="badge bg-warning text-dark fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-torii-gate me-1"></i>DŌJŌ IMPÉRIAL</span>',
+            'Dōjō Impérial (Tenchi no Seichi)',
+            'Le Sanctuaire Suprême de Kyōto &bull; Ère IV',
+            `[${data.coord_x} : ${data.coord_y}]`
+        );
+
         body.innerHTML = `
-            <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div>
-                        <div style="font-weight:800; color:#92400e; font-size:1.2rem;">
-                            Dōjō Impérial (Tenchi no Seichi)
-                        </div>
-                        <div class="small text-secondary mt-0.5">
-                            Le Sanctuaire Suprême de Kyōto &bull; Point culminant de la fin du monde
-                        </div>
-                        <div class="mt-1">${statusBadge}</div>
-                    </div>
-                </div>
+            <div class="mb-3">
+                ${statusBadge}
+            </div>
 
-                <!-- Règle de non-annexion individuelle formelle -->
-                <div class="alert alert-warning py-2 px-3 mb-3 small d-flex align-items-center gap-2 rounded-2">
-                    <i class="fa-solid fa-ban text-danger fs-3 flex-shrink-0"></i>
-                    <div>
-                        <strong class="text-dark d-block">Sanctuaire Impérial &bull; Non Annexable par un Daimyō :</strong>
-                        Cette merveille mondiale ne peut être annexée par aucun joueur individuel. Le contrôle s'opère collectivement par les Alliances via les 10 Paliers de construction.
-                    </div>
+            <!-- Règle de non-annexion individuelle formelle -->
+            <div class="alert alert-warning py-2.5 px-3 mb-3 small d-flex align-items-center gap-2 rounded-2">
+                <i class="fa-solid fa-ban text-danger fs-3 flex-shrink-0"></i>
+                <div>
+                    <strong class="text-dark d-block">Sanctuaire Impérial &bull; Non Annexable par un Daimyō :</strong>
+                    Cette merveille mondiale ne peut être annexée par aucun joueur individuel. Le contrôle s'opère collectivement par les Alliances via les 10 Paliers de construction.
                 </div>
+            </div>
 
-                <div class="row g-2 mb-3">
-                    <div class="col-6">
-                        <div class="p-2 bg-white rounded border">
-                            <span class="text-secondary small d-block">Palier Actuel :</span>
-                            <strong class="text-dark font-monospace" style="font-size:1.05rem;">Niveau ${dojoLvl} / 10</strong>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-2 bg-white rounded border">
-                            <span class="text-secondary small d-block">Alliance Bâtisseuse :</span>
-                            <strong class="text-primary">${allianceTag ? `[${escapeHtml(allianceTag)}] ${escapeHtml(allianceName)}` : 'Non revendiqué'}</strong>
-                        </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <div class="p-2 bg-light rounded border">
+                        <span class="text-secondary small d-block">Palier Actuel :</span>
+                        <strong class="text-dark font-monospace" style="font-size:1.05rem;">Niveau ${dojoLvl} / 10</strong>
                     </div>
                 </div>
+                <div class="col-6">
+                    <div class="p-2 bg-light rounded border">
+                        <span class="text-secondary small d-block">Alliance Bâtisseuse :</span>
+                        <strong class="text-primary">${allianceTag ? `[${escapeHtml(allianceTag)}] ${escapeHtml(allianceName)}` : 'Non revendiqué'}</strong>
+                    </div>
+                </div>
+            </div>
 
-                <!-- Jauge de Structure PV -->
-                <div class="mb-3 p-2 bg-white rounded border">
-                    <div class="d-flex justify-content-between align-items-center mb-1 small">
-                        <span><i class="fa-solid fa-shield-halved text-danger me-1"></i>Résistance de Structure :</span>
-                        <span class="font-monospace fw-bold">${Number(hp).toLocaleString()} / ${Number(maxHp).toLocaleString()} PV (${hpPercent}%)</span>
-                    </div>
-                    <div class="progress" style="height:10px;">
-                        <div class="progress-bar bg-danger" role="progressbar" style="width:${hpPercent}%"></div>
-                    </div>
+            <!-- Jauge de Structure PV -->
+            <div class="mb-3 p-2 bg-light rounded border">
+                <div class="d-flex justify-content-between align-items-center mb-1 small">
+                    <span><i class="fa-solid fa-shield-halved text-danger me-1"></i>Résistance de Structure :</span>
+                    <span class="font-monospace fw-bold">${Number(hp).toLocaleString()} / ${Number(maxHp).toLocaleString()} PV (${hpPercent}%)</span>
                 </div>
+                <div class="progress" style="height:10px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width:${hpPercent}%"></div>
+                </div>
+            </div>
 
-                <!-- Jauge de ressources vers le palier suivant -->
-                ${!isCompleted ? `
-                <div class="mb-3 p-2 bg-white rounded border">
-                    <div class="d-flex justify-content-between align-items-center mb-1 small">
-                        <span><i class="fa-solid fa-cubes-stacked text-warning me-1"></i>Ressources Palier ${targetLvl} :</span>
-                        <span class="font-monospace fw-bold">${progressPercent}% Réunies</span>
-                    </div>
-                    <div class="progress" style="height:10px;">
-                        <div class="progress-bar bg-warning" role="progressbar" style="width:${progressPercent}%"></div>
-                    </div>
+            <!-- Jauge de ressources vers le palier suivant -->
+            ${!isCompleted ? `
+            <div class="mb-3 p-2 bg-light rounded border">
+                <div class="d-flex justify-content-between align-items-center mb-1 small">
+                    <span><i class="fa-solid fa-cubes-stacked text-warning me-1"></i>Ressources Palier ${targetLvl} :</span>
+                    <span class="font-monospace fw-bold">${progressPercent}% Réunies</span>
                 </div>
-                ` : ''}
+                <div class="progress" style="height:10px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width:${progressPercent}%"></div>
+                </div>
+            </div>
+            ` : ''}
 
-                <div class="d-flex gap-2 justify-content-end flex-wrap pt-2 border-top">
-                    <a href="?page=imperial_dojo" class="btn btn-warning font-weight-bold text-dark"><i class="fa-solid fa-torii-gate me-1"></i>Ouvrir le Grand Dōjō</a>
-                    <a href="?page=fleet&target_x=0&target_y=0&mission=dojo_reinforce" class="btn btn-primary"><i class="fa-solid fa-shield me-1"></i>Renforcer la Garnison</a>
-                    <a href="?page=fleet&target_x=0&target_y=0&mission=dojo_siege" class="btn btn-danger"><i class="fa-solid fa-bomb me-1"></i>Siège Destructeur</a>
-                </div>
+            <div class="d-flex gap-2 justify-content-end flex-wrap pt-2 border-top">
+                <a href="?page=imperial_dojo" class="btn btn-warning font-weight-bold text-dark"><i class="fa-solid fa-torii-gate me-1"></i>Ouvrir le Grand Dōjō</a>
+                <a href="?page=fleet&target_x=0&target_y=0&mission=dojo_reinforce" class="btn btn-primary"><i class="fa-solid fa-shield me-1"></i>Renforcer la Garnison</a>
+                <a href="?page=fleet&target_x=0&target_y=0&mission=dojo_siege" class="btn btn-danger"><i class="fa-solid fa-bomb me-1"></i>Siège Destructeur</a>
             </div>
         `;
         openMapModal();
@@ -1024,13 +975,6 @@ window.selectPlanetTile = function(data) {
         const isForest = (data.terrain_type === 'forest' || (data.terrain_name && (data.terrain_name.toLowerCase().includes('forêt') || data.terrain_name.toLowerCase().includes('cèdre'))));
         const isHills = (data.terrain_type === 'hills' || (data.terrain_name && data.terrain_name.toLowerCase().includes('colline')));
 
-        let borderTint = '#cbd5e1';
-        let shadowTint = 'rgba(0,0,0,0.06)';
-        if (isLake) { borderTint = '#0891b2'; shadowTint = 'rgba(8,145,178,0.25)'; }
-        else if (isMountain) { borderTint = '#b45309'; shadowTint = 'rgba(180,83,9,0.25)'; }
-        else if (isForest) { borderTint = '#15803d'; shadowTint = 'rgba(21,128,61,0.25)'; }
-        else if (isHills) { borderTint = '#65a30d'; shadowTint = 'rgba(101,163,13,0.25)'; }
-
         const currentStock = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
         const isDepleted = data.lake_depleted || (currentStock <= 0);
@@ -1048,60 +992,69 @@ window.selectPlanetTile = function(data) {
         }
         const ruralPlotsHtml = renderRuralPlotsGrid(data.rural_plots);
 
-        title.innerHTML = isLake
-            ? `<i class="fa-solid fa-water text-cyan me-1"></i> <span style="color:#0891b2;">${data.terrain_name || 'Lac d\'Eaux Vives'}</span> <span class="badge bg-cyan-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`
-            : (isMountain 
-                ? `<i class="fa-solid fa-mountain text-warning me-1"></i> <span style="color:#b45309;">${data.terrain_name || 'Pics Rocheux & Montagnes'}</span> <span class="badge bg-warning-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`
-                : `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.terrain_name || 'Terres Vierges'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`);
+        let catBadgeHtml = '';
+        let tileTitle = data.terrain_name || '';
+        let tileSubtitle = data.terrain_desc || '';
+
+        if (isLake) {
+            catBadgeHtml = '<span class="badge bg-cyan text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-water me-1"></i>LAC NATUREL</span>';
+            tileTitle = tileTitle || "Lac d'Eaux Vives";
+            tileSubtitle = tileSubtitle || "Étendue d'eau douce et sanctuaire naturel halieutique protégé.";
+        } else if (isMountain) {
+            catBadgeHtml = '<span class="badge bg-warning text-dark fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-mountain me-1"></i>PICS & MONTAGNES</span>';
+            tileTitle = tileTitle || "Pics Rocheux & Montagnes";
+            tileSubtitle = tileSubtitle || "Massif rocheux et crêtes volcaniques sanctuarisées riches en minerais.";
+        } else if (isForest) {
+            catBadgeHtml = '<span class="badge bg-success text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-tree me-1"></i>FORÊT FÉODALE</span>';
+            tileTitle = tileTitle || "Forêt Sauvage de Cèdres";
+            tileSubtitle = tileSubtitle || "Forêt dense de conifères et bois de construction.";
+        } else if (isHills) {
+            catBadgeHtml = '<span class="badge bg-lime text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-mound me-1"></i>COLLINES</span>';
+            tileTitle = tileTitle || "Collines & Coteaux";
+            tileSubtitle = tileSubtitle || "Coteaux fertiles et gisements argileux.";
+        } else {
+            catBadgeHtml = '<span class="badge bg-primary text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-wheat-awn me-1"></i>TERRE LIBRE</span>';
+            tileTitle = tileTitle || "Terres Vierges Inoccupées";
+            tileSubtitle = tileSubtitle || "Plaines fertiles et terroirs prospères du Japon féodal, prêts à être défrichés.";
+        }
+
+        setMapModalHeader(modalImg, catBadgeHtml, tileTitle, tileSubtitle, `[${data.coord_x} : ${data.coord_y}]`);
 
         body.innerHTML = `
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div>
-                        <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
-                            ${data.terrain_name || (isLake ? 'Lac d\'Eaux Vives' : (isMountain ? 'Pics Rocheux des Cimes' : 'Terres Vierges Inoccupées'))}
-                        </div>
-                        <div class="small text-secondary mt-0.5">
-                            ${data.terrain_desc || (isLake ? 'Étendue d\'eau douce et sanctuaire naturel halieutique protégé.' : (isMountain ? 'Massif rocheux et crêtes volcaniques sanctuarisées riches en minerais féodaux.' : 'Plaines fertiles et terroirs prospères du Japon féodal, prêts à être défrichés.'))}
-                        </div>
-                    </div>
+            <!-- Statut de Propriété -->
+            <div class="d-flex align-items-center justify-content-between p-2 mb-3 bg-light rounded border">
+                <div>
+                    <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
+                    ${isLake
+                        ? '<strong class="text-cyan"><i class="fa-solid fa-water me-1"></i>Eaux Libres &bull; Non Annexable</strong>'
+                        : (isMountain 
+                            ? '<strong class="text-warning"><i class="fa-solid fa-mountain me-1"></i>Sanctuaire Minéral &bull; Non Annexable</strong>'
+                            : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>')
+                    }
                 </div>
-
-                <!-- Statut de Propriété -->
-                <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded border">
-                    <div>
-                        <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
-                        ${isLake
-                            ? '<strong class="text-cyan"><i class="fa-solid fa-water me-1"></i>Eaux Libres &bull; Non Annexable</strong>'
-                            : (isMountain 
-                                ? '<strong class="text-warning"><i class="fa-solid fa-mountain me-1"></i>Sanctuaire Minéral &bull; Non Annexable</strong>'
-                                : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>')
-                        }
-                    </div>
-                    <div class="text-end">
-                        <span class="text-secondary small d-block" style="font-size:0.75rem;">Propriétaire Foncier :</span>
-                        <span class="badge bg-secondary-lt text-dark">Aucun seigneur féodal</span>
-                    </div>
+                <div class="text-end">
+                    <span class="text-secondary small d-block" style="font-size:0.75rem;">Propriétaire Foncier :</span>
+                    <span class="badge bg-secondary-lt text-dark">Aucun seigneur féodal</span>
                 </div>
-
-                ${isLake 
-                    ? renderLakeFishCounter(currentStock, initialStock, isDepleted) 
-                    : (isMountain 
-                        ? renderMountainMineralsCounter(sulfurStock, sulfurInit, nitrateStock, nitrateInit, ironSandStock, ironSandInit, isMountainDepleted)
-                        : `
-                            <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
-                                <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
-                                <div>
-                                    <strong>Emplacement Disponible pour Nouveau Fief !</strong><br>
-                                    Vous pouvez y dépêcher une expédition avec un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour y fonder votre prochain domaine castral.
-                                </div>
-                            </div>
-                            ${ruralPlotsHtml}
-                        `)
-                }
             </div>
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            ${isLake 
+                ? renderLakeFishCounter(currentStock, initialStock, isDepleted) 
+                : (isMountain 
+                    ? renderMountainMineralsCounter(sulfurStock, sulfurInit, nitrateStock, nitrateInit, ironSandStock, ironSandInit, isMountainDepleted)
+                    : `
+                        <div class="alert alert-success d-flex align-items-center gap-2 mb-3 p-2.5" style="font-size:0.85rem; border-radius:6px;">
+                            <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
+                            <div>
+                                <strong>Emplacement Disponible pour Nouveau Fief !</strong><br>
+                                Vous pouvez y dépêcher une expédition avec un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour y fonder votre prochain domaine castral.
+                            </div>
+                        </div>
+                        ${ruralPlotsHtml}
+                    `)
+            }
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 border-top mt-2">
                 <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
                 ${isLake ? (
                     isDepleted ? `
@@ -1109,7 +1062,7 @@ window.selectPlanetTile = function(data) {
                             <i class="fa-solid fa-ban me-1"></i>Réserve de Poisson Épuisée
                         </button>
                     ` : `
-                        <button type="button" class="btn btn-cyan text-white font-weight-bold" onclick="openQuickFishingModal(${data.coord_x}, ${data.coord_y}, null, null, '${(data.terrain_name || 'Lac d\'Eaux Calmes').replace(/'/g, "\\'")}', ${currentStock})">
+                        <button type="button" class="btn btn-cyan text-white font-weight-bold" onclick="openQuickFishingModal(${data.coord_x}, ${data.coord_y}, null, null, '${(tileTitle).replace(/'/g, "\\'")}', ${currentStock})">
                             <i class="fa-solid fa-fish me-1"></i>Dépêcher une Expédition de Pêche &rarr;
                         </button>
                     `
@@ -1119,7 +1072,7 @@ window.selectPlanetTile = function(data) {
                             <i class="fa-solid fa-ban me-1"></i>Filon Minéral Épuisé
                         </button>
                     ` : `
-                        <button type="button" class="btn btn-warning text-dark font-weight-bold shadow-sm" onclick="openQuickMiningModal(${data.coord_x}, ${data.coord_y}, null, null, '${(data.terrain_name || 'Pics Rocheux & Montagnes').replace(/'/g, "\\'")}', ${sulfurStock}, ${nitrateStock}, ${ironSandStock})">
+                        <button type="button" class="btn btn-warning text-dark font-weight-bold shadow-sm" onclick="openQuickMiningModal(${data.coord_x}, ${data.coord_y}, null, null, '${(tileTitle).replace(/'/g, "\\'")}', ${sulfurStock}, ${nitrateStock}, ${ironSandStock})">
                             <i class="fa-solid fa-pickaxe me-1"></i>Dépêcher des Mineurs (Expédition Minière) &rarr;
                         </button>
                     `
@@ -1136,37 +1089,29 @@ window.selectPlanetTile = function(data) {
 
     // ── Donjons Authentiques (現存十二天守) ─────────────────────
     if (data.is_authentic_castle) {
-        title.innerHTML = `<i class="fa-solid fa-chess-rook text-warning me-1"></i> <span style="color:#b45309;">${escapeHtml(data.castle_name)}</span> <span class="text-secondary small">${escapeHtml(data.castle_kanji || '')}</span>`;
+        setMapModalHeader(
+            modalImg,
+            '<span class="badge bg-warning text-dark fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-crown me-1"></i>TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE</span>',
+            `${escapeHtml(data.castle_name)} <span class="small text-white-50 fw-normal">${escapeHtml(data.castle_kanji || '')}</span>`,
+            `Province de ${escapeHtml(data.castle_province || 'Historique')} &bull; Bâtisseur : ${escapeHtml(data.castle_builder || 'Maître Féodal')}`,
+            `[${data.coord_x} : ${data.coord_y}]`
+        );
+
         body.innerHTML = `
-            <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div>
-                        <div style="font-weight:800; color:#92400e; font-size:1.15rem;">
-                            ${escapeHtml(data.castle_name)} <span class="small text-secondary fw-normal">${escapeHtml(data.castle_kanji || '')}</span>
-                        </div>
-                        <div class="small text-secondary mt-0.5">
-                            <i class="fa-solid fa-location-dot text-danger me-1"></i>${escapeHtml(data.castle_province || 'Province Historique')} &bull; Bâtisseur : <strong class="text-dark">${escapeHtml(data.castle_builder || 'Maître Féodal')}</strong>
-                        </div>
-                        <div class="mt-1">
-                            <span class="badge bg-warning text-dark"><i class="fa-solid fa-crown text-warning me-1"></i>TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE (現存十二天守)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="alert alert-warning py-2.5 px-3 mb-3 small d-flex align-items-center gap-2 rounded-2">
-                    <i class="fa-solid fa-shield-halved text-warning fs-3 flex-shrink-0"></i>
-                    <div>
-                        <strong class="text-dark d-block">Forteresse Historique d'Époque Sengoku-Edo :</strong>
-                        Ce donjon préservé est l'une des 12 forteresses d'origine du Japon féodal. Enjeu territorial suprême de la fin du monde féodal.
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-white rounded border small">
-                    <span class="text-secondary">Puissance Défensive Antique :</span>
-                    <strong class="text-success"><i class="fa-solid fa-shield me-1"></i>25 000 pts de garnison d'élite</strong>
+            <div class="alert alert-warning py-2.5 px-3 mb-3 small d-flex align-items-center gap-2 rounded-2">
+                <i class="fa-solid fa-shield-halved text-warning fs-3 flex-shrink-0"></i>
+                <div>
+                    <strong class="text-dark d-block">Forteresse Historique d'Époque Sengoku-Edo :</strong>
+                    Ce donjon préservé est l'une des 12 forteresses d'origine du Japon féodal (現存十二天守). Enjeu territorial suprême de la fin du monde féodal.
                 </div>
             </div>
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+            <div class="d-flex justify-content-between align-items-center p-2 mb-3 bg-light rounded border small">
+                <span class="text-secondary">Puissance Défensive Antique :</span>
+                <strong class="text-success"><i class="fa-solid fa-shield me-1"></i>25 000 pts de garnison d'élite</strong>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
                 <a href="/?page=castle&code=${encodeURIComponent(data.castle_code || '')}"
                    class="btn btn-warning text-dark font-weight-bold">
                     <i class="fa-solid fa-scroll me-1"></i>Découvrir l'Histoire &rarr;
@@ -1192,8 +1137,6 @@ window.selectPlanetTile = function(data) {
                                   data.oasis_name.toLowerCase().includes('calme') ||
                                   data.oasis_name.toLowerCase().includes('vive')
                               ));
-        const oasisBorderColor = isLakeOasis ? '#0891b2' : '#16a34a';
-        const oasisShadowColor = isLakeOasis ? 'rgba(8,145,178,0.25)' : 'rgba(22,163,74,0.25)';
         const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
         const isLakeDepleted = data.lake_depleted || (currentStock <= 0);
@@ -1239,46 +1182,49 @@ window.selectPlanetTile = function(data) {
             unitsHtml = '<p class="text-success small my-2"><i class="fa-solid fa-dove me-1"></i>Aucun animal sauvage ni soldat en garnison. L\'oasis est entièrement pacifiée !</p>';
         }
 
-        title.innerHTML = `<i class="fa-solid ${isLakeOasis ? 'fa-water text-cyan' : 'fa-seedling text-success'} me-1"></i> <span style="color:${isLakeOasis ? '#0891b2' : '#15803d'};">${data.oasis_name}</span> <span class="text-secondary small">${data.bonus_label || ''}</span>`;
-        body.innerHTML = `
-            <div style="background:${isLakeOasis ? '#f0fdfa' : '#f0fdf4'}; border:1px solid ${isLakeOasis ? '#99f6e4' : '#bbf7d0'}; padding:1.1rem; border-radius:10px; margin-bottom:1.1rem;">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div>
-                        <div style="font-weight:800; color:${isLakeOasis ? '#0891b2' : '#15803d'}; font-size:1.15rem;">
-                            ${escapeHtml(data.oasis_name)}
-                        </div>
-                        <div class="small text-secondary mt-0.5">
-                            ${isLakeOasis ? 'Sanctuaire naturel halieutique protégé' : 'Sanctuaire féodal de ressources naturelles'}
-                        </div>
-                        <div class="mt-1 d-flex gap-1 flex-wrap align-items-center">
-                            ${statusBadge}
-                            ${bonusBadgesHtml}
-                        </div>
-                    </div>
-                </div>
+        const catBadge = isLakeOasis
+            ? '<span class="badge bg-cyan text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-water me-1"></i>OASIS LACUSTRE</span>'
+            : '<span class="badge bg-success text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-seedling me-1"></i>OASIS NATURELLE</span>';
 
-                <p style="color:${isLakeOasis ? '#0f766e' : '#166534'}; font-size:0.9rem; margin:0.4rem 0 0.75rem 0; line-height:1.45;">
-                    ${isLakeOasis 
-                        ? 'Ce lac naturel est un sanctuaire d\'eaux calmes et poissonneuses. <strong>Cette parcelle ne peut pas être annexée.</strong> Dépêchez vos Pêcheurs Féodaux formés au Dojo en expédition de pêche : les prises sont entreposées dans votre Grenier à Riz Fortifié.'
-                        : 'Cette oasis naturelle regorge de terres fertiles et de ressources précieuses. <strong>Pillez les récoltes</strong> en terrassant la faune, ou <strong>occupez le territoire</strong> pour conférer des bonus permanents à votre fief.'
-                    }
-                </p>
-                ${isLakeOasis ? renderLakeFishCounter(currentStock, initialStock, isLakeDepleted) : ''}
-                <div class="bg-white border rounded p-2 mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
-                    <span class="text-secondary font-weight-medium">Ressources &amp; Récoltes :</span>
-                    <div class="d-flex gap-3 align-items-center flex-wrap">
-                        ${isLakeOasis ? `<span style="color:#0891b2;"><i class="fa-solid fa-fish text-cyan me-1"></i><strong>${currentStock.toLocaleString()}</strong> Poisson</span>` : ''}
-                        <span style="color:#b45309;"><i class="fa-solid fa-tree text-success me-1"></i><strong>${(data.res_wood  || 0).toLocaleString()}</strong></span>
-                        <span style="color:#2563eb;"><i class="fa-solid fa-mountain text-secondary me-1"></i><strong>${(data.res_stone || 0).toLocaleString()}</strong></span>
-                        <span style="color:#15803d;"><i class="fa-solid fa-wheat-awn text-warning me-1"></i><strong>${(data.res_rice  || 0).toLocaleString()}</strong></span>
-                    </div>
-                </div>
-                <div class="mt-2">
-                    <span class="text-secondary font-weight-bold text-uppercase small" style="letter-spacing:0.5px; font-size:0.75rem;">Faune &amp; Garnison :</span>
-                    ${unitsHtml}
+        setMapModalHeader(
+            modalImg,
+            catBadge,
+            escapeHtml(data.oasis_name),
+            isLakeOasis ? "Sanctuaire halieutique protégé &bull; Eaux poissonneuses" : (data.bonus_label || "Sanctuaire féodal de récoltes"),
+            `[${data.coord_x} : ${data.coord_y}]`
+        );
+
+        body.innerHTML = `
+            <div class="d-flex gap-1 flex-wrap align-items-center mb-3">
+                ${statusBadge}
+                ${bonusBadgesHtml}
+            </div>
+
+            <p style="color:${isLakeOasis ? '#0f766e' : '#166534'}; font-size:0.9rem; margin:0 0 0.85rem 0; line-height:1.45;">
+                ${isLakeOasis 
+                    ? 'Ce lac naturel est un sanctuaire d\'eaux calmes et poissonneuses. <strong>Cette parcelle ne peut pas être annexée.</strong> Dépêchez vos Pêcheurs Féodaux formés au Dojo en expédition de pêche : les prises sont entreposées dans votre Grenier à Riz Fortifié.'
+                    : 'Cette oasis naturelle regorge de terres fertiles et de ressources précieuses. <strong>Pillez les récoltes</strong> en terrassant la faune, ou <strong>occupez le territoire</strong> pour conférer des bonus permanents à votre fief.'
+                }
+            </p>
+
+            ${isLakeOasis ? renderLakeFishCounter(currentStock, initialStock, isLakeDepleted) : ''}
+
+            <div class="bg-light border rounded p-2 mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2 small">
+                <span class="text-secondary font-weight-medium">Ressources &amp; Récoltes :</span>
+                <div class="d-flex gap-3 align-items-center flex-wrap">
+                    ${isLakeOasis ? `<span style="color:#0891b2;"><i class="fa-solid fa-fish text-cyan me-1"></i><strong>${currentStock.toLocaleString()}</strong> Poisson</span>` : ''}
+                    <span style="color:#b45309;"><i class="fa-solid fa-tree text-success me-1"></i><strong>${(data.res_wood  || 0).toLocaleString()}</strong></span>
+                    <span style="color:#2563eb;"><i class="fa-solid fa-mountain text-secondary me-1"></i><strong>${(data.res_stone || 0).toLocaleString()}</strong></span>
+                    <span style="color:#15803d;"><i class="fa-solid fa-wheat-awn text-warning me-1"></i><strong>${(data.res_rice  || 0).toLocaleString()}</strong></span>
                 </div>
             </div>
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+            <div class="mb-3">
+                <span class="text-secondary font-weight-bold text-uppercase small" style="letter-spacing:0.5px; font-size:0.75rem;">Faune &amp; Garnison :</span>
+                ${unitsHtml}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=raid"   class="btn btn-warning font-weight-bold"><i class="fa-solid fa-khanda me-1"></i>Piller l'Oasis</a>
                     <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=attack" class="btn btn-danger font-weight-bold"><i class="fa-solid fa-bomb me-1"></i>Nettoyer</a>
@@ -1325,13 +1271,6 @@ window.selectPlanetTile = function(data) {
         const isForestPlanet    = (data.terrain_type === 'forest' || (data.terrain_name && (data.terrain_name.toLowerCase().includes('forêt') || data.terrain_name.toLowerCase().includes('cèdre'))));
         const isHillsPlanet     = (data.terrain_type === 'hills' || (data.terrain_name && data.terrain_name.toLowerCase().includes('colline')));
 
-        let borderTint = '#cbd5e1';
-        let shadowTint = 'rgba(0,0,0,0.06)';
-        if (isLakePlanet) { borderTint = '#0891b2'; shadowTint = 'rgba(8,145,178,0.25)'; }
-        else if (isMountainPlanet) { borderTint = '#b45309'; shadowTint = 'rgba(180,83,9,0.25)'; }
-        else if (isForestPlanet) { borderTint = '#15803d'; shadowTint = 'rgba(21,128,61,0.25)'; }
-        else if (isHillsPlanet) { borderTint = '#65a30d'; shadowTint = 'rgba(101,163,13,0.25)'; }
-
         const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
         const isDepleted    = data.lake_depleted || (currentStock <= 0);
@@ -1349,60 +1288,52 @@ window.selectPlanetTile = function(data) {
         }
         const ruralPlotsHtml = renderRuralPlotsGrid(data.rural_plots);
 
-        title.innerHTML = isLakePlanet
-            ? `<i class="fa-solid fa-water text-cyan me-1"></i> <span style="color:#0891b2;">${data.planet_name || data.terrain_name || 'Lac d\'Eaux Vives'}</span> <span class="badge bg-cyan-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`
+        const catBadge = isLakePlanet
+            ? '<span class="badge bg-cyan text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-water me-1"></i>EAUX COMMUNAUTAIRES</span>'
             : (isMountainPlanet
-                ? `<i class="fa-solid fa-mountain text-warning me-1"></i> <span style="color:#b45309;">${data.planet_name || data.terrain_name || 'Pics Rocheux & Montagnes'}</span> <span class="badge bg-warning-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`
-                : `<i class="fa-solid fa-mountain-sun text-success me-1"></i> <span style="color:#15803d;">${data.planet_name || 'Domaine Libre'}</span> <span class="badge bg-secondary-lt text-dark font-monospace">[${data.coord_x} : ${data.coord_y}]</span>`);
+                ? '<span class="badge bg-warning text-dark fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-mountain me-1"></i>SANCTUAIRE DES CIMES</span>'
+                : '<span class="badge bg-primary text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-compass me-1"></i>DOMAINE LIBRE</span>');
+
+        const tName = data.planet_name || (isLakePlanet ? "Lac d'Eaux Vives" : (isMountainPlanet ? "Pics Rocheux & Montagnes" : "Domaine Libre"));
+        const tDesc = `Type de terrain : ${data.planet_type || (isLakePlanet ? 'oceanic' : (isMountainPlanet ? 'mountain' : 'terrestrial'))}`;
+
+        setMapModalHeader(modalImg, catBadge, escapeHtml(tName), tDesc, `[${data.coord_x} : ${data.coord_y}]`);
 
         body.innerHTML = `
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div>
-                        <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
-                            ${data.planet_name || (isLakePlanet ? 'Lac d\'Eaux Vives' : (isMountainPlanet ? 'Pics Rocheux & Montagnes' : 'Domaine Féodal Libre'))}
-                        </div>
-                        <div class="small text-secondary mt-0.5">
-                            Type de terrain : <strong class="text-dark">${data.planet_type || (isLakePlanet ? 'oceanic' : (isMountainPlanet ? 'mountain' : 'terrestrial'))}</strong> &bull; ${isLakePlanet ? 'Sanctuaire d\'eau libre communautaire.' : (isMountainPlanet ? 'Sanctuaire minéralier des cimes non-annexable.' : 'Emplacement stratégique pour un nouveau fief.')}
-                        </div>
-                    </div>
+            <!-- Statut de Propriété -->
+            <div class="d-flex align-items-center justify-content-between p-2 mb-3 bg-light rounded border">
+                <div>
+                    <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
+                    ${isLakePlanet
+                        ? '<strong class="text-cyan"><i class="fa-solid fa-water me-1"></i>Eaux Libres &bull; Non Annexable</strong>'
+                        : (isMountainPlanet
+                            ? '<strong class="text-warning"><i class="fa-solid fa-mountain me-1"></i>Sanctuaire Minéral &bull; Non Annexable</strong>'
+                            : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>')
+                    }
                 </div>
-
-                <!-- Statut de Propriété -->
-                <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded border">
-                    <div>
-                        <span class="text-secondary small d-block" style="font-size:0.75rem;">Statut de Propriété :</span>
-                        ${isLakePlanet
-                            ? '<strong class="text-cyan"><i class="fa-solid fa-water me-1"></i>Eaux Libres &bull; Non Annexable</strong>'
-                            : (isMountainPlanet
-                                ? '<strong class="text-warning"><i class="fa-solid fa-mountain me-1"></i>Sanctuaire Minéral &bull; Non Annexable</strong>'
-                                : '<strong class="text-success"><i class="fa-solid fa-lock-open me-1"></i>Terre Libre &bull; Domaine Non Réclamé</strong>')
-                        }
-                    </div>
-                    <div class="text-end">
-                        <span class="text-secondary small d-block" style="font-size:0.75rem;">Propriétaire Foncier :</span>
-                        <span class="badge bg-secondary-lt text-dark">Aucun seigneur féodal</span>
-                    </div>
+                <div class="text-end">
+                    <span class="text-secondary small d-block" style="font-size:0.75rem;">Propriétaire Foncier :</span>
+                    <span class="badge bg-secondary-lt text-dark">Aucun seigneur féodal</span>
                 </div>
-
-                ${isLakePlanet 
-                    ? renderLakeFishCounter(currentStock, initialStock, isDepleted) 
-                    : (isMountainPlanet 
-                        ? renderMountainMineralsCounter(sulfurStock, sulfurInit, nitrateStock, nitrateInit, ironSandStock, ironSandInit, isMountainDepleted)
-                        : `
-                            <div class="alert alert-success d-flex align-items-center gap-2 my-2 p-2" style="font-size:0.85rem; border-radius:6px;">
-                                <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
-                                <div>
-                                    <strong>Emplacement Libre pour Colonisation !</strong><br>
-                                    Vous pouvez y envoyer un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour annexer ce terroir et fonder une colonie.
-                                </div>
-                            </div>
-                            ${ruralPlotsHtml}
-                        `)
-                }
             </div>
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            ${isLakePlanet 
+                ? renderLakeFishCounter(currentStock, initialStock, isDepleted) 
+                : (isMountainPlanet 
+                    ? renderMountainMineralsCounter(sulfurStock, sulfurInit, nitrateStock, nitrateInit, ironSandStock, ironSandInit, isMountainDepleted)
+                    : `
+                        <div class="alert alert-success d-flex align-items-center gap-2 mb-3 p-2.5" style="font-size:0.85rem; border-radius:6px;">
+                            <span style="font-size:1.3rem;"><i class="fa-solid fa-sparkles text-warning"></i></span>
+                            <div>
+                                <strong>Emplacement Libre pour Colonisation !</strong><br>
+                                Vous pouvez y envoyer un <strong>Pionnier Féodal (Colon <i class="fa-solid fa-torii-gate text-danger"></i>)</strong> pour annexer ce terroir et fonder une colonie.
+                            </div>
+                        </div>
+                        ${ruralPlotsHtml}
+                    `)
+            }
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top mt-2">
                 <button type="button" class="btn btn-outline-secondary" onclick="closeMapModal()">Fermer</button>
                 <div class="d-flex gap-2">
                     ${isLakePlanet ? (
@@ -1411,7 +1342,7 @@ window.selectPlanetTile = function(data) {
                                 <i class="fa-solid fa-ban me-1"></i>Réserve de Poisson Épuisée
                             </button>
                         ` : `
-                            <button type="button" class="btn btn-cyan font-weight-bold text-white" onclick="openQuickFishingModal(${data.coord_x}, ${data.coord_y}, ${data.planet_id || 'null'}, null, '${(data.planet_name || data.terrain_name || 'Lac d\'Eaux Vives').replace(/'/g, "\\'")}', ${currentStock})">
+                            <button type="button" class="btn btn-cyan font-weight-bold text-white" onclick="openQuickFishingModal(${data.coord_x}, ${data.coord_y}, ${data.planet_id || 'null'}, null, '${(tName).replace(/'/g, "\\'")}', ${currentStock})">
                                 <i class="fa-solid fa-fish me-1"></i>Dépêcher une Expédition de Pêche &rarr;
                             </button>
                         `
@@ -1421,7 +1352,7 @@ window.selectPlanetTile = function(data) {
                                 <i class="fa-solid fa-ban me-1"></i>Filon Minéral Épuisé
                             </button>
                         ` : `
-                            <button type="button" class="btn btn-warning text-dark font-weight-bold shadow-sm" onclick="openQuickMiningModal(${data.coord_x}, ${data.coord_y}, ${data.planet_id || 'null'}, null, '${(data.planet_name || data.terrain_name || 'Pics Rocheux & Montagnes').replace(/'/g, "\\'")}', ${sulfurStock}, ${nitrateStock}, ${ironSandStock})">
+                            <button type="button" class="btn btn-warning text-dark font-weight-bold shadow-sm" onclick="openQuickMiningModal(${data.coord_x}, ${data.coord_y}, ${data.planet_id || 'null'}, null, '${(tName).replace(/'/g, "\\'")}', ${sulfurStock}, ${nitrateStock}, ${ironSandStock})">
                                 <i class="fa-solid fa-pickaxe me-1"></i>Dépêcher des Mineurs (Expédition Minière) &rarr;
                             </button>
                         `
@@ -1448,7 +1379,18 @@ window.selectPlanetTile = function(data) {
     const pts   = (data.points != null) ? Number(data.points).toLocaleString() : '0';
     const targetUserId = parseInt(data.user_id, 10) || 0;
 
-    title.innerHTML = `<i class="fa-solid fa-chess-rook text-danger me-1"></i> ${escapeHtml(data.planet_name)} — ${escapeHtml(data.username || 'Daimyō')}`;
+    const catBadge = isOwn
+        ? '<span class="badge bg-success text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-chess-rook me-1"></i>VOTRE DOMAINE CASTRAL</span>'
+        : '<span class="badge bg-danger text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-khanda me-1"></i>FIEF ENNEMI</span>';
+
+    setMapModalHeader(
+        modalImg,
+        catBadge,
+        escapeHtml(data.planet_name),
+        `Daimyō : <a href="javascript:void(0)" onclick="openPlayerProfileModal(${targetUserId})" class="text-white text-decoration-underline fw-bold">${escapeHtml(data.username || 'Daimyō')}</a> ${data.alliance_tag ? '<span class="badge bg-warning-lt text-dark ms-1">[' + escapeHtml(data.alliance_tag) + ']</span>' : ''}`,
+        `[${data.coord_x} : ${data.coord_y}]`
+    );
+
     body.innerHTML = `
         ${data.is_protected ? `
             <div style="background:#f0fdf4; border:1px solid #86efac; padding:0.75rem 1rem; border-radius:8px; margin-bottom:1.1rem; display:flex; align-items:center; gap:0.75rem;">
@@ -1459,28 +1401,23 @@ window.selectPlanetTile = function(data) {
                 </div>
             </div>
         ` : ''}
-        <div style="background:#fef2f2; border:1px solid #fecaca; padding:1.1rem; border-radius:10px; margin-bottom:1.1rem;">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div>
-                    <div style="font-weight:700; color:#1e293b; font-size:1.1rem;">
-                        ${escapeHtml(data.planet_name)}
-                        ${data.is_protected ? '<span class="badge bg-success-lt ms-2" style="font-size:0.7rem;"><i class="fa-solid fa-shield-halved text-success me-1"></i>Protégé</span>' : ''}
-                    </div>
-                    <div class="small text-secondary mt-0.5">Domaine féodal du Daimyō
-                        <a href="javascript:void(0)" onclick="openPlayerProfileModal(${targetUserId})"
-                           class="font-weight-bold text-danger text-decoration-none ms-1">
-                            <i class="fa-solid fa-user me-1"></i>${escapeHtml(data.username || 'Daimyō')}
-                        </a>
-                        ${data.alliance_tag ? `<span class="badge bg-warning-lt ms-1">[${escapeHtml(data.alliance_tag)}]</span>` : ''}
-                    </div>
-                    <div class="d-flex gap-3 flex-wrap small mt-1">
-                        <span>Clan : <span class="badge bg-secondary-lt font-weight-bold">${fName}</span></span>
-                        <span>Puissance : <strong class="text-danger">${pts} pts</strong></span>
-                    </div>
-                </div>
+
+        <div class="p-3 bg-light rounded border mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                <span class="text-secondary small"><i class="fa-solid fa-flag me-1 text-primary"></i>Clan Féodal :</span>
+                <strong class="text-dark font-monospace">${fName}</strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                <span class="text-secondary small"><i class="fa-solid fa-trophy me-1 text-warning"></i>Puissance du Daimyō :</span>
+                <strong class="text-danger font-monospace">${pts} pts</strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-secondary small"><i class="fa-solid fa-shield-halved me-1 text-info"></i>Statut de Sécurité :</span>
+                <span>${data.is_protected ? '<span class="badge bg-success text-white">Sous Immunité</span>' : '<span class="badge bg-danger-lt text-danger">Vulnérable aux Raids</span>'}</span>
             </div>
         </div>
-        <div class="d-flex gap-2 flex-wrap justify-content-end align-items-center">
+
+        <div class="d-flex gap-2 flex-wrap justify-content-end align-items-center pt-2 border-top">
             <button type="button" onclick="openPlayerProfileModal(${targetUserId})" class="btn btn-outline-danger">
                 <i class="fa-solid fa-user me-1"></i>Fiche Daimyō
             </button>

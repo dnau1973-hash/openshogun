@@ -54,12 +54,19 @@ assertTest(str_contains($mapView, 'foret.jpg'), "Modale : Forêt de Cèdres util
 assertTest(str_contains($mapView, 'collines.jpg'), "Modale : Collines & Coteaux utilise collines.jpg");
 assertTest(str_contains($mapView, 'plaines.jpg'), "Modale : Plaines Fertiles utilise plaines.jpg");
 
-echo PHP_EOL . "[TEST 3] Vérification du bandeau illustré en haut de modale (même modèle que la modale Pêcheur)..." . PHP_EOL;
-assertTest(str_contains($mapView, 'id="mapModalHero"'), "Bandeau illustré #mapModalHero présent en haut de la modale");
-assertTest(str_contains($mapView, 'id="mapModalHeroImg"'), "Image du bandeau #mapModalHeroImg présente");
-assertTest(str_contains($mapView, 'function refreshMapModalHero()'), "Synchronisation du bandeau avant ouverture (refreshMapModalHero)");
+echo PHP_EOL . "[TEST 3] Vérification du bandeau illustré en haut de modale (modèle identique Pêcheur & Terroir)..." . PHP_EOL;
+assertTest(str_contains($mapView, 'id="mapModalBannerImg"'), "Image du bandeau #mapModalBannerImg présente");
+assertTest(str_contains($mapView, 'id="mapModalCategoryBadge"'), "Badge de catégorie #mapModalCategoryBadge présent");
+assertTest(str_contains($mapView, 'id="mapModalCoords"'), "Badge de coordonnées #mapModalCoords présent");
+assertTest(str_contains($mapView, 'function setMapModalHeader('), "Fonction de mise à jour de l'en-tête setMapModalHeader définie");
 assertTest(!str_contains($mapView, 'width:68px; height:68px;'), "Anciennes vignettes latérales 68x68px supprimées");
-assertTest(str_contains($mapView, 'object-fit:cover;'), "Mise à l'échelle propre des images via object-fit:cover");
+assertTest(str_contains($mapView, 'object-fit: cover;'), "Mise à l'échelle propre des images via object-fit: cover");
+
+echo PHP_EOL . "[TEST 4] Vérification de l'alignement des modales Expédition Pêche & Mines..." . PHP_EOL;
+assertTest(str_contains($mapView, 'id="mapFishingModal"'), "Modale d'expédition de pêche #mapFishingModal présente");
+assertTest(str_contains($mapView, '/public/assets/units/pecheur.jpg'), "Illustration d'en-tête pecheur.jpg dans #mapFishingModal");
+assertTest(str_contains($mapView, 'id="mapMiningModal"'), "Modale d'expédition minière #mapMiningModal présente");
+assertTest(str_contains($mapView, '/public/assets/units/mineur.jpg'), "Illustration d'en-tête mineur.jpg dans #mapMiningModal");
 
 echo PHP_EOL . "========================================================================" . PHP_EOL;
 echo " TOUS LES TESTS D'ILLUSTRATION DE LA MODALE SONT 100% OK !" . PHP_EOL;
