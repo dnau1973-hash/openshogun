@@ -36,7 +36,8 @@ $serverDiag = $serverMonitor->getSystemDiagnostics();
                     <div class="text-muted small mt-0.5">
                         <span id="rpi-model-name" class="fw-bold text-secondary"><?= htmlspecialchars($serverDiag['hardware']['model']) ?></span> &bull; 
                         <span id="rpi-os-name"><?= htmlspecialchars($serverDiag['hardware']['os']) ?> (<?= $serverDiag['hardware']['arch'] ?>)</span> &bull; 
-                        Uptime : <strong id="rpi-uptime-str" class="text-dark font-monospace"><?= $serverDiag['uptime']['formatted'] ?></strong>
+                        Uptime : <strong id="rpi-uptime-str" class="text-dark font-monospace"><?= $serverDiag['uptime']['formatted'] ?></strong> &bull; 
+                        <span class="text-dark"><i class="fa-regular fa-clock text-primary me-1"></i>Date &amp; Heure Système : <strong id="rpi-system-time" class="font-monospace text-primary fw-bold"><?= date('d/m/Y H:i:s') ?></strong> <span class="badge bg-blue-lt text-blue font-monospace ms-0.5" id="rpi-system-tz" style="font-size:0.7rem;"><?= date('e') ?></span></span>
                     </div>
                 </div>
             </div>
@@ -1351,6 +1352,21 @@ if (typeof ApexCharts === 'undefined') {
 // =========================================================================
 let rpiLiveInterval = null;
 let rpiLiveActive = true;
+let rpiServerTimeOffset = (<?= time() ?> * 1000) - Date.now();
+
+function updateRpiClockDisplay() {
+    const timeEl = document.getElementById('rpi-system-time');
+    if (!timeEl) return;
+    const now = new Date(Date.now() + rpiServerTimeOffset);
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    timeEl.textContent = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+setInterval(updateRpiClockDisplay, 1000);
 
 async function fetchRpiMetrics(isManual = false) {
     try {
@@ -1373,6 +1389,21 @@ async function fetchRpiMetrics(isManual = false) {
         if (d.uptime && d.uptime.formatted) {
             const upEl = document.getElementById('rpi-uptime-str');
             if (upEl) upEl.textContent = d.uptime.formatted;
+        }
+
+        // 1.b Horloge & Heure Système
+        if (d.timestamp) {
+            rpiServerTimeOffset = (d.timestamp * 1000) - Date.now();
+        }
+        if (d.system_time_formatted || d.system_time || d.datetime) {
+            const timeEl = document.getElementById('rpi-system-time');
+            if (timeEl) {
+                timeEl.textContent = d.system_time_formatted || d.system_time || d.datetime;
+            }
+            const tzEl = document.getElementById('rpi-system-tz');
+            if (tzEl && d.timezone) {
+                tzEl.textContent = d.timezone;
+            }
         }
 
         // 2. Score de santé global

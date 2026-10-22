@@ -38,13 +38,15 @@ GameConfig::set('environment_season_override', 'auto');
 GameConfig::set('environment_time_override', 'auto');
 GameConfig::set('environment_theme_override', 'auto');
 
-echo "[TEST 1] Vérification de la présence physique des 10 images d'arrière-plan...\n";
+echo "[TEST 1] Vérification de la présence physique des images d'arrière-plan...\n";
 $expectedTerroir = [
-    'sun'        => 'public/assets/terroirs/terroir_sun.jpg',
-    'night'      => 'public/assets/terroirs/terroir_night.jpg',
-    'storm'      => 'public/assets/terroirs/terroir_storm.jpg',
-    'snow_day'   => 'public/assets/terroirs/terroir_snow_day.jpg',
-    'snow_night' => 'public/assets/terroirs/terroir_snow_night.jpg',
+    'sun'         => 'public/assets/terroirs/terroir_sun.jpg',
+    'night'       => 'public/assets/terroirs/terroir_night.jpg',
+    'storm'       => 'public/assets/terroirs/terroir_storm.jpg',
+    'storm_day'   => 'public/assets/terroirs/terroir_storm_day.jpg',
+    'storm_night' => 'public/assets/terroirs/terroir_storm_night.jpg',
+    'snow_day'    => 'public/assets/terroirs/terroir_snow_day.jpg',
+    'snow_night'  => 'public/assets/terroirs/terroir_snow_night.jpg',
 ];
 foreach ($expectedTerroir as $th => $relPath) {
     $fullPath = __DIR__ . '/../' . $relPath;
@@ -52,11 +54,13 @@ foreach ($expectedTerroir as $th => $relPath) {
 }
 
 $expectedCity = [
-    'sun'        => 'public/assets/cities/city_sun.jpg',
-    'night'      => 'public/assets/cities/city_night.jpg',
-    'storm'      => 'public/assets/cities/city_storm.jpg',
-    'snow_day'   => 'public/assets/cities/city_snow_day.jpg',
-    'snow_night' => 'public/assets/cities/city_snow_night.jpg',
+    'sun'         => 'public/assets/cities/city_sun.jpg',
+    'night'       => 'public/assets/cities/city_night.jpg',
+    'storm'       => 'public/assets/cities/city_storm.jpg',
+    'storm_day'   => 'public/assets/cities/city_storm_day.jpg',
+    'storm_night' => 'public/assets/cities/city_storm_night.jpg',
+    'snow_day'    => 'public/assets/cities/city_snow_day.jpg',
+    'snow_night'  => 'public/assets/cities/city_snow_night.jpg',
 ];
 foreach ($expectedCity as $th => $relPath) {
     $fullPath = __DIR__ . '/../' . $relPath;
@@ -106,9 +110,9 @@ assertTest($themeSpringDay === 'sun', "Printemps en journée -> 'sun' (Plein Sol
 $themeSummerDay = EnvironmentThemeEngine::getThemeKey(strtotime('2026-07-15 14:00:00'));
 assertTest($themeSummerDay === 'sun', "Été en journée -> 'sun' (Plein Soleil)");
 
-// 3. Automne en journée -> Orage
+// 3. Automne en journée -> Orage Diurne (storm_day)
 $themeAutumnDay = EnvironmentThemeEngine::getThemeKey(strtotime('2026-10-21 14:00:00'));
-assertTest($themeAutumnDay === 'storm', "Automne en journée -> 'storm' (Orage)");
+assertTest($themeAutumnDay === 'storm_day', "Automne en journée -> 'storm_day' (Orage Diurne)");
 
 // 4. Hiver en journée -> Neige
 $themeWinterDay = EnvironmentThemeEngine::getThemeKey(strtotime('2027-01-10 14:00:00'));
@@ -118,18 +122,26 @@ assertTest($themeWinterDay === 'snow_day', "Hiver en journée -> 'snow_day' (Nei
 $themeWinterNight = EnvironmentThemeEngine::getThemeKey(strtotime('2027-01-10 23:00:00'));
 assertTest($themeWinterNight === 'snow_night', "Hiver de nuit -> 'snow_night' (Nuit sous la neige)");
 
-// 6. Nuit en Printemps / Été / Automne -> Nuit au clair de lune
+// 6. Nuit en Automne -> Orage Nocturne (storm_night)
+$themeAutumnNight = EnvironmentThemeEngine::getThemeKey(strtotime('2026-10-21 23:00:00'));
+assertTest($themeAutumnNight === 'storm_night', "Automne de nuit -> 'storm_night' (Orage Nocturne féodal)");
+
+// 7. Nuit en Printemps & Été -> Nuit au clair de lune
 $themeSpringNight = EnvironmentThemeEngine::getThemeKey(strtotime('2026-04-10 23:00:00'));
 assertTest($themeSpringNight === 'night', "Printemps de nuit -> 'night' (Nuit féodale)");
-$themeAutumnNight = EnvironmentThemeEngine::getThemeKey(strtotime('2026-10-21 23:00:00'));
-assertTest($themeAutumnNight === 'night', "Automne de nuit -> 'night' (Nuit féodale)");
 
 echo "\n[TEST 5] Résolution dynamique des URLs de background Terroir & Cité...\n";
-// Automne en journée : terroir_storm.jpg & city_storm.jpg
+// Automne en journée : terroir_storm_day.jpg & city_storm_day.jpg
 $terroirStormUrl = EnvironmentThemeEngine::getTerroirBackground(strtotime('2026-10-21 14:00:00'));
 $cityStormUrl = EnvironmentThemeEngine::getCityBackground(strtotime('2026-10-21 14:00:00'));
-assertTest(str_contains($terroirStormUrl, '/public/assets/terroirs/terroir_storm.jpg'), "Terroir Automne Jour pointe sur terroir_storm.jpg");
-assertTest(str_contains($cityStormUrl, '/public/assets/cities/city_storm.jpg'), "Cité Automne Jour pointe sur city_storm.jpg");
+assertTest(str_contains($terroirStormUrl, '/public/assets/terroirs/terroir_storm'), "Terroir Automne Jour pointe sur terroir_storm_day.jpg ou terroir_storm.jpg");
+assertTest(str_contains($cityStormUrl, '/public/assets/cities/city_storm'), "Cité Automne Jour pointe sur city_storm_day.jpg ou city_storm.jpg");
+
+// Automne de nuit : terroir_storm_night.jpg & city_storm_night.jpg
+$terroirStormNightUrl = EnvironmentThemeEngine::getTerroirBackground(strtotime('2026-10-21 23:00:00'));
+$cityStormNightUrl = EnvironmentThemeEngine::getCityBackground(strtotime('2026-10-21 23:00:00'));
+assertTest(str_contains($terroirStormNightUrl, '/public/assets/terroirs/terroir_storm_night.jpg'), "Terroir Automne Nuit pointe sur terroir_storm_night.jpg");
+assertTest(str_contains($cityStormNightUrl, '/public/assets/cities/city_storm_night.jpg'), "Cité Automne Nuit pointe sur city_storm_night.jpg");
 
 // Hiver de nuit : terroir_snow_night.jpg & city_snow_night.jpg
 $terroirSnowNightUrl = EnvironmentThemeEngine::getTerroirBackground(strtotime('2027-01-15 22:00:00'));
@@ -144,10 +156,14 @@ GameConfig::set('environment_time_override', 'day');
 $overriddenTheme = EnvironmentThemeEngine::getThemeKey(strtotime('2026-08-15 14:00:00'));
 assertTest($overriddenTheme === 'snow_day', "Surcharge saison 'winter' + heure 'day' active -> 'snow_day'");
 
-// Forcer directement le thème complet à 'storm'
-GameConfig::set('environment_theme_override', 'storm');
+// Forcer directement le thème complet à 'storm_day' (ou 'storm')
+GameConfig::set('environment_theme_override', 'storm_day');
 $forcedStorm = EnvironmentThemeEngine::getThemeKey();
-assertTest($forcedStorm === 'storm', "Surcharge directe thème 'storm' prioritaire");
+assertTest($forcedStorm === 'storm_day', "Surcharge directe thème 'storm_day' prioritaire");
+
+GameConfig::set('environment_theme_override', 'storm_night');
+$forcedStormNight = EnvironmentThemeEngine::getThemeKey();
+assertTest($forcedStormNight === 'storm_night', "Surcharge directe thème 'storm_night' prioritaire");
 
 // Réinitialisation en mode automatique
 GameConfig::set('environment_season_override', 'auto');

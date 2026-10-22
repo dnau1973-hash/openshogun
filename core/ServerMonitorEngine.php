@@ -7,6 +7,11 @@
 
 require_once __DIR__ . '/Database.php';
 
+// Alignement sur le fuseau horaire du serveur ou Europe/Paris par défaut
+if (date_default_timezone_get() === 'UTC' || empty(ini_get('date.timezone'))) {
+    @date_default_timezone_set('Europe/Paris');
+}
+
 class ServerMonitorEngine {
     private ?PDO $db;
 
@@ -52,9 +57,12 @@ class ServerMonitorEngine {
         $this->recordHardwareLog(false, 30);
 
         return [
-            'timestamp'        => time(),
-            'datetime'         => date('Y-m-d H:i:s'),
-            'hardware'         => $this->getHardwareInfo(),
+            'timestamp'             => time(),
+            'datetime'              => date('Y-m-d H:i:s'),
+            'system_time'           => date('d/m/Y H:i:s'),
+            'system_time_formatted' => date('d/m/Y H:i:s'),
+            'timezone'              => date_default_timezone_get(),
+            'hardware'              => $this->getHardwareInfo(),
             'cpu'              => $this->getCpuAndThermalInfo(),
             'memory'           => $this->getMemoryAndSwapInfo(),
             'disk'             => $this->getDiskInfo(),

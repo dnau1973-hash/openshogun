@@ -544,7 +544,6 @@ ob_start();
                     <span class="mx-1 text-muted">&bull;</span>
                     <span><?= $envTheme['time_icon'] ?> <?= htmlspecialchars($envTheme['theme_label']) ?></span>
                 </span>
-                <button class="btn btn-secondary" onclick="toggleCityViewMode()" id="btn-toggle-view" style="font-size:0.8rem; padding:0.35rem 0.75rem;"><i class="fa-solid fa-clipboard-list me-1"></i>Fiches Détaillées</button>
                 <a href="?page=resources" class="btn btn-primary" style="font-size:0.8rem; padding:0.35rem 0.75rem;"><i class="fa-solid fa-wheat-awn me-1"></i>Vers les Terroirs Ruraux &rarr;</a>
             </div>
         </div>
@@ -654,68 +653,6 @@ ob_start();
             <p style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted); text-align:center;">
                 <i class="fa-solid fa-lightbulb text-warning me-1"></i> <strong>Cité Castrale & Village Féodal :</strong> Cliquez sur une bâtisse ou un emplacement pour l'élever au niveau supérieur, ou accédez directement au dojo, aux écuries et à l'académie de recherche.
             </p>
-
-            <!-- Vue Grille des Cartes Détaillées (Repliable) -->
-            <div class="city-grid" id="city-cards-grid" style="display:none; margin-top:1.5rem;">
-                <?php foreach (BUILDINGS as $code => $bInfo): ?>
-                    <?php
-                        $lvl = $buildings[$code] ?? 0;
-                        $maxLevel = (int)($bInfo['max_level'] ?? 20);
-                        $isMaxLevel = ($lvl >= $maxLevel);
-                        $details = $buildingEngine->getUpgradeDetails('building', $code, $lvl, $hqLevel);
-                        $cost = $details['cost'];
-                        $duration = $details['duration'];
-                        $tileImg = $bInfo['tile_img'] ?? null;
-                        $tileUrl = ($tileImg && file_exists(__DIR__ . '/../public/assets/tiles/' . $tileImg))
-                            ? '/public/assets/tiles/' . $tileImg
-                            : (($tileImg && file_exists(__DIR__ . '/../public/assets/' . $tileImg)) ? '/public/assets/' . $tileImg : null);
-                    ?>
-                    <div class="building-card">
-                        <div class="building-avatar" style="overflow:hidden; width:72px; height:72px; padding:4px; border-radius:12px; background:rgba(0,0,0,0.03); border:1px solid rgba(194, 37, 43, 0.2); display:flex; align-items:center; justify-content:center; margin-bottom:0.75rem;">
-                            <?php if ($tileUrl): ?>
-                                <img src="<?= $tileUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:100%; height:100%; object-fit:contain;" loading="lazy">
-                            <?php else: ?>
-                                <span style="font-size:2rem;"><?= $bInfo['icon'] ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <h3 class="building-title"><?= htmlspecialchars($bInfo['name']) ?></h3>
-                        <span class="building-lvl-badge <?= $isMaxLevel ? 'bg-success text-white' : '' ?>">
-                            <?= ($lvl > 0) ? ($isMaxLevel ? "Niveau $lvl (Max)" : "Niveau $lvl") : "Non bâti" ?>
-                        </span>
-                        <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem; flex:1;">
-                            <?= htmlspecialchars($bInfo['description']) ?>
-                        </p>
-
-                        <div style="width:100%; display:flex; flex-direction:column; gap:0.5rem;">
-                            <?php if ($code === 'shipyard' && $lvl > 0): ?>
-                                <a href="?page=shipyard" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-horse me-1"></i>Mobiliser Cavalerie & Siège</a>
-                            <?php elseif ($code === 'barracks' && $lvl > 0): ?>
-                                <a href="?page=barracks" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-user-ninja me-1"></i>Entraîner Soldats (Dojo)</a>
-                            <?php elseif ($code === 'research_lab' && $lvl > 0): ?>
-                                <a href="?page=research" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-scroll me-1"></i>Académie des Savoirs</a>
-                            <?php elseif ($code === 'grain_mill' && $lvl >= 10): ?>
-                                <a href="/?page=building&code=grain_mill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-wine-bottle me-1"></i>Raffiner Saké &amp; Farine</a>
-                            <?php elseif ($code === 'sawmill' && $lvl >= 10): ?>
-                                <a href="/?page=building&code=sawmill#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-hammer me-1"></i>Façonner Poutres</a>
-                            <?php elseif ($code === 'stonemason' && $lvl > 0): ?>
-                                <a href="/?page=building&code=stonemason#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-gem me-1"></i>Raffiner Minerais</a>
-                            <?php elseif ($code === 'blacksmith' && $lvl >= 15): ?>
-                                <a href="/?page=building&code=blacksmith#craftSection" class="btn btn-secondary" style="font-size:0.75rem; padding:0.3rem 0.6rem;"><i class="fa-solid fa-fire-burner me-1"></i>Fourneaux &amp; Prestige</a>
-                            <?php endif; ?>
-
-                            <?php if ($isMaxLevel): ?>
-                                <button type="button" onclick="openBuildingSlotModalByCode('<?= $code ?>')" class="btn btn-outline-success" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center;">
-                                    <i class="fa-solid fa-crown text-warning me-1"></i>Niveau Maximum (<?= $lvl ?>)
-                                </button>
-                            <?php else: ?>
-                                <button type="button" onclick="openBuildingSlotModalByCode('<?= $code ?>')" class="btn btn-primary" style="font-size:0.75rem; padding:0.4rem 0.6rem; text-align:center;">
-                                    <?= ($lvl === 0) ? '<i class="fa-solid fa-hammer me-1"></i>Construire' : '<i class="fa-solid fa-bolt text-warning me-1"></i>Gérer &amp; Améliorer' ?>
-                                </button>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
         </div>
 <?php
 $centerCardContent = ob_get_clean();
@@ -3468,21 +3405,6 @@ function filterCitySector(sector) {
             hs.classList.remove('highlighted');
         }
     });
-}
-
-function toggleCityViewMode() {
-    const cardsGrid = document.getElementById('city-cards-grid');
-    const toggleBtn = document.getElementById('btn-toggle-view');
-    if (!cardsGrid || !toggleBtn) return;
-
-    if (cardsGrid.style.display === 'none') {
-        cardsGrid.style.display = 'grid';
-        toggleBtn.innerHTML = '<i class="fa-solid fa-map me-1"></i>Masquer les Fiches';
-        cardsGrid.scrollIntoView({ behavior: 'smooth' });
-    } else {
-        cardsGrid.style.display = 'none';
-        toggleBtn.innerHTML = '<i class="fa-solid fa-clipboard-list me-1"></i>Fiches Détaillées';
-    }
 }
 
 // Initialisation dynamique lors du basculement sur l'onglet Marché & Troc

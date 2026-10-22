@@ -6,20 +6,28 @@
  *
  * Règles Métier :
  * - Printemps & Été (Jour)  => Plein Soleil (sun)
- * - Automne (Jour)           => Orage féodal (storm)
+ * - Printemps & Été (Nuit)  => Nuit féodale au clair de lune (night)
+ * - Automne (Jour)           => Orage féodal diurne (storm_day / storm)
+ * - Automne (Nuit)           => Orage féodal nocturne (storm_night)
  * - Hiver (Jour)             => Neige immaculée (snow_day)
- * - Nuit (Toutes saisons)    => Nuit féodale au clair de lune (night)
- * - Nuit (Hiver)             => Nuit sous la neige (snow_night)
+ * - Hiver (Nuit)             => Nuit sous la neige (snow_night)
  */
 require_once __DIR__ . '/GameConfig.php';
 
+// Alignement sur le fuseau horaire du serveur ou Europe/Paris par défaut
+if (date_default_timezone_get() === 'UTC' || empty(ini_get('date.timezone'))) {
+    @date_default_timezone_set('Europe/Paris');
+}
+
 class EnvironmentThemeEngine {
 
-    public const THEME_SUN        = 'sun';
-    public const THEME_NIGHT      = 'night';
-    public const THEME_STORM      = 'storm';
-    public const THEME_SNOW_DAY   = 'snow_day';
-    public const THEME_SNOW_NIGHT = 'snow_night';
+    public const THEME_SUN         = 'sun';
+    public const THEME_NIGHT       = 'night';
+    public const THEME_STORM_DAY   = 'storm_day';
+    public const THEME_STORM_NIGHT = 'storm_night';
+    public const THEME_STORM       = 'storm_day'; // Alias de rétrocompatibilité
+    public const THEME_SNOW_DAY    = 'snow_day';
+    public const THEME_SNOW_NIGHT  = 'snow_night';
 
     public const SEASONS = [
         'spring' => [
@@ -42,8 +50,8 @@ class EnvironmentThemeEngine {
             'name'        => 'Automne',
             'jp_name'     => '秋 (Aki)',
             'icon'        => '🍂',
-            'day_theme'   => self::THEME_STORM,
-            'night_theme' => self::THEME_NIGHT,
+            'day_theme'   => self::THEME_STORM_DAY,
+            'night_theme' => self::THEME_STORM_NIGHT,
             'desc'        => 'Pluies battantes, ciels tourmentés et orages impériaux de Raiden.'
         ],
         'winter' => [
@@ -58,6 +66,11 @@ class EnvironmentThemeEngine {
 
     /**
      * Détermine la saison courante ('spring', 'summer', 'autumn', 'winter')
+     * Découpage astronomique réaliste par défaut (équinoxes et solstices)
+     * Printemps : ~21 Mars au 20 Juin
+     * Été       : ~21 Juin au 21 Septembre
+     * Automne   : ~22 Septembre au 20 Décembre
+     * Hiver     : ~21 Décembre au 20 Mars
      */
     public static function getCurrentSeason(?int $timestamp = null): string {
         $override = GameConfig::get('environment_season_override', 'auto');
@@ -66,14 +79,33 @@ class EnvironmentThemeEngine {
         }
 
         $ts = $timestamp ?? time();
-        $month = (int)date('n', $ts);
+        $mode = GameConfig::get('environment_season_mode', 'astronomical');
 
-        return match ($month) {
-            3, 4, 5   => 'spring',
-            6, 7, 8   => 'summer',
-            9, 10, 11 => 'autumn',
-            default   => 'winter', // 12, 1, 2
-        };
+        if ($mode === 'meteorological') {
+            $month = (int)date('n', $ts);
+            return match ($month) {
+                3, 4, 5   => 'spring',
+                6, 7, 8   => 'summer',
+                9, 10, 11 => 'autumn',
+                default   => 'winter',
+            };
+        }
+
+        // Calcul astronomique fin basé sur le jour et mois (MMDD)
+        $month = (int)date('n', $ts);
+        $day = (int)date('j', $ts);
+        $md = ($month * 100) + $day;
+
+        if ($md >= 321 && $md < 621) {
+            return 'spring';
+        }
+        if ($md >= 621 && $md < 922) {
+            return 'summer';
+        }
+        if ($md >= 922 && $md < 1221) {
+            return 'autumn';
+        }
+        return 'winter';
     }
 
     /**
@@ -88,19 +120,33 @@ class EnvironmentThemeEngine {
         $ts = $timestamp ?? time();
         $hour = (int)date('G', $ts); // 0 à 23
 
-        return ($hour >= 7 && $hour < 20);
+        $dayStart = (int)GameConfig::get('environment_day_start_hour', 7);
+        $dayEnd   = (int)GameConfig::get('environment_day_end_hour', 20);
+
+        return ($hour >= $dayStart && $hour < $dayEnd);
     }
 
     /**
-     * Retourne la clé de thème actif : 'sun', 'night', 'storm', 'snow_day', 'snow_night'
+     * Retourne la clé de thème actif : 'sun', 'night', 'storm_day', 'storm_night', 'snow_day', 'snow_night'
      */
     public static function getThemeKey(?int $timestamp = null): string {
         // Surcharge directe du thème complet (priorité absolue si configurée)
         $themeOverride = GameConfig::get('environment_theme_override', 'auto');
         if ($themeOverride && $themeOverride !== 'auto') {
-            $valid = [self::THEME_SUN, self::THEME_NIGHT, self::THEME_STORM, self::THEME_SNOW_DAY, self::THEME_SNOW_NIGHT];
+            if ($themeOverride === 'storm') {
+                $themeOverride = self::THEME_STORM_DAY;
+            }
+            $valid = [
+                self::THEME_SUN,
+                self::THEME_NIGHT,
+                self::THEME_STORM_DAY,
+                self::THEME_STORM_NIGHT,
+                self::THEME_SNOW_DAY,
+                self::THEME_SNOW_NIGHT,
+                'storm'
+            ];
             if (in_array($themeOverride, $valid, true)) {
-                return $themeOverride;
+                return ($themeOverride === 'storm') ? self::THEME_STORM_DAY : $themeOverride;
             }
         }
 
@@ -110,18 +156,18 @@ class EnvironmentThemeEngine {
         if ($isDay) {
             return match ($season) {
                 'spring', 'summer' => self::THEME_SUN,
-                'autumn'           => self::THEME_STORM,
+                'autumn'           => self::THEME_STORM_DAY,
                 'winter'           => self::THEME_SNOW_DAY,
                 default            => self::THEME_SUN,
             };
         }
 
         // Période nocturne
-        if ($season === 'winter') {
-            return self::THEME_SNOW_NIGHT;
-        }
-
-        return self::THEME_NIGHT;
+        return match ($season) {
+            'autumn'           => self::THEME_STORM_NIGHT,
+            'winter'           => self::THEME_SNOW_NIGHT,
+            default            => self::THEME_NIGHT,
+        };
     }
 
     /**
@@ -132,12 +178,24 @@ class EnvironmentThemeEngine {
         $baseDir = __DIR__ . '/../public/assets/terroirs/';
         $fallback = '/public/assets/shogun_rural_terroir_9plots.jpg';
 
+        $themeVariants = match ($theme) {
+            self::THEME_STORM_DAY, 'storm' => ['storm_day', 'storm'],
+            self::THEME_STORM_NIGHT        => ['storm_night'],
+            self::THEME_SNOW_DAY           => ['snow_day', 'snow'],
+            self::THEME_SNOW_NIGHT         => ['snow_night'],
+            self::THEME_SUN                => ['sun', 'day'],
+            self::THEME_NIGHT              => ['night'],
+            default                        => [$theme],
+        };
+
         $extensions = ['jpg', 'jpeg', 'webp', 'png'];
-        foreach ($extensions as $ext) {
-            $filename = "terroir_{$theme}.{$ext}";
-            if (file_exists($baseDir . $filename)) {
-                $mtime = filemtime($baseDir . $filename);
-                return "/public/assets/terroirs/{$filename}?v={$mtime}";
+        foreach ($themeVariants as $variant) {
+            foreach ($extensions as $ext) {
+                $filename = "terroir_{$variant}.{$ext}";
+                if (file_exists($baseDir . $filename)) {
+                    $mtime = filemtime($baseDir . $filename);
+                    return "/public/assets/terroirs/{$filename}?v={$mtime}";
+                }
             }
         }
 
@@ -152,12 +210,24 @@ class EnvironmentThemeEngine {
         $baseDir = __DIR__ . '/../public/assets/cities/';
         $fallback = '/public/assets/shogun_castle_city_bg.jpg';
 
+        $themeVariants = match ($theme) {
+            self::THEME_STORM_DAY, 'storm' => ['storm_day', 'storm'],
+            self::THEME_STORM_NIGHT        => ['storm_night'],
+            self::THEME_SNOW_DAY           => ['snow_day', 'snow'],
+            self::THEME_SNOW_NIGHT         => ['snow_night'],
+            self::THEME_SUN                => ['sun', 'day'],
+            self::THEME_NIGHT              => ['night'],
+            default                        => [$theme],
+        };
+
         $extensions = ['jpg', 'jpeg', 'webp', 'png'];
-        foreach ($extensions as $ext) {
-            $filename = "city_{$theme}.{$ext}";
-            if (file_exists($baseDir . $filename)) {
-                $mtime = filemtime($baseDir . $filename);
-                return "/public/assets/cities/{$filename}?v={$mtime}";
+        foreach ($themeVariants as $variant) {
+            foreach ($extensions as $ext) {
+                $filename = "city_{$variant}.{$ext}";
+                if (file_exists($baseDir . $filename)) {
+                    $mtime = filemtime($baseDir . $filename);
+                    return "/public/assets/cities/{$filename}?v={$mtime}";
+                }
             }
         }
 
@@ -175,12 +245,16 @@ class EnvironmentThemeEngine {
         $themeKey = self::getThemeKey($ts);
 
         $themeLabels = [
-            self::THEME_SUN        => ['label' => 'Zénith Doré & Plein Soleil',  'icon' => '☀️', 'badge' => 'bg-warning text-dark'],
-            self::THEME_NIGHT      => ['label' => 'Clair de Lune & Lanternes',     'icon' => '🌙', 'badge' => 'bg-dark text-white'],
-            self::THEME_STORM      => ['label' => 'Tourmente d\'Orage & Éclairs', 'icon' => '⛈️', 'badge' => 'bg-secondary text-white'],
-            self::THEME_SNOW_DAY   => ['label' => 'Hiver Poudré de Neige',        'icon' => '❄️', 'badge' => 'bg-info text-dark'],
-            self::THEME_SNOW_NIGHT => ['label' => 'Nuit Féodale sous la Neige',   'icon' => '❄️🌙', 'badge' => 'bg-primary text-white'],
+            self::THEME_SUN         => ['label' => 'Zénith Doré & Plein Soleil',     'icon' => '☀️',   'badge' => 'bg-warning text-dark'],
+            self::THEME_NIGHT       => ['label' => 'Clair de Lune & Lanternes',        'icon' => '🌙',   'badge' => 'bg-dark text-white'],
+            self::THEME_STORM_DAY   => ['label' => 'Orage Diurne & Tempête Féodale',  'icon' => '⛈️',   'badge' => 'bg-secondary text-white'],
+            self::THEME_STORM_NIGHT => ['label' => 'Orage Nocturne & Éclairs Féodaux', 'icon' => '⛈️🌙', 'badge' => 'bg-dark text-warning'],
+            self::THEME_SNOW_DAY    => ['label' => 'Hiver Poudré de Neige',           'icon' => '❄️',   'badge' => 'bg-info text-dark'],
+            self::THEME_SNOW_NIGHT  => ['label' => 'Nuit Féodale sous la Neige',      'icon' => '❄️🌙', 'badge' => 'bg-primary text-white'],
         ];
+
+        // Rétrocompatibilité pour la clé 'storm'
+        $themeLabels['storm'] = $themeLabels[self::THEME_STORM_DAY];
 
         $currentThemeMeta = $themeLabels[$themeKey] ?? $themeLabels[self::THEME_SUN];
 
@@ -213,4 +287,3 @@ class EnvironmentThemeEngine {
         ];
     }
 }
-
