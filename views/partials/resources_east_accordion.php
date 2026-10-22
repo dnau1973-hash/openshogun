@@ -172,6 +172,18 @@ $totalMarketActivities = (int)($marketSummaryData['total_active'] ?? 0);
 $isMarketBuiltAccordion = !empty($marketSummaryData['is_market_built']);
 $marketLevelAccordion = (int)($marketSummaryData['market_level'] ?? 0);
 
+// Données des Mouvements de Troupes, Mineurs des Cimes, Pêcheurs & Héros
+require_once __DIR__ . '/../../core/FleetEngine.php';
+$fleetEngineSummary = new FleetEngine();
+try {
+    $movementsSummaryData = ($user && $planet) ? $fleetEngineSummary->getMovementsSummary((int)$user['id'], (int)$planet['id']) : null;
+} catch (Throwable $e) {
+    $movementsSummaryData = null;
+}
+$totalMovementsAccordion = (int)($movementsSummaryData['total_movements'] ?? 0);
+$incomingThreatsAccordion = (int)($movementsSummaryData['incoming_threats_count'] ?? 0);
+$hasHeroMovingAccordion = !empty($movementsSummaryData['has_hero_moving']);
+
 // Détermination de l'élément ouvert par défaut : Didacticiel si quête active, sinon Chantiers
 $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
 ?>
@@ -569,7 +581,58 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
         </div>
     </div>
 
-    <!-- ── 6. GARNISON DU DOMAINE ── -->
+    <!-- ── 7. TROUPES & EXPÉDITIONS EN MARCHE (MINEURS, PÊCHEURS, HÉROS) ── -->
+    <div class="accordion-item bg-white <?= ($incomingThreatsAccordion > 0) ? 'border-danger' : '' ?>">
+        <h3 class="accordion-header" id="heading-east-movements">
+            <button class="accordion-button collapsed" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#east-item-movements" 
+                    aria-expanded="false" 
+                    aria-controls="east-item-movements">
+                <div class="d-flex align-items-center gap-2 flex-grow-1 text-truncate pe-2">
+                    <i class="fa-solid fa-person-walking-arrow-right text-danger"></i>
+                    <span class="fw-bold">Troupes &amp; Expéditions</span>
+                    <?php if ($incomingThreatsAccordion > 0): ?>
+                        <span class="badge bg-danger text-white ms-auto font-monospace animate-pulse" style="font-size:0.68rem;">
+                            ⚠️ <?= $incomingThreatsAccordion ?> alerte(s)
+                        </span>
+                    <?php elseif ($totalMovementsAccordion > 0): ?>
+                        <span class="badge bg-danger-lt text-danger fw-bold ms-auto font-monospace" style="font-size:0.68rem;">
+                            <?= $totalMovementsAccordion ?> en marche
+                        </span>
+                    <?php elseif ($hasHeroMovingAccordion): ?>
+                        <span class="badge bg-purple-lt text-purple fw-bold ms-auto" style="font-size:0.68rem;">
+                            Héros en quête
+                        </span>
+                    <?php else: ?>
+                        <span class="badge bg-secondary-lt text-muted ms-auto" style="font-size:0.65rem;">
+                            0 en marche
+                        </span>
+                    <?php endif; ?>
+                </div>
+                <span class="accordion-button-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon"><path d="M6 9l6 6l6 -6" /></svg>
+                </span>
+            </button>
+        </h3>
+        <div id="east-item-movements" 
+             class="accordion-collapse collapse" 
+             aria-labelledby="heading-east-movements" 
+             data-bs-parent="#resourcesEastAccordion">
+            <div class="accordion-body">
+                <?php 
+                    try {
+                        require __DIR__ . '/movements_panel.php'; 
+                    } catch (Throwable $e) {
+                        echo '<div class="alert alert-warning py-1 px-2 small mb-0">Chargement des mouvements indisponible.</div>';
+                    }
+                ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 8. GARNISON DU DOMAINE ── -->
     <div class="accordion-item bg-white">
         <h3 class="accordion-header" id="heading-east-troops">
             <button class="accordion-button collapsed" 

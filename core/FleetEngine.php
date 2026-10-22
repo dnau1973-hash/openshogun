@@ -1323,5 +1323,125 @@ class FleetEngine {
             'protection_revoked' => $protectionRevoked
         ];
     }
+
+    /**
+     * Récupère le bilan complet et classifié des mouvements de troupes, mineurs, pêcheurs et héros
+     */
+    public function getMovementsSummary(int $userId, int $planetId): array {
+        require_once __DIR__ . '/HeroEngine.php';
+        $heroEngine = new HeroEngine();
+        $hero = $heroEngine->getHeroByUserId($userId);
+
+        // 1. Détection des menaces hostiles arrivant vers le fief actif
+        $stmtThreats = $this->db->prepare("
+            SELECT fm.*,
+                   p1.name as source_name, p1.coord_x as sx, p1.coord_y as sy,
+                   u1.username as attacker_name
+            FROM fleet_missions fm
+            JOIN planets p1 ON fm.source_planet_id = p1.id
+            JOIN users u1 ON fm.user_id = u1.id
+            WHERE fm.target_planet_id = ?
+              AND fm.user_id != ?
+              AND fm.status = 'en_route'
+              AND fm.mission_type IN ('raid', 'attack', 'occupy', 'spy')
+            ORDER BY fm.arrival_time ASC
+        ");
+        $stmtThreats->execute([$planetId, $userId]);
+        $threats = $stmtThreats->fetchAll(PDO::FETCH_ASSOC);
+
+        // 2. Toutes les marches actives de l'utilisateur (sortantes ou de retour)
+        $stmtMissions = $this->db->prepare("
+            SELECT fm.*, 
+                   p1.name as source_name, p1.coord_x as sx, p1.coord_y as sy,
+                   COALESCE(p2.name, CONCAT('Oasis ', o.name)) as target_name, 
+                   COALESCE(p2.coord_x, o.coord_x, 0) as tx, 
+                   COALESCE(p2.coord_y, o.coord_y, 0) as ty,
+                   ha.name as adventure_name, ha.difficulty as adventure_diff
+            FROM fleet_missions fm 
+            JOIN planets p1 ON fm.source_planet_id = p1.id 
+            LEFT JOIN planets p2 ON fm.target_planet_id = p2.id 
+            LEFT JOIN oases o ON fm.target_oasis_id = o.id
+            LEFT JOIN hero_adventures ha ON fm.adventure_id = ha.id
+            WHERE fm.user_id = ? AND fm.status IN ('en_route', 'returning') 
+            ORDER BY fm.arrival_time ASC
+        ");
+        $stmtMissions->execute([$userId]);
+        $allMissions = $stmtMissions->fetchAll(PDO::FETCH_ASSOC);
+
+        $now = time();
+        $heroMissions = [];
+        $minerMissions = [];
+        $fisherMissions = [];
+        $militaryMissions = [];
+
+        foreach ($allMissions as $m) {
+            $isOutbound = ($m['status'] === 'en_route');
+            $targetTime = $isOutbound ? (int)$m['arrival_time'] : (int)$m['return_time'];
+            $secRemaining = max(0, $targetTime - $now);
+            $fleetData = json_decode($m['fleet_data'] ?? '[]', true) ?: [];
+            $cargoData = json_decode($m['cargo_data'] ?? '[]', true) ?: [];
+            $totalUnits = array_sum($fleetData);
+
+            $targetName = $m['target_name'];
+            if (empty($targetName)) {
+                $targetName = ($m['tx'] || $m['ty']) ? "Territoire [{$m['tx']}:{$m['ty']}]" : 'Terres Féodales';
+            }
+
+            $formattedMission = [
+                'id' => (int)$m['id'],
+                'mission_type' => $m['mission_type'],
+                'status' => $m['status'],
+                'is_outbound' => $isOutbound,
+                'source_planet_id' => (int)$m['source_planet_id'],
+                'source_name' => $m['source_name'],
+                'source_coords' => "[{$m['sx']}:{$m['sy']}]",
+                'target_name' => $targetName,
+                'target_coords' => "[{$m['tx']}:{$m['ty']}]",
+                'target_time' => $targetTime,
+                'seconds_remaining' => $secRemaining,
+                'fleet' => $fleetData,
+                'total_units' => $totalUnits,
+                'cargo' => $cargoData,
+                'has_hero' => !empty($m['has_hero']),
+                'adventure_name' => $m['adventure_name'] ?? null,
+                'adventure_diff' => $m['adventure_diff'] ?? null,
+            ];
+
+            if ($m['mission_type'] === 'adventure') {
+                $heroMissions[] = $formattedMission;
+            } elseif ($m['mission_type'] === 'mining') {
+                $minerCount = (int)($fleetData['mineur'] ?? 0);
+                $formattedMission['miner_count'] = $minerCount;
+                $minerMissions[] = $formattedMission;
+            } elseif ($m['mission_type'] === 'fishing') {
+                $fisherCount = (int)($fleetData['pecheur'] ?? 0);
+                $formattedMission['fisher_count'] = $fisherCount;
+                $fisherMissions[] = $formattedMission;
+            } else {
+                if (!empty($m['has_hero'])) {
+                    $heroMissions[] = $formattedMission;
+                }
+                $militaryMissions[] = $formattedMission;
+            }
+        }
+
+        $totalMovements = count($allMissions);
+
+        return [
+            'hero' => $hero,
+            'hero_missions' => $heroMissions,
+            'has_hero_moving' => !empty($heroMissions),
+            'miner_missions' => $minerMissions,
+            'miner_missions_count' => count($minerMissions),
+            'fisher_missions' => $fisherMissions,
+            'fisher_missions_count' => count($fisherMissions),
+            'military_missions' => $militaryMissions,
+            'military_missions_count' => count($militaryMissions),
+            'all_missions' => $allMissions,
+            'total_movements' => $totalMovements,
+            'incoming_threats' => $threats,
+            'incoming_threats_count' => count($threats)
+        ];
+    }
 }
 
