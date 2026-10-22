@@ -55,6 +55,9 @@ $html = ob_get_clean();
 assert(strlen($html) > 0, "Le rendu du partial est vide");
 assert(strpos($html, 'market-ongoing-panel') !== false, "Classe market-ongoing-panel absente du HTML");
 assert(strpos($html, 'openEastMarketQuickAccess') !== false, "Fonction JS openEastMarketQuickAccess absente");
+assert(strpos($html, 'modalConfirmCancelOffer') !== false, "Modale de confirmation modalConfirmCancelOffer absente");
+assert(strpos($html, 'requestCancelEastMarketOffer') !== false, "Fonction requestCancelEastMarketOffer absente");
+assert(strpos($html, 'window.confirm') === false, "window.confirm ne doit pas être utilisé");
 
 echo "✓ Rendu de market_panel.php réussi sans avertissements (" . strlen($html) . " octets).\n";
 
@@ -70,3 +73,4 @@ echo "✓ Intégration dans l'accordéon Est vérifiée avec succès.\n";
 echo "\n============================================\n";
 echo "🎉 TOUS LES TESTS SONT PASSÉS AVEC SUCCÈS !\n";
 echo "============================================\n";
+

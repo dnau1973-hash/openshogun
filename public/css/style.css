@@ -3364,11 +3364,20 @@
     }
 }
 
-.depth-parallax-scene:not(.is-interacting) .depth-parallax-img.has-cinematic-breathing {
-    animation: cinematicBreathing 18s ease-in-out infinite;
+/* Respiration cinématique autonome et automatique */
+.depth-parallax-scene:not(.is-interacting) .depth-parallax-img.has-cinematic-breathing,
+.modal .depth-parallax-scene .depth-parallax-img.has-cinematic-breathing,
+.modal .depth-parallax-scene .depth-parallax-img {
+    animation: cinematicBreathing 18s ease-in-out infinite !important;
 }
 
-.depth-parallax-scene.is-interacting .depth-parallax-img {
+/* Dans les modales : suppression totale de l'effet au survol souris, maintien de l'animation autonome */
+.modal .depth-parallax-scene.is-interacting .depth-parallax-img,
+.modal .depth-parallax-scene:hover .depth-parallax-img {
+    animation: cinematicBreathing 18s ease-in-out infinite !important;
+}
+
+.depth-parallax-scene:not(.in-modal).is-interacting .depth-parallax-img {
     animation: none !important;
 }
 
@@ -3376,6 +3385,13 @@
     will-change: transform;
     transform: translate3d(0, 0, 15px);
     transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Dans les fenêtres modales : stabilité des textes et boutons au passage du curseur */
+.modal .depth-parallax-foreground,
+.modal .depth-parallax-scene:hover .depth-parallax-foreground {
+    transform: none !important;
+    transition: none !important;
 }
 
 .depth-parallax-overlay {

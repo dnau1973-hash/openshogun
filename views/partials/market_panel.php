@@ -111,7 +111,7 @@ $transporters      = $marketSummary['transporters'];
                             <button type="button" 
                                     class="btn btn-sm btn-ghost-danger py-0 px-1 text-danger" 
                                     style="font-size:0.68rem;" 
-                                    onclick="cancelEastMarketOffer(<?= (int)$off['id'] ?>)" 
+                                    onclick="requestCancelEastMarketOffer(<?= (int)$off['id'] ?>, '<?= htmlspecialchars($off['offer_amount_formatted'] . ' ' . $off['offer_meta']['name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($off['demand_amount_formatted'] . ' ' . $off['demand_meta']['name'], ENT_QUOTES) ?>')" 
                                     title="Annuler cette offre et récupérer les ressources bloquées">
                                 <i class="fa-solid fa-times me-0.5"></i>Annuler
                             </button>
@@ -289,9 +289,56 @@ $transporters      = $marketSummary['transporters'];
 
 </div>
 
+<!-- ── MODALE DE CONFIRMATION DE SUPPRESSION D'OFFRE EN ATTENTE ── -->
+<div class="modal fade" id="modalConfirmCancelOffer" tabindex="-1" aria-labelledby="modalConfirmCancelOfferTitle" aria-hidden="true" style="z-index: 1065;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content shadow-lg border-0" style="border-radius: 8px; overflow: hidden;">
+            <div class="modal-header py-2.5 px-3 bg-dark text-white border-bottom border-warning">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="avatar avatar-xs bg-warning text-dark rounded-circle" style="width:26px; height:26px; font-size:0.75rem;">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </span>
+                    <h5 class="modal-title fw-bold fs-5 text-warning mb-0" id="modalConfirmCancelOfferTitle">
+                        Annuler l'Offre de Troc
+                    </h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body p-3 bg-white">
+                <p class="text-secondary small mb-2.5" id="modalConfirmCancelOfferMsg">
+                    Êtes-vous certain de vouloir annuler cette offre en attente sur la Bourse Féodale ?
+                </p>
+                <div class="p-2.5 rounded bg-surface-secondary border mb-2.5" id="modalConfirmCancelOfferBox">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted font-monospace small" id="modalConfirmCancelOfferId">Offre #--</span>
+                        <span class="badge bg-warning-lt text-warning">En attente</span>
+                    </div>
+                    <div class="small fw-bold text-dark" id="modalConfirmCancelOfferExchange">
+                        --
+                    </div>
+                </div>
+                <div class="alert alert-info py-2 px-2.5 mb-0 small" style="font-size: 0.76rem;">
+                    <i class="fa-solid fa-circle-info me-1"></i>
+                    Vos ressources consignées sous séquestre seront <strong>immédiatement restituées</strong> à vos entrepôts.
+                </div>
+            </div>
+            <div class="modal-footer py-2 px-3 bg-light d-flex justify-content-between">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                    Conserver l'offre
+                </button>
+                <button type="button" class="btn btn-sm btn-danger fw-bold shadow-2xs" id="modalConfirmCancelOfferBtn">
+                    <i class="fa-solid fa-trash-can me-1"></i>Confirmer l'annulation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Script de décompte en direct et interactions rapides pour le panel Marché -->
 <script>
 (function() {
+    let pendingOfferIdToCancel = null;
+
     // 1. Décompte en temps réel des convois de marchands
     function tickEastMarketCountdowns() {
         document.querySelectorAll('.market-convoy-countdown').forEach(el => {
@@ -315,7 +362,6 @@ $transporters      = $marketSummary['transporters'];
 
     // 2. Navigation rapide vers la modale ou la page Marché
     window.openEastMarketQuickAccess = function(tabTargetId = null) {
-        // Si nous sommes déjà sur la page city.php avec les slots de la cité
         if (typeof openBuildingSlotModalByCode === 'function') {
             openBuildingSlotModalByCode('market');
             if (tabTargetId) {
@@ -330,15 +376,68 @@ $transporters      = $marketSummary['transporters'];
             return;
         }
 
-        // Si nous sommes sur resources.php ou map.php, rediriger vers la cité
         window.location.href = '/?page=city';
     };
 
-    // 3. Annulation rapide d'une offre en direct depuis la colonne latérale
-    window.cancelEastMarketOffer = function(offerId) {
-        if (!confirm(`Voulez-vous vraiment annuler l'offre de troc #${offerId} et récupérer vos ressources consignées ?`)) {
+    // 3. Déclenchement de la modale de confirmation d'annulation d'offre
+    window.requestCancelEastMarketOffer = function(offerId, offerDesc = '', demandDesc = '') {
+        pendingOfferIdToCancel = offerId;
+        const modalEl = document.getElementById('modalConfirmCancelOffer');
+
+        if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const idEl = document.getElementById('modalConfirmCancelOfferId');
+            const exEl = document.getElementById('modalConfirmCancelOfferExchange');
+            if (idEl) idEl.textContent = `Offre de troc #${offerId}`;
+            if (exEl) {
+                exEl.textContent = (offerDesc && demandDesc)
+                    ? `Restitution : ${offerDesc} (demandé : ${demandDesc})`
+                    : `Restitution immédiate de vos ressources consignées.`;
+            }
+            const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            bsModal.show();
             return;
         }
+
+        // Modale de confirmation alternative via showModalConfirm
+        if (typeof showModalConfirm === 'function') {
+            showModalConfirm(
+                `Voulez-vous annuler l'offre n°#${offerId} ? Vos ressources consignées seront immédiatement restituées à vos entrepôts.`,
+                "Annulation de l'Offre & Restitution"
+            ).then(confirmed => {
+                if (confirmed) executeCancelEastMarketOffer(offerId);
+            });
+            return;
+        }
+
+        // Dernier recours : exécution sécurisée
+        executeCancelEastMarketOffer(offerId);
+    };
+
+    // Rétrocompatibilité
+    window.cancelEastMarketOffer = function(offerId) {
+        requestCancelEastMarketOffer(offerId);
+    };
+
+    // Clic sur le bouton de confirmation de la modale
+    const confirmBtn = document.getElementById('modalConfirmCancelOfferBtn');
+    if (confirmBtn) {
+        confirmBtn.onclick = function() {
+            if (!pendingOfferIdToCancel) return;
+            const targetId = pendingOfferIdToCancel;
+            pendingOfferIdToCancel = null;
+
+            const modalEl = document.getElementById('modalConfirmCancelOffer');
+            if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const bsModal = bootstrap.Modal.getInstance(modalEl);
+                if (bsModal) bsModal.hide();
+            }
+
+            executeCancelEastMarketOffer(targetId);
+        };
+    }
+
+    // Exécution asynchrone de l'annulation de l'offre
+    function executeCancelEastMarketOffer(offerId) {
         const fd = new FormData();
         fd.append('action', 'cancel_offer');
         fd.append('offer_id', offerId);
@@ -348,7 +447,7 @@ $transporters      = $marketSummary['transporters'];
             .then(data => {
                 if (data.success) {
                     if (typeof showModalAlert === 'function') {
-                        showModalAlert(data.message || 'Offre annulée avec succès.', 'success');
+                        showModalAlert(data.message || 'Offre annulée et ressources restituées avec succès !', 'success');
                     } else {
                         alert(data.message || 'Offre annulée avec succès.');
                     }
@@ -357,7 +456,7 @@ $transporters      = $marketSummary['transporters'];
                         row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
                         row.style.opacity = '0';
                         row.style.transform = 'scale(0.95)';
-                        setTimeout(() => window.location.reload(), 400);
+                        setTimeout(() => window.location.reload(), 450);
                     } else {
                         window.location.reload();
                     }
@@ -369,7 +468,14 @@ $transporters      = $marketSummary['transporters'];
                     }
                 }
             })
-            .catch(() => alert('Erreur de transmission avec les intendants du marché.'));
-    };
+            .catch(() => {
+                if (typeof showModalAlert === 'function') {
+                    showModalAlert('Erreur de transmission avec les intendants du marché.', 'error');
+                } else {
+                    alert('Erreur de transmission avec les intendants du marché.');
+                }
+            });
+    }
 })();
 </script>
+

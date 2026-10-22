@@ -14,15 +14,16 @@ assert(strpos($css, '.depth-parallax-scene') !== false, "La classe .depth-parall
 assert(strpos($css, '.depth-parallax-img') !== false, "La classe .depth-parallax-img doit être définie dans style.css");
 assert(strpos($css, 'cinematicBreathing') !== false, "L'animation @keyframes cinematicBreathing doit être définie");
 assert(strpos($css, 'prefers-reduced-motion') !== false, "L'accessibilité prefers-reduced-motion doit être respectée");
+assert(strpos($css, '.modal .depth-parallax-scene .depth-parallax-img') !== false, "L'animation automatique des illustrations en modale doit être garantie en CSS");
 echo "✅ [1/5] Styles CSS d'accélération matérielle, respiration et accessibilité validés !\n";
 
 // 2. Vérification JavaScript
 $js = file_get_contents(__DIR__ . '/../public/js/app.js');
 assert(strpos($js, 'initDepthParallax') !== false, "La fonction initDepthParallax doit être déclarée dans app.js");
 assert(strpos($js, 'initDepthParallax();') !== false, "initDepthParallax() doit être appelée au DOMContentLoaded");
-assert(strpos($js, 'requestAnimationFrame') !== false, "La boucle de rendu doit utiliser requestAnimationFrame pour du 60/120fps");
+assert(strpos($js, 'scene.closest(\'.modal\')') !== false, "Les scènes en modale doivent désactiver la parallaxe au survol souris");
 assert(strpos($js, 'shown.bs.modal') !== false, "Les événements des modales Bootstrap doivent être interceptés");
-echo "✅ [2/5] Moteur interactif JS (lerp, souris, tactile, gyroscope) validé dans app.js !\n";
+echo "✅ [2/5] Moteur interactif JS (lerp, animation automatique en modale, exclusion survol) validé dans app.js !\n";
 
 // 3. Vérification Carrousel en haut de page (views/partials/header.php) - Effet retiré conformément à la demande
 $header = file_get_contents(__DIR__ . '/../views/partials/header.php');

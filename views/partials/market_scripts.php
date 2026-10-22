@@ -454,7 +454,11 @@ async function submitP2POffer() {
 }
 
 async function cancelP2POffer(offerId) {
-    let confirmed = true;
+    if (typeof requestCancelEastMarketOffer === 'function') {
+        requestCancelEastMarketOffer(offerId);
+        return;
+    }
+    let confirmed = false;
     if (typeof showModalConfirm === 'function') {
         confirmed = await showModalConfirm(
             `Voulez-vous annuler l'offre n°#${offerId} ? Vos ressources consignées seront immédiatement restituées à vos entrepôts.`,

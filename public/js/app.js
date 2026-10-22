@@ -540,6 +540,7 @@ function showModalConfirm(message, title = 'Ordre de Commandement', callback = n
         currentConfirmResolve = resolve;
 
         const isDemolish = /raser|démant|démol/i.test(title + ' ' + message);
+        const isOfferCancel = /offre/i.test(title + ' ' + message) && /annul/i.test(title + ' ' + message);
         const isCancelAction = /interruption|annul|suspend/i.test(title + ' ' + message);
 
         let icon = '<i class="fa-solid fa-circle-question text-info"></i>';
@@ -547,6 +548,9 @@ function showModalConfirm(message, title = 'Ordre de Commandement', callback = n
         if (isDemolish) {
             icon = '<i class="fa-solid fa-fire text-danger"></i>';
             confirmLabel = /bâtiment/i.test(title + ' ' + message) ? 'Démanteler le bâtiment' : 'Raser l\'exploitation';
+        } else if (isOfferCancel) {
+            icon = '<i class="fa-solid fa-scale-balanced text-warning"></i>';
+            confirmLabel = 'Annuler l\'offre & Restituer';
         } else if (isCancelAction) {
             icon = '<i class="fa-solid fa-circle-stop text-danger"></i>';
             confirmLabel = 'Confirmer l\'interruption';
@@ -681,6 +685,17 @@ function initDepthParallax() {
         if (!img) return;
 
         img.classList.add('has-cinematic-breathing');
+
+        // Dans les fenêtres modales : suppression de la parallaxe au passage de la souris,
+        // préservation exclusive du mouvement autonome et automatique de l'illustration (respiration cinématique).
+        const isModalScene = Boolean(scene.closest('.modal'));
+        if (isModalScene) {
+            scene.classList.add('in-modal');
+            img.style.transform = '';
+            // Ne pas attacher d'écouteurs de déplacement de la souris ou tactiles
+            return;
+        }
+
         const foregroundEls = scene.querySelectorAll('.depth-parallax-foreground');
 
         let rect = null;
@@ -824,11 +839,18 @@ function initDepthParallax() {
         if (!e.target) return;
         const modalScenes = e.target.querySelectorAll('.depth-parallax-scene');
         modalScenes.forEach(scene => {
+            scene.classList.add('in-modal');
+            scene.classList.remove('is-interacting');
             bindScene(scene);
             const img = scene.querySelector('.depth-parallax-img');
             if (img) {
+                img.classList.add('has-cinematic-breathing');
                 img.style.transform = '';
             }
+            const foregroundEls = scene.querySelectorAll('.depth-parallax-foreground');
+            foregroundEls.forEach(fg => {
+                fg.style.transform = '';
+            });
         });
     });
 
@@ -848,7 +870,7 @@ function initDepthParallax() {
         });
     });
 
-    // Support optionnel du Gyroscope mobile (inclinaison du smartphone)
+    // Support optionnel du Gyroscope mobile (inclinaison du smartphone hors modales)
     if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission !== 'function') {
         window.addEventListener('deviceorientation', e => {
             const gamma = e.gamma; // -90 à +90 (gauche / droite)
@@ -858,8 +880,10 @@ function initDepthParallax() {
             const normX = Math.max(-0.5, Math.min(0.5, gamma / 60));
             const normY = Math.max(-0.5, Math.min(0.5, (beta - 45) / 60));
 
-            const visibleScenes = document.querySelectorAll('.modal.show .depth-parallax-scene');
+            // Les modales conservent leur animation autonome sans perturbation gyroscopique
+            const visibleScenes = document.querySelectorAll('.depth-parallax-scene:not(.in-modal)');
             visibleScenes.forEach(scene => {
+                if (scene.closest('.modal')) return;
                 const img = scene.querySelector('.depth-parallax-img');
                 if (img && !scene.classList.contains('is-interacting')) {
                     const transX = -(normX * 20).toFixed(2);
