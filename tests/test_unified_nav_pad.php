@@ -52,3 +52,4 @@ echo "✓ Styles CSS de la grille boussole validés !\n";
 echo "\n============================================\n";
 echo "🎉 TOUS LES TESTS DU BOÎTIER DE NAVIGATION SONT VALIDÉS AVEC SUCCÈS !\n";
 echo "============================================\n";
+
