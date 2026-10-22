@@ -37,6 +37,8 @@
 <?php require_once __DIR__ . '/rename_village_modal.php'; ?>
 <!-- Modale Interactive : Mode Apprentissage & Maître de la Sagesse (Shinōkōshō) -->
 <?php require_once __DIR__ . '/wisdom_learning_modal.php'; ?>
+<!-- Modale d'Alerte Tactique : Général Oda Nobunaga (Conquête & Guerre) -->
+<?php require_once __DIR__ . '/oda_alert_modal.php'; ?>
 
 <!-- Modale Universelle de la Fiche Daimyō / Profil (Style Washi Féodal) -->
 <div class="modal-overlay" id="playerProfileModal">

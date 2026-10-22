@@ -3168,7 +3168,15 @@ $navItems = [
                         <span class="alert-countdown-chip">Retour dans <strong data-countdown="<?= $closestTime ?>">Calcul...</strong></span>
                     <?php endif; ?>
                 </div>
-                <div class="alert-banner-right">
+                <div class="alert-banner-right d-flex align-items-center gap-2">
+                    <?php if ($hasHostile): ?>
+                        <button type="button" class="btn btn-danger btn-sm py-1 px-2 fw-bold d-inline-flex align-items-center gap-1 shadow-sm"
+                                onclick="event.stopPropagation(); if(window.openOdaAlertModal){window.openOdaAlertModal();}"
+                                title="Consulter l'ordre de bataille du Général Oda Nobunaga">
+                            <i class="fa-solid fa-skull-crossbones"></i>
+                            <span class="d-none d-sm-inline">Conseil d'Oda</span>
+                        </button>
+                    <?php endif; ?>
                     <span class="alert-cta-btn">
                         <span><i class="fa-solid fa-scroll me-1"></i> Détails (<?= count($activeMissions) ?>)</span>
                         <span class="alert-cta-arrow">&rarr;</span>
