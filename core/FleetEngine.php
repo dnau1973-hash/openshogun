@@ -263,11 +263,44 @@ class FleetEngine {
                 }
                 $this->db->prepare("UPDATE fleet_missions SET status = 'completed' WHERE id = ?")->execute([$missionId]);
             }
+
+            // ⚔️ Réciprocité Féodale des IA : Si un joueur humain attaque un Bot PNJ, le Bot planifie une contre-attaque proportionnée
+            if (!empty($defenderUser['is_bot']) && empty($attackerUser['is_bot'])) {
+                try {
+                    require_once __DIR__ . '/BotEngine.php';
+                    $botEngine = new BotEngine();
+                    $attackFleet = json_decode($mission['fleet_data'], true) ?: [];
+                    $botEngine->scheduleAttackRetaliation(
+                        $defenderUser,
+                        $targetPlanet,
+                        $attackerUser,
+                        $sourcePlanetId,
+                        $missionType,
+                        $attackFleet,
+                        $missionId
+                    );
+                } catch (Throwable $e) {}
+            }
         } elseif ($missionType === 'spy') {
             // Rapport d'espionnage
             $this->generateSpyReport($mission, $targetPlanet, $attackerUser, $defenderUser);
             // La sonde retourne
             $this->db->prepare("UPDATE fleet_missions SET status = 'returning' WHERE id = ?")->execute([$missionId]);
+
+            // 🥷 Réciprocité Féodale des IA : Si un joueur humain espionne un Bot PNJ, le Bot planifie un contre-espionnage Shinobi
+            if (!empty($defenderUser['is_bot']) && empty($attackerUser['is_bot'])) {
+                try {
+                    require_once __DIR__ . '/BotEngine.php';
+                    $botEngine = new BotEngine();
+                    $botEngine->scheduleSpyRetaliation(
+                        $defenderUser,
+                        $targetPlanet,
+                        $attackerUser,
+                        $sourcePlanetId,
+                        $missionId
+                    );
+                } catch (Throwable $e) {}
+            }
         } elseif ($missionType === 'transport') {
             // Décharger les ressources sur la cible
             $cargo = json_decode($mission['cargo_data'], true) ?: ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];

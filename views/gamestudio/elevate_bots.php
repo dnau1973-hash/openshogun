@@ -16,6 +16,7 @@ $spawnInterval = (int)($settings['bot_spawn_interval_min'] ?? 15);
 $maxVillages = (int)($settings['bot_spawn_max_villages'] ?? 50);
 $currentVillages = (int)($botSpawnStatus['current_villages'] ?? $totalBots);
 $aggressiveness = $settings['bot_aggressiveness'] ?? 'moderate';
+$isRetaliationActive = GameConfig::get('bot_retaliation_enabled', true);
 ?>
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->
@@ -177,47 +178,58 @@ $aggressiveness = $settings['bot_aggressiveness'] ?? 'moderate';
 
         <form id="botSettingsForm" onsubmit="saveBotSettings(event)">
             <div class="row g-3 mb-4">
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-4 col-lg-2">
                     <label class="form-label fw-bold text-dark mb-1">
-                        <i class="fa-solid fa-power-off text-primary me-1"></i>Interrupteur Général de l'IA
+                        <i class="fa-solid fa-power-off text-primary me-1"></i>IA Générale
                     </label>
                     <select name="bots_enabled" class="form-select" id="bots_enabled">
-                        <option value="1" <?= $isAiActive ? 'selected' : '' ?>>IA Active (Cycles opérationnels)</option>
-                        <option value="0" <?= !$isAiActive ? 'selected' : '' ?>>IA En Veille (Bots figés)</option>
+                        <option value="1" <?= $isAiActive ? 'selected' : '' ?>>Active</option>
+                        <option value="0" <?= !$isAiActive ? 'selected' : '' ?>>En Veille</option>
                     </select>
-                    <div class="form-hint">Permet aux clans de développer leurs mines, bâtiments et armées.</div>
+                    <div class="form-hint">Mines, parcelles, bâtiments.</div>
                 </div>
 
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-4 col-lg-2">
                     <label class="form-label fw-bold text-dark mb-1">
-                        <i class="fa-solid fa-chess-rook text-indigo me-1"></i>Colonisation Automatique
+                        <i class="fa-solid fa-chess-rook text-indigo me-1"></i>Colonisation
                     </label>
                     <select name="bot_colonize_enabled" class="form-select" id="bot_colonize_enabled">
-                        <option value="1" <?= $isColonizeActive ? 'selected' : '' ?>>Autorisée (Conquêtes de fiefs)</option>
-                        <option value="0" <?= !$isColonizeActive ? 'selected' : '' ?>>Désactivée (Domaine initial)</option>
+                        <option value="1" <?= $isColonizeActive ? 'selected' : '' ?>>Autorisée</option>
+                        <option value="0" <?= !$isColonizeActive ? 'selected' : '' ?>>Désactivée</option>
                     </select>
-                    <div class="form-hint">Autorise les Daimyōs IA à coloniser de nouvelles tuiles de l'archipel.</div>
+                    <div class="form-hint">Conquêtes provinciales.</div>
                 </div>
 
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-4 col-lg-2">
                     <label class="form-label fw-bold text-dark mb-1">
-                        <i class="fa-solid fa-layer-group text-success me-1"></i>Max Fiefs par Daimyō IA
+                        <i class="fa-solid fa-layer-group text-success me-1"></i>Max Fiefs / Bot
                     </label>
                     <input type="number" name="bot_max_planets" id="bot_max_planets" min="1" max="10" 
                            value="<?= (int)($settings['bot_max_planets'] ?? 3) ?>" class="form-control text-center font-weight-bold">
-                    <div class="form-hint">Plafond maximum de domaines contrôlés par un même seigneur PNJ.</div>
+                    <div class="form-hint">Plafond de domaines PNJ.</div>
                 </div>
 
                 <div class="col-md-6 col-lg-3">
                     <label class="form-label fw-bold text-dark mb-1">
-                        <i class="fa-solid fa-shield-halved text-danger me-1"></i>Profil d'Agressivité
+                        <i class="fa-solid fa-shield-halved text-danger me-1"></i>Agressivité Spontanée
                     </label>
                     <select name="bot_aggressiveness" class="form-select" id="bot_aggressiveness">
-                        <option value="passive" <?= in_array($aggressiveness, ['peaceful', 'passive'], true) ? 'selected' : '' ?>>Passif / Pacifique (Mines &amp; Défense)</option>
+                        <option value="passive" <?= in_array($aggressiveness, ['peaceful', 'passive'], true) ? 'selected' : '' ?>>Passif (Défense pure)</option>
                         <option value="moderate" <?= ($aggressiveness === 'moderate') ? 'selected' : '' ?>>Modéré (Équilibré)</option>
-                        <option value="aggressive" <?= ($aggressiveness === 'aggressive') ? 'selected' : '' ?>>Belliqueux (Armées &amp; Raids)</option>
+                        <option value="aggressive" <?= ($aggressiveness === 'aggressive') ? 'selected' : '' ?>>Belliqueux (Raids actifs)</option>
                     </select>
-                    <div class="form-hint">Régit les priorités budgétaires : artisanat civil vs recrutement militaire.</div>
+                    <div class="form-hint">Priorité artisanat vs raids spontanés.</div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <label class="form-label fw-bold text-dark mb-1">
+                        <i class="fa-solid fa-arrows-split-up-and-left text-warning me-1"></i>Réciprocité &amp; Ripostes
+                    </label>
+                    <select name="bot_retaliation_enabled" class="form-select border-warning-subtle" id="bot_retaliation_enabled">
+                        <option value="1" <?= $isRetaliationActive ? 'selected' : '' ?>>Activée (Œil pour œil)</option>
+                        <option value="0" <?= !$isRetaliationActive ? 'selected' : '' ?>>Désactivée (Aucune riposte)</option>
+                    </select>
+                    <div class="form-hint">Contre-espionnage et contre-attaque proportionnée.</div>
                 </div>
             </div>
 
@@ -442,6 +454,38 @@ $aggressiveness = $settings['bot_aggressiveness'] ?? 'moderate';
                             </div>
                             <div class="text-muted small">
                                 <i class="fa-solid fa-circle-check text-indigo me-1"></i>Le clan étend sa présence territoriale sans dépasser le plafond fixé par l'administrateur.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Règle 7 : Réciprocité & Riposte Féodale (Œil pour œil, dent pour dent) -->
+                <div class="col-lg-12">
+                    <div class="card h-100 border shadow-xs bg-white">
+                        <div class="card-header bg-warning-lt py-2 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-warning d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-arrows-split-up-and-left"></i>7. Réciprocité Féodale &amp; Riposte Proportionnée (Œil pour œil, dent pour dent)
+                            </span>
+                            <span class="badge bg-warning text-dark font-monospace">Contre-Espionnage &bull; Contre-Attaque</span>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="p-2 bg-light rounded border-start border-3 border-cyan small h-100">
+                                        <div class="text-cyan fw-bold mb-1">
+                                            <i class="fa-solid fa-user-ninja me-1"></i>Si on les espionne &rarr; Ils nous espionnent :
+                                        </div>
+                                        Dès qu'un joueur humain dépêche un éclaireur Shinobi sur un domaine PNJ, l'IA détecte l'infiltration et programme une riposte de contre-espionnage sous <strong>30 à 75 secondes</strong> avec 1 à 3 sondes vers le fief d'origine de l'agresseur.
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-2 bg-light rounded border-start border-3 border-danger small h-100">
+                                        <div class="text-danger fw-bold mb-1">
+                                            <i class="fa-solid fa-shield-halved me-1"></i>Si on les attaque &rarr; Ils renvoient une attaque proportionnée :
+                                        </div>
+                                        Dès qu'un joueur humain assaille ou pille un domaine PNJ, l'IA évalue l'effectif reçu et lève une armée équivalente (<strong>85% à 115% des effectifs</strong> engagés, min. 10, max. 150 soldats). La contre-offensive est mobilisée sous <strong>60 à 160 secondes</strong>, déclenchant l'alerte de guerre du Général Oda Nobunaga !
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -887,6 +931,8 @@ async function saveBotSettings(event) {
         formData.append('bot_colonize_enabled', document.getElementById('bot_colonize_enabled').value);
         formData.append('bot_max_planets', document.getElementById('bot_max_planets').value);
         formData.append('bot_aggressiveness', document.getElementById('bot_aggressiveness').value);
+        const retalEl = document.getElementById('bot_retaliation_enabled');
+        if (retalEl) formData.append('bot_retaliation_enabled', retalEl.value);
         formData.append('bot_spawn_enabled', document.getElementById('bot_spawn_enabled').value);
         formData.append('bot_spawn_interval_min', document.getElementById('bot_spawn_interval_min').value);
         formData.append('bot_spawn_max_villages', document.getElementById('bot_spawn_max_villages').value);

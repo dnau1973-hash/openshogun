@@ -183,6 +183,14 @@ class BotEngine {
         $now = time();
         $report = [];
 
+        // 0. ⚔️ Traitement prioritaire des ripostes et contre-attaques programmées des IA
+        if (GameConfig::get('bots_enabled', true) && GameConfig::get('bot_retaliation_enabled', true)) {
+            $retaliationRes = $this->processPendingRetaliations();
+            if (!empty($retaliationRes['dispatched_total'])) {
+                $report['retaliations'] = $retaliationRes;
+            }
+        }
+
         // 1. 🌸 Éclosion spontanée de nouveaux villages PNJ (si activée et délai écoulé)
         if (GameConfig::get('bot_spawn_enabled', false)) {
             $spawnIntervalMin = max(1, (int)GameConfig::get('bot_spawn_interval_min', 15));
@@ -1015,6 +1023,330 @@ class BotEngine {
      */
     private function findFreeCoordinates(): array {
         return VillageFieldGenerator::findRandomFreeCoordinates($this->db, null);
+    }
+
+    /**
+     * Crée la table de suivi des ripostes et contre-attaques des bots si absente
+     */
+    public function ensureRetaliationTable(): void {
+        $sql = "
+            CREATE TABLE IF NOT EXISTS `bot_retaliations` (
+                `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                `bot_id` INT UNSIGNED NOT NULL,
+                `bot_planet_id` INT UNSIGNED NOT NULL,
+                `target_user_id` INT UNSIGNED NOT NULL,
+                `target_planet_id` INT UNSIGNED NOT NULL,
+                `retaliation_type` ENUM('spy', 'attack', 'raid') NOT NULL,
+                `trigger_mission_id` INT UNSIGNED NULL,
+                `trigger_fleet_count` INT UNSIGNED NOT NULL DEFAULT 1,
+                `planned_fleet` LONGTEXT NOT NULL,
+                `scheduled_at` INT UNSIGNED NOT NULL,
+                `dispatched_at` INT UNSIGNED NULL,
+                `status` ENUM('pending', 'dispatched', 'canceled') NOT NULL DEFAULT 'pending',
+                `created_at` INT UNSIGNED NOT NULL,
+                INDEX `idx_status_scheduled` (`status`, `scheduled_at`),
+                INDEX `idx_bot_target` (`bot_id`, `target_user_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ";
+        try {
+            $this->db->exec($sql);
+        } catch (Throwable $e) {}
+    }
+
+    /**
+     * Planifie un contre-espionnage Shinobi en réponse à un espionnage joueur
+     */
+    public function scheduleSpyRetaliation(
+        array $bot, 
+        array $botPlanet, 
+        array $attackerUser, 
+        int $attackerPlanetId, 
+        int $triggerMissionId
+    ): ?int {
+        // Pas de représailles entre bots ni envers les seigneurs sous immunité
+        if (!empty($attackerUser['is_bot']) || empty($bot['is_bot'])) return null;
+        if (Auth::isUserProtected((int)$attackerUser['id'])) return null;
+
+        // Contrôle des flags de configuration
+        if (!GameConfig::get('bots_enabled', true) || !GameConfig::get('bot_retaliation_enabled', true)) {
+            return null;
+        }
+
+        $this->ensureRetaliationTable();
+
+        $botId = (int)$bot['id'];
+        $botPlanetId = (int)$botPlanet['id'];
+        $targetUserId = (int)$attackerUser['id'];
+
+        // Éviter d'accumuler plusieurs contre-espionnages en attente pour le même bot vers cette cible
+        $stmtPending = $this->db->prepare("
+            SELECT COUNT(*) FROM bot_retaliations 
+            WHERE bot_id = ? AND target_planet_id = ? AND retaliation_type = 'spy' AND status = 'pending'
+        ");
+        $stmtPending->execute([$botId, $attackerPlanetId]);
+        if ((int)$stmtPending->fetchColumn() > 0) return null;
+
+        // 1 à 3 éclaireurs shinobi
+        $probesCount = rand(1, 3);
+        $plannedFleet = ['spy_probe' => $probesCount];
+
+        // Délai de réaction tactique réaliste (30 à 75 secondes)
+        $fleetSpeed = max(1, (float)GameConfig::get('fleet_speed', 5));
+        $delaySec = max(15, (int)round(rand(30, 70) / ($fleetSpeed > 5 ? 1.8 : 1)));
+        $scheduledAt = time() + $delaySec;
+
+        $stmt = $this->db->prepare("
+            INSERT INTO bot_retaliations 
+            (bot_id, bot_planet_id, target_user_id, target_planet_id, retaliation_type, trigger_mission_id, trigger_fleet_count, planned_fleet, scheduled_at, status, created_at)
+            VALUES (?, ?, ?, ?, 'spy', ?, 1, ?, ?, 'pending', UNIX_TIMESTAMP())
+        ");
+        $stmt->execute([
+            $botId,
+            $botPlanetId,
+            $targetUserId,
+            $attackerPlanetId,
+            $triggerMissionId,
+            json_encode($plannedFleet),
+            $scheduledAt
+        ]);
+
+        return (int)$this->db->lastInsertId();
+    }
+
+    /**
+     * Planifie une contre-attaque proportionnée en réponse à un assaut ou raid joueur
+     */
+    public function scheduleAttackRetaliation(
+        array $bot, 
+        array $botPlanet, 
+        array $attackerUser, 
+        int $attackerPlanetId, 
+        string $missionType, 
+        array $attackerFleet, 
+        int $triggerMissionId
+    ): ?int {
+        // Pas de représailles entre bots ni envers les seigneurs sous immunité
+        if (!empty($attackerUser['is_bot']) || empty($bot['is_bot'])) return null;
+        if (Auth::isUserProtected((int)$attackerUser['id'])) return null;
+
+        // Contrôle des flags de configuration
+        if (!GameConfig::get('bots_enabled', true) || !GameConfig::get('bot_retaliation_enabled', true)) {
+            return null;
+        }
+
+        $this->ensureRetaliationTable();
+
+        $botId = (int)$bot['id'];
+        $botPlanetId = (int)$botPlanet['id'];
+        $targetUserId = (int)$attackerUser['id'];
+        $faction = $bot['faction'] ?? 'terran';
+
+        // Éviter de programmer plus de 2 contre-attaques simultanées en attente pour un même bot
+        $stmtPending = $this->db->prepare("
+            SELECT COUNT(*) FROM bot_retaliations 
+            WHERE bot_id = ? AND target_planet_id = ? AND retaliation_type IN ('attack', 'raid') AND status = 'pending'
+        ");
+        $stmtPending->execute([$botId, $attackerPlanetId]);
+        if ((int)$stmtPending->fetchColumn() >= 2) return null;
+
+        // Calcul de la taille de l'attaque reçue
+        $attackerTroopCount = 0;
+        foreach ($attackerFleet as $code => $cnt) {
+            $attackerTroopCount += (int)$cnt;
+        }
+        $attackerTroopCount = max(5, $attackerTroopCount);
+
+        // Détermination de la force proportionnée : entre 85% et 115% de l'effectif reçu
+        // Plancher minimal de 10 guerriers et plafond de sécurité de 150 guerriers
+        $multiplier = (float)rand(85, 115) / 100.0;
+        $retaliationCount = min(150, max(10, (int)round($attackerTroopCount * $multiplier)));
+
+        // Composition de la garnison de riposte adaptée à la faction du clan IA
+        $plannedFleet = $this->composeProportionalFleet($faction, $retaliationCount);
+
+        // Type de mission réciproque (raid si raid, attack si attack)
+        $retaliationType = in_array($missionType, ['raid', 'attack'], true) ? $missionType : 'raid';
+
+        // Délai de mobilisation tactique : 60 à 180 secondes (pondéré par la vitesse du jeu)
+        $fleetSpeed = max(1, (float)GameConfig::get('fleet_speed', 5));
+        $delaySec = max(30, (int)round(rand(60, 160) / ($fleetSpeed > 5 ? 1.8 : 1)));
+        $scheduledAt = time() + $delaySec;
+
+        $stmt = $this->db->prepare("
+            INSERT INTO bot_retaliations 
+            (bot_id, bot_planet_id, target_user_id, target_planet_id, retaliation_type, trigger_mission_id, trigger_fleet_count, planned_fleet, scheduled_at, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', UNIX_TIMESTAMP())
+        ");
+        $stmt->execute([
+            $botId,
+            $botPlanetId,
+            $targetUserId,
+            $attackerPlanetId,
+            $retaliationType,
+            $triggerMissionId,
+            $attackerTroopCount,
+            json_encode($plannedFleet),
+            $scheduledAt
+        ]);
+
+        return (int)$this->db->lastInsertId();
+    }
+
+    /**
+     * Compose une armée proportionnée adaptée à la faction féodale du clan IA
+     */
+    private function composeProportionalFleet(string $faction, int $totalCount): array {
+        $fleet = [];
+        switch ($faction) {
+            case 'vorash': // Clan Takeda : cavalerie et archers montés
+                $cavalry = max(1, (int)round($totalCount * 0.40));
+                $infantry = max(1, $totalCount - $cavalry);
+                $fleet['fantassin_leger_takeda'] = $infantry;
+                $fleet['archer_yumi_monte'] = $cavalry;
+                break;
+
+            case 'aethelis': // Clan Tokugawa : sentinelles de muraille et archers
+                $bowmen = max(1, (int)round($totalCount * 0.40));
+                $spearmen = max(1, $totalCount - $bowmen);
+                $fleet['sentinelle_yari_tokugawa'] = $spearmen;
+                $fleet['archer_protecteur_muraille'] = $bowmen;
+                break;
+
+            case 'terran': // Clan Oda : piquiers ashigaru et mousquetaires
+            default:
+                $guns = max(1, (int)round($totalCount * 0.35));
+                $pikes = max(1, $totalCount - $guns);
+                $fleet['piquier_ashigaru_yari'] = $pikes;
+                $fleet['arquebusier_oda_tanegashima'] = $guns;
+                break;
+        }
+        return $fleet;
+    }
+
+    /**
+     * Traite et déclenche toutes les représailles dont le délai de mobilisation est échu
+     */
+    public function processPendingRetaliations(): array {
+        $this->ensureRetaliationTable();
+        $now = time();
+
+        $stmt = $this->db->prepare("
+            SELECT r.*, 
+                   b.faction as bot_faction, b.username as bot_name,
+                   bp.coord_x as source_x, bp.coord_y as source_y,
+                   tp.coord_x as target_x, tp.coord_y as target_y,
+                   u.protection_until as target_protected
+            FROM bot_retaliations r
+            JOIN users b ON r.bot_id = b.id
+            JOIN planets bp ON r.bot_planet_id = bp.id
+            JOIN planets tp ON r.target_planet_id = tp.id
+            JOIN users u ON r.target_user_id = u.id
+            WHERE r.status = 'pending' AND r.scheduled_at <= ?
+            ORDER BY r.scheduled_at ASC
+            LIMIT 15
+        ");
+        $stmt->execute([$now]);
+        $pending = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $dispatchedSpies = 0;
+        $dispatchedAttacks = 0;
+        $canceled = 0;
+
+        require_once __DIR__ . '/FleetEngine.php';
+        $fleetEngine = new FleetEngine();
+
+        foreach ($pending as $item) {
+            $retaliationId = (int)$item['id'];
+            $botId = (int)$item['bot_id'];
+            $botPlanetId = (int)$item['bot_planet_id'];
+            $targetPlanetId = (int)$item['target_planet_id'];
+            $targetUserId = (int)$item['target_user_id'];
+            $retaliationType = $item['retaliation_type'];
+            $fleet = json_decode($item['planned_fleet'], true) ?: [];
+
+            // 1. Contrôle d'immunité débutant ou de trêve impériale
+            if (Auth::isUserProtected($targetUserId) || GameConfig::isImperialTruceActive()) {
+                $this->db->prepare("UPDATE bot_retaliations SET status = 'canceled' WHERE id = ?")->execute([$retaliationId]);
+                $canceled++;
+                continue;
+            }
+
+            // 2. Contrôle de distance
+            $distance = FleetEngine::calculateDistance(
+                (int)$item['source_x'], 
+                (int)$item['source_y'], 
+                (int)$item['target_x'], 
+                (int)$item['target_y']
+            );
+
+            // 3. Mobilisation des unités sur le fief du bot
+            if ($retaliationType === 'spy') {
+                $probeCount = (int)($fleet['spy_probe'] ?? 1);
+                $this->db->prepare("
+                    INSERT INTO planet_ships (planet_id, ship_code, count)
+                    VALUES (?, 'spy_probe', ?)
+                    ON DUPLICATE KEY UPDATE count = count + VALUES(count)
+                ")->execute([$botPlanetId, $probeCount]);
+            } else {
+                foreach ($fleet as $unitCode => $count) {
+                    $cnt = (int)$count;
+                    $this->db->prepare("
+                        INSERT INTO planet_units (planet_id, unit_code, count)
+                        VALUES (?, ?, ?)
+                        ON DUPLICATE KEY UPDATE count = count + VALUES(count)
+                    ")->execute([$botPlanetId, $unitCode, $cnt]);
+                }
+            }
+
+            // 4. Calcul de la durée de vol
+            $flightDuration = max(35, $fleetEngine->calculateFlightDuration(
+                $fleet, 
+                $distance, 
+                $item['bot_faction'] ?? 'terran', 
+                $botPlanetId
+            ));
+
+            $arrivalTime = $now + $flightDuration;
+            $returnTime = $arrivalTime + $flightDuration;
+
+            // 5. Enregistrement de la mission de flotte
+            $stmtMission = $this->db->prepare("
+                INSERT INTO fleet_missions 
+                (user_id, source_planet_id, target_planet_id, mission_type, fleet_data, cargo_data, has_hero, departure_time, arrival_time, return_time, status)
+                VALUES (?, ?, ?, ?, ?, '{}', 0, ?, ?, ?, 'en_route')
+            ");
+            $stmtMission->execute([
+                $botId,
+                $botPlanetId,
+                $targetPlanetId,
+                $retaliationType,
+                json_encode($fleet),
+                $now,
+                $arrivalTime,
+                $returnTime
+            ]);
+
+            // 6. Marquer la riposte comme déclenchée
+            $this->db->prepare("
+                UPDATE bot_retaliations 
+                SET status = 'dispatched', dispatched_at = ? 
+                WHERE id = ?
+            ")->execute([$now, $retaliationId]);
+
+            if ($retaliationType === 'spy') {
+                $dispatchedSpies++;
+            } else {
+                $dispatchedAttacks++;
+            }
+        }
+
+        return [
+            'processed' => count($pending),
+            'spies_dispatched' => $dispatchedSpies,
+            'attacks_dispatched' => $dispatchedAttacks,
+            'canceled' => $canceled,
+            'dispatched_total' => ($dispatchedSpies + $dispatchedAttacks)
+        ];
     }
 }
 

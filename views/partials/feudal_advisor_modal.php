@@ -181,3 +181,4 @@ window.openFeudalAdvisorModal = function(options) {
     modalInst.show();
 };
 </script>
+

@@ -82,6 +82,11 @@ try {
             GameConfig::set('bot_spawn_interval_min', $botSpawnIntervalMin);
             GameConfig::set('bot_spawn_max_villages', $botSpawnMaxVillages);
 
+            if (isset($_POST['bot_retaliation_enabled'])) {
+                $botRetaliation = !empty($_POST['bot_retaliation_enabled']) && ($_POST['bot_retaliation_enabled'] === '1' || $_POST['bot_retaliation_enabled'] === 'true');
+                GameConfig::set('bot_retaliation_enabled', $botRetaliation);
+            }
+
             // Si passage en mode Passif ou désactivation des bots : rappel immédiat des raids PNJ
             if ($botAggressiveness === 'passive' || !$botsEnabled) {
                 $dbAdmin = Database::getConnection();
