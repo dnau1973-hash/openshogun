@@ -48,3 +48,4 @@ echo "  [INFO] Fichiers logs détectés : " . implode(', ', $logNames) . PHP_EOL
 echo PHP_EOL . "========================================================================" . PHP_EOL;
 echo " TOUS LES TESTS DU SERVICE DE LOG APACHE SONT 100% VALIDES !" . PHP_EOL;
 echo "========================================================================" . PHP_EOL;
+

@@ -20,10 +20,20 @@
                             <h2 class="text-dark fw-bold m-0" style="font-size: 1.4rem;">
                                 Journal des Erreurs Apache &amp; Serveur Web
                             </h2>
-                            <?php if ($logExists): ?>
-                                <span class="badge bg-success-lt fw-bold px-2.5 py-1">
-                                    <i class="fa-solid fa-circle-check me-1"></i>Fichier En Ligne
+                            <?php if ($permissionDenied && empty($parsedEntries)): ?>
+                                <span class="badge bg-warning text-dark fw-bold px-2.5 py-1">
+                                    <i class="fa-solid fa-shield-halved me-1"></i>Accès Restreint (Permissions OS)
                                 </span>
+                            <?php elseif ($logExists): ?>
+                                <?php if (($sourceType ?? '') === 'journalctl'): ?>
+                                    <span class="badge bg-info-lt fw-bold px-2.5 py-1">
+                                        <i class="fa-solid fa-terminal me-1"></i>Via journalctl
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge bg-success-lt fw-bold px-2.5 py-1">
+                                        <i class="fa-solid fa-circle-check me-1"></i>Fichier En Ligne
+                                    </span>
+                                <?php endif; ?>
                             <?php else: ?>
                                 <span class="badge bg-danger-lt fw-bold px-2.5 py-1">
                                     <i class="fa-solid fa-triangle-exclamation me-1"></i>Fichier Non Trouvé
@@ -150,21 +160,47 @@
             <div class="card card-sm border-start border-2 border-teal shadow-sm h-100">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between mb-1.5">
-                        <span class="text-secondary small fw-bold text-uppercase">Serveur HTTP</span>
+                        <span class="text-secondary small fw-bold text-uppercase">Système &amp; Serveur</span>
                         <span class="avatar avatar-xs rounded bg-teal-lt text-teal"><i class="fa-solid fa-server"></i></span>
                     </div>
                     <div class="fw-bold text-dark text-truncate" title="<?= htmlspecialchars($_SERVER['SERVER_SOFTWARE'] ?? 'Apache') ?>">
-                        <?= htmlspecialchars(explode(' ', $_SERVER['SERVER_SOFTWARE'] ?? 'Apache HTTP Server')[0]) ?>
+                        <?php if (!empty($isRaspberryPi)): ?>
+                            <span class="text-danger"><i class="fa-brands fa-raspberry-pi me-1"></i><?= htmlspecialchars($piModel ?: 'Raspberry Pi OS') ?></span>
+                        <?php else: ?>
+                            <?= htmlspecialchars(explode(' ', $_SERVER['SERVER_SOFTWARE'] ?? 'Apache HTTP Server')[0]) ?>
+                        <?php endif; ?>
                     </div>
-                    <div class="text-secondary small mt-2 pt-2 border-top">
+                    <div class="text-secondary small mt-2 pt-2 border-top d-flex justify-content-between align-items-center">
                         <span class="badge bg-<?= $isWritable ? 'success' : 'secondary' ?>-lt font-monospace">
                             <i class="fa-solid fa-<?= $isWritable ? 'pen-to-square' : 'lock' ?> me-1"></i><?= $isWritable ? 'Accessible en écriture' : 'Lecture seule' ?>
                         </span>
+                        <span class="badge bg-dark-lt font-monospace" title="Utilisateur d'exécution PHP"><?= htmlspecialchars($permissionUser ?? 'www-data') ?></span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <?php if (($sourceType ?? '') === 'journalctl'): ?>
+        <!-- Bandeau d'information quand les logs sont récupérés via journalctl -->
+        <div class="alert alert-info border-0 shadow-sm mb-4 py-2.5 px-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-terminal text-info fs-3"></i>
+                    <div>
+                        <strong class="text-dark">Logs récupérés en direct via systemd journalctl</strong>
+                        <div class="text-secondary small">
+                            L'accès direct au fichier <code><?= htmlspecialchars($logPath ?? '/var/log/apache2/error.log') ?></code> nécessite les droits du groupe <code>adm</code>. Pour autoriser la lecture directe du fichier sans passer par journalctl :
+                            <code class="user-select-all"><?= htmlspecialchars($permissionCommand ?? '') ?></code>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-info" onclick="copySnippetToClipboard('<?= htmlspecialchars($permissionCommand ?? '') ?>', this)">
+                    <i class="fa-solid fa-copy me-1"></i>Copier la commande
+                </button>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- ── 3. BARRE DE FILTRAGE & RECHERCHE EN DIRECT ── -->
     <div class="card border shadow-sm mb-4 bg-white">
@@ -235,7 +271,77 @@
     </div>
 
     <!-- ── 4. CONTENU DU JOURNAL DE LOG ── -->
-    <?php if (!$logExists): ?>
+    <?php if ($permissionDenied && empty($parsedEntries)): ?>
+        <!-- Diagnostic Permissions Raspberry Pi OS / Debian Linux -->
+        <div class="card border-0 shadow-sm mb-4" style="border-left: 4px solid #ef4444 !important;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-start gap-3">
+                    <span class="avatar avatar-xl rounded bg-danger-lt text-danger fs-1 shadow-sm flex-shrink-0">
+                        <i class="fa-brands fa-raspberry-pi"></i>
+                    </span>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                            <h3 class="fw-bold text-dark m-0 d-flex align-items-center gap-2">
+                                <span>Fichier Log Détecté sur Raspberry Pi :</span>
+                                <code class="text-danger"><?= htmlspecialchars($logPath ?? '/var/log/apache2/error.log') ?></code>
+                            </h3>
+                            <span class="badge bg-danger text-white fw-bold px-2 py-1">
+                                <i class="fa-solid fa-lock me-1"></i>Permissions Système Restreintes (0750)
+                            </span>
+                        </div>
+                        <p class="text-secondary small mb-3">
+                            Sur <strong>Raspberry Pi OS (Debian)</strong>, le dossier <code>/var/log/apache2/</code> appartient par défaut à <code>root:adm</code> avec les droits <code>0750</code>. 
+                            L'utilisateur web du serveur <strong><code><?= htmlspecialchars($permissionUser ?? 'www-data') ?></code></strong> n'est pas membre du groupe <code>adm</code> à l'installation, ce qui empêche PHP de lire le fichier de log d'erreurs Apache.
+                        </p>
+
+                        <!-- Commande SSH Recommandée (1 Seul Clic) -->
+                        <div class="card bg-dark text-white border-0 shadow-sm mb-3">
+                            <div class="card-header bg-dark border-bottom border-secondary py-2 px-3 d-flex justify-content-between align-items-center">
+                                <span class="small font-monospace text-warning">
+                                    <i class="fa-solid fa-terminal me-1"></i>Résolution en 1 commande SSH (Recommandée) :
+                                </span>
+                                <button type="button" class="btn btn-xs btn-outline-warning text-warning" onclick="copySnippetToClipboard('<?= htmlspecialchars($permissionCommand ?? '') ?>', this)">
+                                    <i class="fa-solid fa-copy me-1"></i>Copier la commande
+                                </button>
+                            </div>
+                            <div class="card-body p-3 font-monospace small" style="background:#0b0f19;">
+                                <div class="text-secondary mb-1"># Ajouter l'utilisateur web au groupe système adm puis recharger Apache :</div>
+                                <div class="text-warning user-select-all fs-4 fw-bold">
+                                    $ <?= htmlspecialchars($permissionCommand ?? '') ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Commande Alternative chmod -->
+                        <div class="p-3 bg-light rounded border text-secondary small d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <div>
+                                <strong>Alternative rapide (chmod) :</strong>
+                                <code class="ms-1 user-select-all"><?= htmlspecialchars($permissionAlternative ?? '') ?></code>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-ghost-secondary" onclick="copySnippetToClipboard('<?= htmlspecialchars($permissionAlternative ?? '') ?>', this)">
+                                <i class="fa-solid fa-copy me-1"></i>Copier le chmod
+                            </button>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <button type="button" class="btn btn-success btn-sm d-flex align-items-center gap-1.5" onclick="window.location.reload();">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                                <span>J'ai exécuté la commande &mdash; Recharger les logs</span>
+                            </button>
+                            <a href="?page=gamestudio&tab=general&subtab=apache_logs&log_file=/var/log/apache2/other_vhosts_access.log" class="btn btn-outline-secondary btn-sm">
+                                Tester other_vhosts_access.log
+                            </a>
+                            <a href="?page=gamestudio&tab=general&subtab=apache_logs&log_file=/var/log/syslog" class="btn btn-outline-secondary btn-sm">
+                                Tester /var/log/syslog
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <?php elseif (!$logExists): ?>
         <!-- Fichier non détecté -->
         <div class="card border-warning shadow-sm">
             <div class="card-body p-4 text-center">
@@ -243,14 +349,24 @@
                     <i class="fa-solid fa-file-circle-question fs-1"></i>
                 </span>
                 <h3 class="fw-bold text-dark">Fichier Log Apache Introuvable</h3>
-                <p class="text-secondary mx-auto" style="max-width: 580px;">
+                <p class="text-secondary mx-auto mb-3" style="max-width: 580px;">
                     Aucun journal d'erreur Apache n'a été détecté automatiquement dans les chemins standards de Wamp, XAMPP ou Linux.
                 </p>
+
+                <!-- Raccourcis chemins courants -->
+                <div class="mb-3 d-flex justify-content-center gap-2 flex-wrap">
+                    <span class="small text-secondary align-self-center">Tester :</span>
+                    <a href="?page=gamestudio&tab=general&subtab=apache_logs&log_file=/var/log/apache2/error.log" class="btn btn-xs btn-outline-secondary font-monospace">/var/log/apache2/error.log</a>
+                    <a href="?page=gamestudio&tab=general&subtab=apache_logs&log_file=/var/log/apache2/other_vhosts_access.log" class="btn btn-xs btn-outline-secondary font-monospace">/var/log/apache2/other_vhosts_access.log</a>
+                    <a href="?page=gamestudio&tab=general&subtab=apache_logs&log_file=/var/log/syslog" class="btn btn-xs btn-outline-secondary font-monospace">/var/log/syslog</a>
+                    <a href="?page=gamestudio&tab=general&subtab=apache_logs&log_file=C:/wamp64/logs/apache_error.log" class="btn btn-xs btn-outline-secondary font-monospace">C:/wamp64/logs/apache_error.log</a>
+                </div>
+
                 <form method="GET" action="" class="d-inline-flex gap-2 mx-auto" style="max-width: 500px;">
                     <input type="hidden" name="page" value="gamestudio">
                     <input type="hidden" name="tab" value="general">
                     <input type="hidden" name="subtab" value="apache_logs">
-                    <input type="text" name="log_file" class="form-control font-monospace form-control-sm" placeholder="ex: C:/wamp64/logs/apache_error.log">
+                    <input type="text" name="log_file" class="form-control font-monospace form-control-sm" placeholder="ex: /var/log/apache2/error.log ou C:/wamp64/logs/apache_error.log">
                     <button type="submit" class="btn btn-primary btn-sm">Inspecter</button>
                 </form>
             </div>
@@ -505,6 +621,17 @@ function copyTerminalText() {
     });
 }
 
+function copySnippetToClipboard(text, btn) {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+        if (btn) {
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check me-1"></i>Copié !';
+            setTimeout(() => { btn.innerHTML = originalHtml; }, 2500);
+        }
+    });
+}
+
 function confirmClearLog() {
     const modalEl = document.getElementById('modalConfirmClearLog');
     if (modalEl) {
@@ -513,3 +640,4 @@ function confirmClearLog() {
     }
 }
 </script>
+

@@ -71,6 +71,29 @@ assertTest(!empty($output), "Vue general_apache_logs.php rendue avec succès (" 
 assertTest(str_contains($output, "Journal des Erreurs Apache"), "Titre présent dans le HTML rendu");
 assertTest(str_contains($output, "apacheLogsTable"), "Tableau des logs présent dans le HTML rendu");
 
+// 6. Simulation du mode Raspberry Pi / Permissions Debian
+echo PHP_EOL . "[TEST 6] Simulation diagnostic Raspberry Pi / Permissions Linux..." . PHP_EOL;
+$mockPiData = $data;
+$mockPiData['isLinux'] = true;
+$mockPiData['isRaspberryPi'] = true;
+$mockPiData['piModel'] = 'Raspberry Pi 4 Model B';
+$mockPiData['logPath'] = '/var/log/apache2/error.log';
+$mockPiData['permissionDenied'] = true;
+$mockPiData['permissionUser'] = 'www-data';
+$mockPiData['permissionCommand'] = 'sudo usermod -aG adm www-data && sudo systemctl restart apache2';
+$mockPiData['permissionAlternative'] = 'sudo chmod 755 /var/log/apache2 && sudo chmod 644 /var/log/apache2/*.log';
+$mockPiData['parsedEntries'] = []; // Simule l'accès bloqué avant chmod/usermod
+
+extract($mockPiData);
+ob_start();
+include __DIR__ . '/../views/gamestudio/general_apache_logs.php';
+$piOutput = ob_get_clean();
+assertTest(str_contains($piOutput, "Raspberry Pi"), "Mention de Raspberry Pi présente dans le diagnostic");
+assertTest(str_contains($piOutput, "sudo usermod -aG adm www-data"), "Commande de correction usermod présente dans l'interface");
+assertTest(str_contains($piOutput, "copySnippetToClipboard"), "Fonction de copie de snippet présente");
+assertTest(str_contains($piOutput, "/var/log/apache2/error.log"), "Chemin Debian standard affiché");
+
 echo PHP_EOL . "========================================================================" . PHP_EOL;
 echo " TOUS LES TESTS D'INTÉGRATION DU LOG APACHE SONT 100% VALIDES !" . PHP_EOL;
 echo "========================================================================" . PHP_EOL;
+
