@@ -861,9 +861,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     const sessionKey = `codex_quest_notified_${currentLoggedUserId}_${activeQ.key}_claimable`;
                     if (!sessionStorage.getItem(sessionKey)) {
                         sessionStorage.setItem(sessionKey, '1');
-                        setTimeout(() => {
-                            openCodexQuestModal(activeQ.key);
-                        }, 700);
+                        if (window.ModalQueueManager) {
+                            window.ModalQueueManager.enqueue({
+                                id: 'codex_quest_' + activeQ.key,
+                                priority: 30,
+                                modalElement: '#modalCodexQuest',
+                                open: () => openCodexQuestModal(activeQ.key)
+                            });
+                        } else {
+                            setTimeout(() => {
+                                openCodexQuestModal(activeQ.key);
+                            }, 700);
+                        }
                     }
                 }
             }

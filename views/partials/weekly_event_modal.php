@@ -409,14 +409,27 @@ $secRemaining = (int)($activeEvent['seconds_remaining'] ?? 0);
         syncCheckbox();
     }
 
-    // Auto-ouverture uniquement si jamais vue cette session ET non désactivée
+    // Auto-ouverture séquentielle via ModalQueueManager uniquement si jamais vue cette session ET non désactivée
     if (!isDismissed && !isSeenThisSession) {
         sessionStorage.setItem(sessionKeySeen, '1');
-        setTimeout(function() {
-            if (typeof window.openWeeklyChronicleModal === 'function') {
-                window.openWeeklyChronicleModal();
-            }
-        }, 800);
+        if (window.ModalQueueManager) {
+            window.ModalQueueManager.enqueue({
+                id: 'weekly_chronicle_' + eventId,
+                priority: 40,
+                modalElement: '#weeklyChronicleModal',
+                open: () => {
+                    if (typeof window.openWeeklyChronicleModal === 'function') {
+                        window.openWeeklyChronicleModal();
+                    }
+                }
+            });
+        } else {
+            setTimeout(function() {
+                if (typeof window.openWeeklyChronicleModal === 'function') {
+                    window.openWeeklyChronicleModal();
+                }
+            }, 800);
+        }
     }
 })();
 
@@ -469,6 +482,9 @@ window.closeWeeklyChronicleModal = function() {
     if (bd) bd.remove();
     document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
     document.body.classList.remove('modal-open');
+    if (window.ModalQueueManager) {
+        window.ModalQueueManager.notifyClosed();
+    }
 };
 
 (function() {

@@ -187,6 +187,8 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
     <!-- Transparence & Détails des Prompts Images IA -->
     <link rel="stylesheet" href="/public/css/ai_prompt_modal.css?v=<?= file_exists(__DIR__ . '/../../public/css/ai_prompt_modal.css') ? filemtime(__DIR__ . '/../../public/css/ai_prompt_modal.css') : time() ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏯</text></svg>">
+    <!-- Orchestrateur de Modales (évite l'empilement simultané à l'ouverture de session) -->
+    <script src="/public/js/modal_queue.js?v=<?= file_exists(__DIR__ . '/../../public/js/modal_queue.js') ? filemtime(__DIR__ . '/../../public/js/modal_queue.js') : time() ?>"></script>
     <script>
         window.IS_ADMIN = <?= (!empty($user['is_admin']) || (($user['role'] ?? '') === 'admin') || (isset($auth) && $auth->isAdmin())) ? 'true' : 'false' ?>;
     </script>
@@ -359,13 +361,22 @@ $navItems = [
                     }
                 }
 
-                // Ouverture automatique si le joueur ne l'a pas encore consultée dans sa session
+                // Ouverture automatique séquentielle via ModalQueueManager si le joueur ne l'a pas encore consultée dans sa session
                 document.addEventListener('DOMContentLoaded', function() {
                     try {
                         const bcId = <?= json_encode($bcId) ?>;
                         if (bcId && !sessionStorage.getItem('seen_proclamation_' + bcId)) {
                             sessionStorage.setItem('seen_proclamation_' + bcId, '1');
-                            setTimeout(openImperialProclamationModal, 600);
+                            if (window.ModalQueueManager) {
+                                window.ModalQueueManager.enqueue({
+                                    id: 'imperial_proclamation_' + bcId,
+                                    priority: 10,
+                                    modalElement: '#modalImperialProclamation',
+                                    open: openImperialProclamationModal
+                                });
+                            } else {
+                                setTimeout(openImperialProclamationModal, 600);
+                            }
                         }
                     } catch (e) {}
                 });

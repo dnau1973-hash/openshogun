@@ -117,8 +117,23 @@ async function checkWisdomAdvice(isManual = false) {
             renderWisdomModal(data.advice);
             const modalEl = document.getElementById('modalWisdomLearning');
             if (modalEl) {
-                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                modal.show();
+                if (isManual) {
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
+                } else if (window.ModalQueueManager) {
+                    window.ModalQueueManager.enqueue({
+                        id: 'wisdom_advice_' + (data.advice.key || 'current'),
+                        priority: 50,
+                        modalElement: modalEl,
+                        open: () => {
+                            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                            modal.show();
+                        }
+                    });
+                } else {
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
+                }
             }
         } else if (isManual) {
             // Si ouverture manuelle mais tout est déjà accompli

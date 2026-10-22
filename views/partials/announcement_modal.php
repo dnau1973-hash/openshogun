@@ -125,7 +125,16 @@ async function checkUnreadAnnouncements() {
 
         if (data.success && data.has_unread && data.announcement) {
             isAnnouncementPreviewMode = false;
-            displayAnnouncementModal(data.announcement);
+            if (window.ModalQueueManager) {
+                window.ModalQueueManager.enqueue({
+                    id: 'announcement_' + data.announcement.id,
+                    priority: 20,
+                    modalElement: '#announcementModal',
+                    open: () => displayAnnouncementModal(data.announcement, false)
+                });
+            } else {
+                displayAnnouncementModal(data.announcement, false);
+            }
         }
     } catch (e) {
         console.warn("Vérification des annonces:", e);
@@ -195,6 +204,9 @@ function closeAnnouncementModalSilently() {
     const modal = document.getElementById('announcementModal');
     if (modal) {
         modal.style.display = 'none';
+    }
+    if (window.ModalQueueManager) {
+        window.ModalQueueManager.notifyClosed();
     }
 }
 
