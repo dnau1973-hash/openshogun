@@ -713,6 +713,64 @@ function renderLakeFishCounter(currentStock, initialStock, isDepleted) {
     `;
 }
 
+// ── Résolution de l'illustration pour chaque type de parcelle dans la modale de carte ──
+function getMapModalIllustration(data) {
+    if (!data) return '/public/assets/map/plaines.jpg?v=1';
+
+    // 1. Terre Sacrée Inviolable [0 : 0] Scellée
+    if (data.is_sealed_dojo || (parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0 && !data.is_imperial_dojo && !data.dojo_unlocked)) {
+        return '/public/assets/map/terre_sacree.jpg?v=1';
+    }
+    // 2. Dōjō Impérial Éveillé [0 : 0] (Tenchi no Seichi)
+    if (data.is_imperial_dojo || (parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0 && (data.is_imperial_dojo || data.dojo_unlocked))) {
+        return '/public/assets/map/dojo_imperial.jpg?v=1';
+    }
+    // 3. Donjon Historique Authentique (現存十二天守)
+    if (data.is_authentic_castle) {
+        return '/public/assets/map/donjon.jpg?v=1';
+    }
+    // 4. Fief de Daimyō (Joueur ou IA)
+    if (data.user_id) {
+        return '/public/assets/map/fief.jpg?v=1';
+    }
+    // 5. Oasis Naturelle (selon type d'oasis ou oasis générale)
+    if (data.is_oasis) {
+        const oType = (data.oasis_type || '').toLowerCase();
+        const oName = (data.oasis_name || '').toLowerCase();
+        if (oType.includes('lake') || oName.includes('lac') || oName.includes('eau')) {
+            return '/public/assets/map/lac.jpg?v=1';
+        }
+        if (oType.includes('forest') || oName.includes('forêt') || oName.includes('bois')) {
+            return '/public/assets/map/foret.jpg?v=1';
+        }
+        if (oType.includes('mountain') || oType.includes('rock') || oName.includes('montagne') || oName.includes('pic')) {
+            return '/public/assets/map/pics.jpg?v=1';
+        }
+        if (oType.includes('hills') || oName.includes('colline')) {
+            return '/public/assets/map/collines.jpg?v=1';
+        }
+        return '/public/assets/map/oasis.jpg?v=1';
+    }
+
+    // 6. Terrains Naturels et Domaines Libres (Plaines, Forêt, Montagnes, Collines, Lac)
+    const tType = (data.terrain_type || data.planet_type || '').toLowerCase();
+    const tName = (data.terrain_name || data.planet_name || '').toLowerCase();
+
+    if (tType === 'lake' || tType === 'oceanic' || data.is_lake || tName.includes('lac') || tName.includes('eau') || tName.includes('calme') || tName.includes('vive')) {
+        return '/public/assets/map/lac.jpg?v=1';
+    }
+    if (tType === 'mountain' || data.is_mountain || tName.includes('montagne') || tName.includes('pic') || tName.includes('crête') || tName.includes('rocheux')) {
+        return '/public/assets/map/pics.jpg?v=1';
+    }
+    if (tType === 'forest' || tName.includes('forêt') || tName.includes('cèdre') || tName.includes('bois') || tName.includes('sugi')) {
+        return '/public/assets/map/foret.jpg?v=1';
+    }
+    if (tType === 'hills' || tName.includes('colline') || tName.includes('coteau') || tName.includes('terrasse')) {
+        return '/public/assets/map/collines.jpg?v=1';
+    }
+    return '/public/assets/map/plaines.jpg?v=1';
+}
+
 // Fonction appelée lors du clic sur une tuile de la carte
 window.selectPlanetTile = function(data) {
     const title  = document.getElementById('mapModalTitle');
@@ -720,6 +778,7 @@ window.selectPlanetTile = function(data) {
     const body   = document.getElementById('mapModalBody');
 
     coords.innerText = `[${data.coord_x} : ${data.coord_y}]`;
+    const modalImg = getMapModalIllustration(data);
 
     // ── Terre Sacrée [0 : 0] / Le Dōjō Impérial ──────────────────────────────
     if (data.is_imperial_dojo || (parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0)) {
@@ -731,8 +790,8 @@ window.selectPlanetTile = function(data) {
             body.innerHTML = `
                 <div style="background:#f8fafc; border:2px solid #cbd5e1; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                     <div class="d-flex align-items-center gap-3 mb-3">
-                        <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #94a3b8; flex-shrink:0; background:#e2e8f0; display:flex; align-items:center; justify-content:center;">
-                            <i class="fa-solid fa-mountain text-secondary fs-1"></i>
+                        <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #94a3b8; flex-shrink:0; background:#e2e8f0; box-shadow:0 0 10px rgba(148,163,184,0.35);">
+                            <img src="${modalImg}" alt="Terre Sacrée Inviolable" style="width:100%; height:100%; object-fit:cover;">
                         </div>
                         <div>
                             <div style="font-weight:800; color:#1e293b; font-size:1.15rem;">
@@ -796,7 +855,7 @@ window.selectPlanetTile = function(data) {
             <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #d97706; flex-shrink:0; background:#fef3c7; box-shadow:0 0 10px rgba(245,158,11,0.4);">
-                        <img src="/public/assets/map/tile_imperial_dojo.jpg?v=1" alt="Dojo Imperial" style="width:100%; height:100%; object-fit:cover;">
+                        <img src="${modalImg}" alt="Dōjō Impérial" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div>
                         <div style="font-weight:800; color:#92400e; font-size:1.2rem;">
@@ -877,6 +936,15 @@ window.selectPlanetTile = function(data) {
             data.terrain_name.toLowerCase().includes('vive')
         )));
         const isMountain = (data.terrain_type === 'mountain' || (data.terrain_name && data.terrain_name.toLowerCase().includes('montagne')));
+        const isForest = (data.terrain_type === 'forest' || (data.terrain_name && (data.terrain_name.toLowerCase().includes('forêt') || data.terrain_name.toLowerCase().includes('cèdre'))));
+        const isHills = (data.terrain_type === 'hills' || (data.terrain_name && data.terrain_name.toLowerCase().includes('colline')));
+
+        let borderTint = '#cbd5e1';
+        let shadowTint = 'rgba(0,0,0,0.06)';
+        if (isLake) { borderTint = '#0891b2'; shadowTint = 'rgba(8,145,178,0.25)'; }
+        else if (isMountain) { borderTint = '#b45309'; shadowTint = 'rgba(180,83,9,0.25)'; }
+        else if (isForest) { borderTint = '#15803d'; shadowTint = 'rgba(21,128,61,0.25)'; }
+        else if (isHills) { borderTint = '#65a30d'; shadowTint = 'rgba(101,163,13,0.25)'; }
 
         const currentStock = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
@@ -904,8 +972,8 @@ window.selectPlanetTile = function(data) {
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width:58px; height:58px; border-radius:8px; overflow:hidden; border:2px solid #cbd5e1; flex-shrink:0; background:#f1f5f9;">
-                        ${data.terrain_img ? `<img src="${data.terrain_img}" alt="" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:2rem; display:flex; align-items:center; justify-content:center; height:100%;"><i class="fa-solid fa-wheat-awn text-warning"></i></span>'}
+                    <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid ${borderTint}; flex-shrink:0; background:#f1f5f9; box-shadow:0 0 10px ${shadowTint};">
+                        <img src="${modalImg}" alt="${escapeHtml(data.terrain_name || 'Terrain')}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div>
                         <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
@@ -986,22 +1054,37 @@ window.selectPlanetTile = function(data) {
 
     // ── Donjons Authentiques (現存十二天守) ─────────────────────
     if (data.is_authentic_castle) {
-        title.innerHTML = `<i class="fa-solid fa-chess-rook text-warning me-1"></i> <span style="color:#b45309;">${data.castle_name}</span> <span class="text-secondary small">${data.castle_kanji || ''}</span>`;
+        title.innerHTML = `<i class="fa-solid fa-chess-rook text-warning me-1"></i> <span style="color:#b45309;">${escapeHtml(data.castle_name)}</span> <span class="text-secondary small">${escapeHtml(data.castle_kanji || '')}</span>`;
         body.innerHTML = `
-            <div class="card card-sm bg-warning-lt p-3 mb-3 border border-warning">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                    <span class="badge bg-warning text-warning-fg fw-bold">
-                        <i class="fa-solid fa-crown text-warning me-1"></i>TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE (現存十二天守)
-                    </span>
-                    <span class="fw-bold small text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i>${data.castle_province || 'Province Historique'}</span>
+            <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #d97706; flex-shrink:0; background:#fef3c7; box-shadow:0 0 10px rgba(245,158,11,0.35);">
+                        <img src="${modalImg}" alt="${escapeHtml(data.castle_name || 'Donjon Authentique')}" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div>
+                        <div style="font-weight:800; color:#92400e; font-size:1.15rem;">
+                            ${escapeHtml(data.castle_name)} <span class="small text-secondary fw-normal">${escapeHtml(data.castle_kanji || '')}</span>
+                        </div>
+                        <div class="small text-secondary mt-0.5">
+                            <i class="fa-solid fa-location-dot text-danger me-1"></i>${escapeHtml(data.castle_province || 'Province Historique')} &bull; Bâtisseur : <strong class="text-dark">${escapeHtml(data.castle_builder || 'Maître Féodal')}</strong>
+                        </div>
+                        <div class="mt-1">
+                            <span class="badge bg-warning text-dark"><i class="fa-solid fa-crown text-warning me-1"></i>TRÉSOR NATIONAL &bull; DONJON AUTHENTIQUE (現存十二天守)</span>
+                        </div>
+                    </div>
                 </div>
-                <p class="small mb-2">
-                    Ce donjon d'époque Sengoku-Edo est l'une des 12 forteresses d'origine préservées du Japon.
-                    <strong class="text-warning">Enjeu suprême de la Bataille Finale du Shogunat.</strong>
-                </p>
-                <div class="small d-flex gap-3 flex-wrap text-muted">
-                    <span>Bâtisseur : <strong class="text-dark">${data.castle_builder || 'Maître Féodal'}</strong></span>
-                    <span>Garnison : <strong class="text-success">25 000 pts défense</strong></span>
+
+                <div class="alert alert-warning py-2.5 px-3 mb-3 small d-flex align-items-center gap-2 rounded-2">
+                    <i class="fa-solid fa-shield-halved text-warning fs-3 flex-shrink-0"></i>
+                    <div>
+                        <strong class="text-dark d-block">Forteresse Historique d'Époque Sengoku-Edo :</strong>
+                        Ce donjon préservé est l'une des 12 forteresses d'origine du Japon féodal. Enjeu territorial suprême de la fin du monde féodal.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-white rounded border small">
+                    <span class="text-secondary">Puissance Défensive Antique :</span>
+                    <strong class="text-success"><i class="fa-solid fa-shield me-1"></i>25 000 pts de garnison d'élite</strong>
                 </div>
             </div>
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -1030,6 +1113,8 @@ window.selectPlanetTile = function(data) {
                                   data.oasis_name.toLowerCase().includes('calme') ||
                                   data.oasis_name.toLowerCase().includes('vive')
                               ));
+        const oasisBorderColor = isLakeOasis ? '#0891b2' : '#16a34a';
+        const oasisShadowColor = isLakeOasis ? 'rgba(8,145,178,0.25)' : 'rgba(22,163,74,0.25)';
         const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
         const isLakeDepleted = data.lake_depleted || (currentStock <= 0);
@@ -1077,11 +1162,25 @@ window.selectPlanetTile = function(data) {
 
         title.innerHTML = `<i class="fa-solid ${isLakeOasis ? 'fa-water text-cyan' : 'fa-seedling text-success'} me-1"></i> <span style="color:${isLakeOasis ? '#0891b2' : '#15803d'};">${data.oasis_name}</span> <span class="text-secondary small">${data.bonus_label || ''}</span>`;
         body.innerHTML = `
-            <div style="background:${isLakeOasis ? '#f0fdfa' : '#f0fdf4'}; border:1px solid ${isLakeOasis ? '#99f6e4' : '#bbf7d0'}; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                    ${statusBadge}
-                    <div class="d-flex gap-1 flex-wrap">${bonusBadgesHtml}</div>
+            <div style="background:${isLakeOasis ? '#f0fdfa' : '#f0fdf4'}; border:1px solid ${isLakeOasis ? '#99f6e4' : '#bbf7d0'}; padding:1.1rem; border-radius:10px; margin-bottom:1.1rem;">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid ${oasisBorderColor}; flex-shrink:0; background:#ffffff; box-shadow:0 0 10px ${oasisShadowColor};">
+                        <img src="${modalImg}" alt="${escapeHtml(data.oasis_name || 'Oasis')}" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div>
+                        <div style="font-weight:800; color:${isLakeOasis ? '#0891b2' : '#15803d'}; font-size:1.15rem;">
+                            ${escapeHtml(data.oasis_name)}
+                        </div>
+                        <div class="small text-secondary mt-0.5">
+                            ${isLakeOasis ? 'Sanctuaire naturel halieutique protégé' : 'Sanctuaire féodal de ressources naturelles'}
+                        </div>
+                        <div class="mt-1 d-flex gap-1 flex-wrap align-items-center">
+                            ${statusBadge}
+                            ${bonusBadgesHtml}
+                        </div>
+                    </div>
                 </div>
+
                 <p style="color:${isLakeOasis ? '#0f766e' : '#166534'}; font-size:0.9rem; margin:0.4rem 0 0.75rem 0; line-height:1.45;">
                     ${isLakeOasis 
                         ? 'Ce lac naturel est un sanctuaire d\'eaux calmes et poissonneuses. <strong>Cette parcelle ne peut pas être annexée.</strong> Dépêchez vos Pêcheurs Féodaux formés au Dojo en expédition de pêche : les prises sont entreposées dans votre Grenier à Riz Fortifié.'
@@ -1147,6 +1246,15 @@ window.selectPlanetTile = function(data) {
             data.planet_name.toLowerCase().includes('vive')
         )));
         const isMountainPlanet  = (data.terrain_type === 'mountain' || (data.terrain_name && data.terrain_name.toLowerCase().includes('montagne')) || data.is_mountain);
+        const isForestPlanet    = (data.terrain_type === 'forest' || (data.terrain_name && (data.terrain_name.toLowerCase().includes('forêt') || data.terrain_name.toLowerCase().includes('cèdre'))));
+        const isHillsPlanet     = (data.terrain_type === 'hills' || (data.terrain_name && data.terrain_name.toLowerCase().includes('colline')));
+
+        let borderTint = '#cbd5e1';
+        let shadowTint = 'rgba(0,0,0,0.06)';
+        if (isLakePlanet) { borderTint = '#0891b2'; shadowTint = 'rgba(8,145,178,0.25)'; }
+        else if (isMountainPlanet) { borderTint = '#b45309'; shadowTint = 'rgba(180,83,9,0.25)'; }
+        else if (isForestPlanet) { borderTint = '#15803d'; shadowTint = 'rgba(21,128,61,0.25)'; }
+        else if (isHillsPlanet) { borderTint = '#65a30d'; shadowTint = 'rgba(101,163,13,0.25)'; }
 
         const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
@@ -1174,8 +1282,8 @@ window.selectPlanetTile = function(data) {
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width:58px; height:58px; border-radius:8px; overflow:hidden; border:2px solid #cbd5e1; flex-shrink:0; background:#f1f5f9;">
-                        ${data.terrain_img ? `<img src="${data.terrain_img}" alt="" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:2rem; display:flex; align-items:center; justify-content:center; height:100%;"><i class="fa-solid fa-wheat-awn text-warning"></i></span>'}
+                    <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid ${borderTint}; flex-shrink:0; background:#f1f5f9; box-shadow:0 0 10px ${shadowTint};">
+                        <img src="${modalImg}" alt="${escapeHtml(data.planet_name || data.terrain_name || 'Domaine Libre')}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div>
                         <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
@@ -1267,7 +1375,7 @@ window.selectPlanetTile = function(data) {
     const pts   = (data.points != null) ? Number(data.points).toLocaleString() : '0';
     const targetUserId = parseInt(data.user_id, 10) || 0;
 
-    title.innerHTML = `<i class="fa-solid fa-chess-rook text-danger me-1"></i> ${data.planet_name} — ${data.username || 'Daimyō'}`;
+    title.innerHTML = `<i class="fa-solid fa-chess-rook text-danger me-1"></i> ${escapeHtml(data.planet_name)} — ${escapeHtml(data.username || 'Daimyō')}`;
     body.innerHTML = `
         ${data.is_protected ? `
             <div style="background:#f0fdf4; border:1px solid #86efac; padding:0.75rem 1rem; border-radius:8px; margin-bottom:1.1rem; display:flex; align-items:center; gap:0.75rem;">
@@ -1278,26 +1386,28 @@ window.selectPlanetTile = function(data) {
                 </div>
             </div>
         ` : ''}
-        <div style="background:#fef2f2; border:1px solid #fecaca; padding:1.1rem; border-radius:8px; margin-bottom:1.1rem;">
+        <div style="background:#fef2f2; border:1px solid #fecaca; padding:1.1rem; border-radius:10px; margin-bottom:1.1rem;">
             <div class="d-flex align-items-center gap-3 mb-3">
-                <div style="width:44px; height:44px; border-radius:50%; background:rgba(220,38,38,0.1); border:1px solid rgba(220,38,38,0.25); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;"><i class="fa-solid fa-chess-rook text-danger"></i></div>
+                <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #dc2626; flex-shrink:0; background:#fff; box-shadow:0 0 10px rgba(220,38,38,0.25);">
+                    <img src="${modalImg}" alt="Fief de Daimyō" style="width:100%; height:100%; object-fit:cover;">
+                </div>
                 <div>
-                    <div style="font-weight:700; color:#1e293b; font-size:1.05rem;">
-                        ${data.planet_name}
+                    <div style="font-weight:700; color:#1e293b; font-size:1.1rem;">
+                        ${escapeHtml(data.planet_name)}
                         ${data.is_protected ? '<span class="badge bg-success-lt ms-2" style="font-size:0.7rem;"><i class="fa-solid fa-shield-halved text-success me-1"></i>Protégé</span>' : ''}
                     </div>
-                    <div class="small text-secondary">Fief du Daimyō
+                    <div class="small text-secondary mt-0.5">Domaine féodal du Daimyō
                         <a href="javascript:void(0)" onclick="openPlayerProfileModal(${targetUserId})"
                            class="font-weight-bold text-danger text-decoration-none ms-1">
-                            <i class="fa-solid fa-user me-1"></i>${data.username || 'Daimyō'}
+                            <i class="fa-solid fa-user me-1"></i>${escapeHtml(data.username || 'Daimyō')}
                         </a>
-                        ${data.alliance_tag ? `<span class="badge bg-warning-lt ms-1">[${data.alliance_tag}]</span>` : ''}
+                        ${data.alliance_tag ? `<span class="badge bg-warning-lt ms-1">[${escapeHtml(data.alliance_tag)}]</span>` : ''}
+                    </div>
+                    <div class="d-flex gap-3 flex-wrap small mt-1">
+                        <span>Clan : <span class="badge bg-secondary-lt font-weight-bold">${fName}</span></span>
+                        <span>Puissance : <strong class="text-danger">${pts} pts</strong></span>
                     </div>
                 </div>
-            </div>
-            <div class="d-flex gap-4 flex-wrap small">
-                <span>Clan : <span class="badge bg-secondary-lt font-weight-bold">${fName}</span></span>
-                <span>Puissance : <strong class="text-danger">${pts} pts</strong></span>
             </div>
         </div>
         <div class="d-flex gap-2 flex-wrap justify-content-end align-items-center">
