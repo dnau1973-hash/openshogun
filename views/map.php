@@ -7,20 +7,40 @@ require_once __DIR__ . '/../core/QuestEngine.php';
 require_once __DIR__ . '/../core/Database.php';
 require_once __DIR__ . '/../core/GameConfig.php';
 
-$centerX = isset($_GET['x']) ? (int)$_GET['x'] : (int)$planet['coord_x'];
-$centerY = isset($_GET['y']) ? (int)$_GET['y'] : (int)$planet['coord_y'];
+$planetX = isset($planet['coord_x']) ? (int)$planet['coord_x'] : 0;
+$planetY = isset($planet['coord_y']) ? (int)$planet['coord_y'] : 0;
+$planetId = isset($planet['id']) ? (int)$planet['id'] : 0;
+$planetName = isset($planet['name']) ? (string)$planet['name'] : 'Fief';
+$userId = isset($user['id']) ? (int)$user['id'] : 0;
 
-$questEngine = new QuestEngine();
-$questEngine->recordAction((int)$user['id'], 'visit_map');
+$centerX = isset($_GET['x']) ? (int)$_GET['x'] : $planetX;
+$centerY = isset($_GET['y']) ? (int)$_GET['y'] : $planetY;
 
-$dbMap = Database::getConnection();
-$stPec = $dbMap->prepare("SELECT count FROM planet_units WHERE planet_id = ? AND unit_code = 'pecheur'");
-$stPec->execute([(int)$planet['id']]);
-$stationedPecheurs = (int)$stPec->fetchColumn() ?: 0;
+try {
+    if ($userId > 0) {
+        $questEngine = new QuestEngine();
+        $questEngine->recordAction($userId, 'visit_map');
+    }
+} catch (Throwable $e) {
+    error_log("views/map.php quest error: " . $e->getMessage());
+}
 
-$stMin = $dbMap->prepare("SELECT count FROM planet_units WHERE planet_id = ? AND unit_code = 'mineur'");
-$stMin->execute([(int)$planet['id']]);
-$stationedMineurs = (int)$stMin->fetchColumn() ?: 0;
+$stationedPecheurs = 0;
+$stationedMineurs = 0;
+try {
+    if ($planetId > 0) {
+        $dbMap = Database::getConnection();
+        $stPec = $dbMap->prepare("SELECT count FROM planet_units WHERE planet_id = ? AND unit_code = 'pecheur'");
+        $stPec->execute([$planetId]);
+        $stationedPecheurs = (int)$stPec->fetchColumn() ?: 0;
+
+        $stMin = $dbMap->prepare("SELECT count FROM planet_units WHERE planet_id = ? AND unit_code = 'mineur'");
+        $stMin->execute([$planetId]);
+        $stationedMineurs = (int)$stMin->fetchColumn() ?: 0;
+    }
+} catch (Throwable $e) {
+    error_log("views/map.php stationed units query error: " . $e->getMessage());
+}
 
 $gameSpeedFactor = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
 
@@ -31,10 +51,10 @@ ob_start();
             <div>
                 <h2 class="card-title d-flex align-items-center gap-2">
                     <span><i class="fa-solid fa-map-location-dot text-danger me-1"></i> Carte des Provinces &amp; Fiefs</span>
-                    <span class="badge bg-secondary-lt font-monospace" style="font-size:0.72rem;">[<?= (int)$planet['coord_x'] ?> : <?= (int)$planet['coord_y'] ?>]</span>
+                    <span class="badge bg-secondary-lt font-monospace" style="font-size:0.72rem;">[<?= $planetX ?> : <?= $planetY ?>]</span>
                 </h2>
                 <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
-                    Fief d'attache : <strong><?= htmlspecialchars($planet['name']) ?></strong> &bull; Exploration panoramique &amp; terroirs du Japon Féodal
+                    Fief d'attache : <strong><?= htmlspecialchars($planetName) ?></strong> &bull; Exploration panoramique &amp; terroirs du Japon Féodal
                 </div>
             </div>
 
@@ -418,8 +438,8 @@ ob_start();
 <script src="/public/js/galaxy_map.js?v=<?= file_exists(__DIR__ . '/../public/js/galaxy_map.js') ? filemtime(__DIR__ . '/../public/js/galaxy_map.js') : time() ?>"></script>
 <script>
 let galaxyMap = null;
-const mapPlayerX = <?= (int)$planet['coord_x'] ?>;
-const mapPlayerY = <?= (int)$planet['coord_y'] ?>;
+const mapPlayerX = <?= $planetX ?>;
+const mapPlayerY = <?= $planetY ?>;
 let stationedPecheurs = <?= (int)$stationedPecheurs ?>;
 let stationedMineurs = <?= (int)$stationedMineurs ?>;
 const mapGameSpeed = <?= (float)$gameSpeedFactor ?>;
@@ -430,9 +450,9 @@ document.addEventListener('DOMContentLoaded', () => {
     galaxyMap = new GalaxyMapController('galaxyMapContainer', {
         initialX: <?= $centerX ?>,
         initialY: <?= $centerY ?>,
-        playerX: <?= $planet['coord_x'] ?>,
-        playerY: <?= $planet['coord_y'] ?>,
-        userId: <?= $user['id'] ?>
+        playerX: <?= $planetX ?>,
+        playerY: <?= $planetY ?>,
+        userId: <?= $userId ?>
         // radius non spécifié pour calcul automatique pleine largeur
     });
 });
@@ -1119,7 +1139,7 @@ window.selectPlanetTile = function(data) {
         const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
         const isLakeDepleted = data.lake_depleted || (currentStock <= 0);
         const isOccupied    = (data.is_occupied == 1);
-        const isOwn         = (data.owner_planet_id && parseInt(data.owner_planet_id, 10) === <?= (int)$planet['id'] ?>);
+        const isOwn         = (data.owner_planet_id && parseInt(data.owner_planet_id, 10) === <?= $planetId ?>);
         const units         = data.units || [];
         const hasWildBeasts = units.some(u => u.is_wild == 1 && parseInt(u.count, 10) > 0);
 
@@ -1369,7 +1389,7 @@ window.selectPlanetTile = function(data) {
     }
 
     // ── Fief d'un joueur ────────────────────────────────────────
-    const isOwn = (parseInt(data.user_id, 10) === <?= (int)$user['id'] ?>);
+    const isOwn = (parseInt(data.user_id, 10) === <?= $userId ?>);
     const fKey  = (data.faction || 'terran').toLowerCase();
     const fName = (data.faction || 'Terran').toUpperCase();
     const pts   = (data.points != null) ? Number(data.points).toLocaleString() : '0';

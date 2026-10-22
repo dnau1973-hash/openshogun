@@ -535,11 +535,15 @@ class QuestEngine {
      * Enregistre une action spécifique déclenchée par le joueur (ex: visite de la carte)
      */
     public function recordAction(int $userId, string $actionKey): void {
-        $actionKey = trim($actionKey);
-        if ($actionKey === 'visit_map') {
-            $this->upsertQuestStatus($userId, 'explore_map', 'completed', 100);
-        } elseif ($actionKey === 'send_fleet') {
-            $this->upsertQuestStatus($userId, 'first_expedition', 'completed', 100);
+        try {
+            $actionKey = trim($actionKey);
+            if ($actionKey === 'visit_map') {
+                $this->upsertQuestStatus($userId, 'explore_map', 'completed', 100);
+            } elseif ($actionKey === 'send_fleet') {
+                $this->upsertQuestStatus($userId, 'first_expedition', 'completed', 100);
+            }
+        } catch (Throwable $e) {
+            error_log("QuestEngine::recordAction error: " . $e->getMessage());
         }
     }
 
@@ -649,27 +653,37 @@ class QuestEngine {
      * Met à jour ou insère l'état d'une quête dans user_quests
      */
     private function upsertQuestStatus(int $userId, string $questKey, string $status, int $progress = 0, bool $isClaim = false): void {
-        if ($isClaim) {
-            $stmt = $this->db->prepare("
-                INSERT INTO user_quests (user_id, quest_key, status, progress, completed_at, claimed_at) 
-                VALUES (?, ?, 'claimed', 100, NOW(), NOW()) 
-                ON DUPLICATE KEY UPDATE 
-                    status = 'claimed', 
-                    progress = 100, 
-                    claimed_at = NOW()
-            ");
-            $stmt->execute([$userId, $questKey]);
-        } else {
-            $completedAtClause = ($status === 'completed') ? 'NOW()' : 'NULL';
-            $stmt = $this->db->prepare("
-                INSERT INTO user_quests (user_id, quest_key, status, progress, completed_at) 
-                VALUES (?, ?, ?, ?, {$completedAtClause}) 
-                ON DUPLICATE KEY UPDATE 
-                    status = IF(status = 'claimed', 'claimed', VALUES(status)), 
-                    progress = VALUES(progress), 
-                    completed_at = IF(status = 'claimed', completed_at, VALUES(completed_at))
-            ");
-            $stmt->execute([$userId, $questKey, $status, $progress]);
+        try {
+            $stmtCheck = $this->db->prepare("SELECT id, status FROM user_quests WHERE user_id = ? AND quest_key = ?");
+            $stmtCheck->execute([$userId, $questKey]);
+            $existing = $stmtCheck->fetch();
+
+            if ($existing) {
+                if ($isClaim) {
+                    $stmtUp = $this->db->prepare("UPDATE user_quests SET status = 'claimed', progress = 100, claimed_at = NOW() WHERE id = ?");
+                    $stmtUp->execute([(int)$existing['id']]);
+                } else {
+                    if ($existing['status'] === 'claimed') {
+                        $stmtUp = $this->db->prepare("UPDATE user_quests SET progress = ? WHERE id = ?");
+                        $stmtUp->execute([$progress, (int)$existing['id']]);
+                    } else {
+                        $completedAtSql = ($status === 'completed') ? 'NOW()' : 'NULL';
+                        $stmtUp = $this->db->prepare("UPDATE user_quests SET status = ?, progress = ?, completed_at = {$completedAtSql} WHERE id = ?");
+                        $stmtUp->execute([$status, $progress, (int)$existing['id']]);
+                    }
+                }
+            } else {
+                if ($isClaim) {
+                    $stmtIn = $this->db->prepare("INSERT INTO user_quests (user_id, quest_key, status, progress, completed_at, claimed_at) VALUES (?, ?, 'claimed', 100, NOW(), NOW())");
+                    $stmtIn->execute([$userId, $questKey]);
+                } else {
+                    $completedAtSql = ($status === 'completed') ? 'NOW()' : 'NULL';
+                    $stmtIn = $this->db->prepare("INSERT INTO user_quests (user_id, quest_key, status, progress, completed_at) VALUES (?, ?, ?, ?, {$completedAtSql})");
+                    $stmtIn->execute([$userId, $questKey, $status, $progress]);
+                }
+            }
+        } catch (Throwable $e) {
+            error_log("QuestEngine::upsertQuestStatus error: " . $e->getMessage());
         }
     }
 

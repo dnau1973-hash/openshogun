@@ -15,14 +15,22 @@ require_once __DIR__ . '/../../core/ResearchEngine.php';
 require_once __DIR__ . '/../../config/game_constants.php';
 
 if (!isset($queue) && !empty($planet['id'])) {
-    require_once __DIR__ . '/../../core/BuildingEngine.php';
-    $bEngine = new BuildingEngine();
-    $queue = $bEngine->getQueue((int)$planet['id']);
+    try {
+        require_once __DIR__ . '/../../core/BuildingEngine.php';
+        $bEngine = new BuildingEngine();
+        $queue = $bEngine->getQueue((int)$planet['id']);
+    } catch (Throwable $e) {
+        $queue = [];
+    }
 }
 if (!isset($annexedOases) && !empty($planet['id'])) {
-    require_once __DIR__ . '/../../core/OasisEngine.php';
-    $oEngine = new OasisEngine();
-    $annexedOases = $oEngine->getAnnexedOasesForPlanet((int)$planet['id']);
+    try {
+        require_once __DIR__ . '/../../core/OasisEngine.php';
+        $oEngine = new OasisEngine();
+        $annexedOases = $oEngine->getAnnexedOasesForPlanet((int)$planet['id']);
+    } catch (Throwable $e) {
+        $annexedOases = [];
+    }
 }
 
 require_once __DIR__ . '/../../core/ResearchEngine.php';
@@ -359,7 +367,13 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
              aria-labelledby="heading-east-quest" 
              data-bs-parent="#resourcesEastAccordion">
             <div class="accordion-body">
-                <?php require __DIR__ . '/quest_banner.php'; ?>
+                <?php 
+                    try {
+                        require __DIR__ . '/quest_banner.php'; 
+                    } catch (Throwable $e) {
+                        echo '<div class="alert alert-warning py-1 px-2 small mb-0">Chargement du didacticiel indisponible.</div>';
+                    }
+                ?>
             </div>
         </div>
     </div>
@@ -490,8 +504,12 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
              data-bs-parent="#resourcesEastAccordion">
             <div class="accordion-body">
                 <?php 
-                    $panelTitle = 'Récoltes, Stocks & Oasis';
-                    require __DIR__ . '/rural_harvest_resources_panel.php'; 
+                    try {
+                        $panelTitle = 'Récoltes, Stocks & Oasis';
+                        require __DIR__ . '/rural_harvest_resources_panel.php'; 
+                    } catch (Throwable $e) {
+                        echo '<div class="alert alert-warning py-1 px-2 small mb-0">Chargement des récoltes indisponible.</div>';
+                    }
                 ?>
             </div>
         </div>
@@ -576,7 +594,13 @@ $defaultOpen = $hasActiveQuest ? 'quest' : 'queue';
              aria-labelledby="heading-east-workforce" 
              data-bs-parent="#resourcesEastAccordion">
             <div class="accordion-body">
-                <?php require __DIR__ . '/workforce_demographics_panel.php'; ?>
+                <?php 
+                    try {
+                        require __DIR__ . '/workforce_demographics_panel.php'; 
+                    } catch (Throwable $e) {
+                        echo '<div class="alert alert-warning py-1 px-2 small mb-0">Chargement de la main-d\'œuvre indisponible.</div>';
+                    }
+                ?>
             </div>
         </div>
     </div>
