@@ -5,7 +5,7 @@
  */
 
 $currentPageSlug = $page ?? 'gamestudio';
-$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates', 'users'], true) ? $_GET['subtab'] : 'overview';
+$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates', 'users', 'apache_logs'], true) ? $_GET['subtab'] : 'overview';
 ?>
 
 <div class="gamestudio-general">
@@ -66,6 +66,14 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'b
                     <i class="fa-solid fa-users text-warning"></i>
                     <span>Gestion des Joueurs</span>
                     <span class="badge bg-warning-lt ms-1 font-monospace"><?= number_format((int)($totalUsers ?? 0), 0, ',', ' ') ?></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="?page=gamestudio&tab=general&subtab=apache_logs" 
+                   class="nav-link py-2 px-3 d-flex align-items-center justify-content-center gap-2 <?= $currentSubTab === 'apache_logs' ? 'active fw-bold text-danger border-bottom-0' : 'text-secondary' ?>">
+                    <i class="fa-solid fa-file-waveform text-danger"></i>
+                    <span>Logs d'Erreur Apache</span>
+                    <span class="badge bg-danger-lt ms-1 font-monospace">Error Log</span>
                 </a>
             </li>
         </ul>
@@ -794,5 +802,10 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'b
         <!-- SOUS-ONGLET 5 : GESTION DES JOUEURS & FIEFS                        -->
         <!-- ═══════════════════════════════════════════════════════════════════ -->
         <?php require __DIR__ . '/general_users.php'; ?>
+    <?php elseif ($currentSubTab === 'apache_logs'): ?>
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- SOUS-ONGLET 6 : LOGS D'ERREUR APACHE & DIAGNOSTIC SERVEUR          -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <?php require __DIR__ . '/general_apache_logs.php'; ?>
     <?php endif; ?>
 </div>

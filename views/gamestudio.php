@@ -77,7 +77,7 @@ $allowedTabs = [
     'dev_tickets', 'dev_backend_tasks'
 ];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
-$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates', 'users'], true) ? $_GET['subtab'] : 'overview';
+$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates', 'users', 'apache_logs'], true) ? $_GET['subtab'] : 'overview';
 $analyticsPeriod = in_array($_GET['period'] ?? '', ['today', '7d', '30d', 'all'], true) ? (string)$_GET['period'] : '30d';
 
 // 2. Préparation des données selon l'onglet
@@ -316,8 +316,36 @@ if ($currentTab === 'dashboard') {
             ];
             header('Location: ?page=gamestudio&tab=general&subtab=world_config#section-world-truce-config');
             exit;
+        } elseif ($_POST['action'] === 'clear_apache_log') {
+            require_once __DIR__ . '/../core/ApacheLogService.php';
+            $logService = new ApacheLogService();
+            $targetLog = $logService->detectApacheErrorLogPath($_POST['log_file'] ?? null);
+            $res = $targetLog ? $logService->clearLogFile($targetLog) : false;
+            $_SESSION['general_flash'] = [
+                'type' => $res ? 'success' : 'danger',
+                'msg'  => $res ? "Le fichier log (" . basename($targetLog) . ") a été vidé avec succès !" : "Échec du vidage du fichier log (droits insuffisants ou fichier introuvable)."
+            ];
+            header('Location: ?page=gamestudio&tab=general&subtab=apache_logs' . ($targetLog ? '&log_file=' . urlencode($targetLog) : ''));
+            exit;
         }
     }
+
+    // Téléchargement direct du fichier log brut si demandé
+    if (isset($_GET['download_log']) && $currentSubTab === 'apache_logs') {
+        require_once __DIR__ . '/../core/ApacheLogService.php';
+        $logService = new ApacheLogService();
+        $targetLog = $logService->detectApacheErrorLogPath($_GET['log_file'] ?? null);
+        if ($targetLog && file_exists($targetLog) && is_readable($targetLog)) {
+            header('Content-Description: File Transfer');
+            header('Content-Type: text/plain; charset=utf-8');
+            header('Content-Disposition: attachment; filename="' . basename($targetLog) . '"');
+            header('Content-Length: ' . filesize($targetLog));
+            header('Cache-Control: no-cache, must-revalidate');
+            readfile($targetLog);
+            exit;
+        }
+    }
+
     $generalData = $gameStudioEngine->getGeneralData();
     extract($generalData);
     if ($currentSubTab === 'world_config') {
@@ -326,6 +354,11 @@ if ($currentTab === 'dashboard') {
     } elseif ($currentSubTab === 'users') {
         $usersManagementData = $gameStudioEngine->getGeneralUsersData($_GET);
         extract($usersManagementData);
+    } elseif ($currentSubTab === 'apache_logs') {
+        require_once __DIR__ . '/../core/ApacheLogService.php';
+        $apacheLogService = new ApacheLogService();
+        $apacheLogData = $apacheLogService->getLogViewData($_GET);
+        extract($apacheLogData);
     }
 } elseif ($currentTab === 'elevate_research') {
     require_once __DIR__ . '/../core/ResearchElevateService.php';
@@ -935,6 +968,13 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div>
                                 <div>Gestion des Joueurs &amp; Fiefs</div>
                                 <div class="small text-secondary">Daimyōs, inspection 360°, immunité &amp; outils GM</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'apache_logs') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=apache_logs">
+                            <i class="fa-solid fa-file-waveform text-danger"></i>
+                            <div>
+                                <div>Logs d'Erreur Apache</div>
+                                <div class="small text-secondary">Visualisation en direct &amp; diagnostic du serveur web</div>
                             </div>
                         </a>
                     </div>
