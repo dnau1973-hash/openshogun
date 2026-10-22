@@ -139,8 +139,25 @@ ob_start();
         </div>
 
         <!-- Corps -->
-        <div id="mapModalBody" class="card-body p-3" style="color: #334155;">
-            <!-- Rempli dynamiquement par JavaScript -->
+        <div class="card-body p-3" style="color: #334155;">
+            <!-- Illustration en bandeau (même modèle que les modales Pêcheur / Ressources) -->
+            <div id="mapModalHero" class="position-relative overflow-hidden rounded mb-3 border shadow-2xs" style="height: 135px; background:#0f172a;">
+                <img id="mapModalHeroImg" src="/public/assets/map/plaines.jpg?v=1" alt="" style="width:100%; height:100%; object-fit:cover; object-position: center 40%;">
+                <div style="position:absolute; inset:0; background: linear-gradient(to top, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.25) 55%, transparent 100%);"></div>
+                <div style="position:absolute; bottom:8px; left:12px; right:12px;" class="d-flex justify-content-between align-items-end text-white">
+                    <div class="min-w-0 me-2">
+                        <div class="fw-bold small text-truncate" id="mapModalHeroName">Parcelle</div>
+                        <div class="text-white-50 font-monospace" style="font-size:0.75rem;" id="mapModalHeroCoords">[X : Y]</div>
+                    </div>
+                    <span class="badge bg-dark text-white font-monospace shadow-2xs" id="mapModalHeroBadge" style="font-size:0.75rem; background:rgba(15,23,42,0.75) !important; border:1px solid rgba(255,255,255,0.25);">
+                        <i class="fa-solid fa-map-pin me-1"></i>Carte
+                    </span>
+                </div>
+            </div>
+
+            <div id="mapModalBody">
+                <!-- Rempli dynamiquement par JavaScript -->
+            </div>
         </div>
     </div>
 </div>
@@ -465,7 +482,28 @@ function jumpToCoords() {
     }
 }
 
+// Synchronise le bandeau illustré (image + nom + coordonnées) avant ouverture de la modale
+function refreshMapModalHero() {
+    const hero = window.__mapModalHero || {};
+    const img = document.getElementById('mapModalHeroImg');
+    const nameEl = document.getElementById('mapModalHeroName');
+    const coordsEl = document.getElementById('mapModalHeroCoords');
+    const badgeEl = document.getElementById('mapModalHeroBadge');
+    const titleEl = document.getElementById('mapModalTitle');
+    if (img) {
+        img.src = hero.img || '/public/assets/map/plaines.jpg?v=1';
+        img.alt = hero.name || '';
+    }
+    if (nameEl) {
+        const fallbackName = titleEl ? titleEl.textContent.replace(/\[[^\]]*\]/g, '').trim() : '';
+        nameEl.textContent = hero.name || fallbackName || 'Parcelle';
+    }
+    if (coordsEl) coordsEl.textContent = hero.coords || '';
+    if (badgeEl) badgeEl.innerHTML = `<i class="fa-solid ${hero.icon || 'fa-map-pin'} me-1"></i>${hero.label || 'Carte'}`;
+}
+
 function openMapModal() {
+    refreshMapModalHero();
     const modal = document.getElementById('mapTileModal');
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -800,6 +838,39 @@ window.selectPlanetTile = function(data) {
     coords.innerText = `[${data.coord_x} : ${data.coord_y}]`;
     const modalImg = getMapModalIllustration(data);
 
+    // Données du bandeau illustré en haut de modale
+    (function () {
+        const isOrigin = parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0;
+        let name = '', label = 'Terres Libres', icon = 'fa-wheat-awn';
+        if (data.is_imperial_dojo || isOrigin) {
+            const unlocked = !!(data.dojo_unlocked || data.is_imperial_dojo);
+            name  = unlocked ? 'Dōjō Impérial — Tenchi no Seichi' : 'Terre Sacrée Inviolable de Kyōto';
+            label = unlocked ? 'Dōjō Impérial' : 'Terre Scellée';
+            icon  = 'fa-torii-gate';
+        } else if (data.is_authentic_castle) {
+            name = data.castle_name || 'Donjon Authentique'; label = 'Donjon Historique'; icon = 'fa-chess-rook';
+        } else if (data.user_id) {
+            name = (data.planet_name || 'Fief') + (data.username ? ' — ' + data.username : '');
+            label = 'Fief de Daimyō'; icon = 'fa-chess-rook';
+        } else if (data.is_oasis) {
+            name = data.oasis_name || 'Oasis Naturelle'; label = 'Oasis'; icon = 'fa-seedling';
+        } else {
+            name = data.terrain_name || data.planet_name || 'Domaine Libre';
+            const t = (data.terrain_type || '').toLowerCase();
+            if (t === 'lake' || data.is_lake)          { label = 'Lac';       icon = 'fa-water'; }
+            else if (t === 'mountain' || data.is_mountain) { label = 'Montagne'; icon = 'fa-mountain'; }
+            else if (t === 'forest')                   { label = 'Forêt';     icon = 'fa-tree'; }
+            else if (t === 'hills')                    { label = 'Collines';  icon = 'fa-mound'; }
+        }
+        window.__mapModalHero = {
+            img: modalImg,
+            name: name,
+            label: label,
+            icon: icon,
+            coords: `[${data.coord_x} : ${data.coord_y}]`
+        };
+    })();
+
     // ── Terre Sacrée [0 : 0] / Le Dōjō Impérial ──────────────────────────────
     if (data.is_imperial_dojo || (parseInt(data.coord_x, 10) === 0 && parseInt(data.coord_y, 10) === 0)) {
         const isDojoUnlocked = !!(data.dojo_unlocked || data.is_imperial_dojo);
@@ -810,9 +881,6 @@ window.selectPlanetTile = function(data) {
             body.innerHTML = `
                 <div style="background:#f8fafc; border:2px solid #cbd5e1; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                     <div class="d-flex align-items-center gap-3 mb-3">
-                        <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #94a3b8; flex-shrink:0; background:#e2e8f0; box-shadow:0 0 10px rgba(148,163,184,0.35);">
-                            <img src="${modalImg}" alt="Terre Sacrée Inviolable" style="width:100%; height:100%; object-fit:cover;">
-                        </div>
                         <div>
                             <div style="font-weight:800; color:#1e293b; font-size:1.15rem;">
                                 Terre Sacrée Inviolable de Kyōto
@@ -874,9 +942,6 @@ window.selectPlanetTile = function(data) {
         body.innerHTML = `
             <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #d97706; flex-shrink:0; background:#fef3c7; box-shadow:0 0 10px rgba(245,158,11,0.4);">
-                        <img src="${modalImg}" alt="Dōjō Impérial" style="width:100%; height:100%; object-fit:cover;">
-                    </div>
                     <div>
                         <div style="font-weight:800; color:#92400e; font-size:1.2rem;">
                             Dōjō Impérial (Tenchi no Seichi)
@@ -992,9 +1057,6 @@ window.selectPlanetTile = function(data) {
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid ${borderTint}; flex-shrink:0; background:#f1f5f9; box-shadow:0 0 10px ${shadowTint};">
-                        <img src="${modalImg}" alt="${escapeHtml(data.terrain_name || 'Terrain')}" style="width:100%; height:100%; object-fit:cover;">
-                    </div>
                     <div>
                         <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
                             ${data.terrain_name || (isLake ? 'Lac d\'Eaux Vives' : (isMountain ? 'Pics Rocheux des Cimes' : 'Terres Vierges Inoccupées'))}
@@ -1078,9 +1140,6 @@ window.selectPlanetTile = function(data) {
         body.innerHTML = `
             <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #d97706; flex-shrink:0; background:#fef3c7; box-shadow:0 0 10px rgba(245,158,11,0.35);">
-                        <img src="${modalImg}" alt="${escapeHtml(data.castle_name || 'Donjon Authentique')}" style="width:100%; height:100%; object-fit:cover;">
-                    </div>
                     <div>
                         <div style="font-weight:800; color:#92400e; font-size:1.15rem;">
                             ${escapeHtml(data.castle_name)} <span class="small text-secondary fw-normal">${escapeHtml(data.castle_kanji || '')}</span>
@@ -1184,9 +1243,6 @@ window.selectPlanetTile = function(data) {
         body.innerHTML = `
             <div style="background:${isLakeOasis ? '#f0fdfa' : '#f0fdf4'}; border:1px solid ${isLakeOasis ? '#99f6e4' : '#bbf7d0'}; padding:1.1rem; border-radius:10px; margin-bottom:1.1rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid ${oasisBorderColor}; flex-shrink:0; background:#ffffff; box-shadow:0 0 10px ${oasisShadowColor};">
-                        <img src="${modalImg}" alt="${escapeHtml(data.oasis_name || 'Oasis')}" style="width:100%; height:100%; object-fit:cover;">
-                    </div>
                     <div>
                         <div style="font-weight:800; color:${isLakeOasis ? '#0891b2' : '#15803d'}; font-size:1.15rem;">
                             ${escapeHtml(data.oasis_name)}
@@ -1302,9 +1358,6 @@ window.selectPlanetTile = function(data) {
         body.innerHTML = `
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; margin-bottom:1.25rem;">
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid ${borderTint}; flex-shrink:0; background:#f1f5f9; box-shadow:0 0 10px ${shadowTint};">
-                        <img src="${modalImg}" alt="${escapeHtml(data.planet_name || data.terrain_name || 'Domaine Libre')}" style="width:100%; height:100%; object-fit:cover;">
-                    </div>
                     <div>
                         <div style="font-weight:700; color:#1e293b; font-size:1.15rem;">
                             ${data.planet_name || (isLakePlanet ? 'Lac d\'Eaux Vives' : (isMountainPlanet ? 'Pics Rocheux & Montagnes' : 'Domaine Féodal Libre'))}
@@ -1408,9 +1461,6 @@ window.selectPlanetTile = function(data) {
         ` : ''}
         <div style="background:#fef2f2; border:1px solid #fecaca; padding:1.1rem; border-radius:10px; margin-bottom:1.1rem;">
             <div class="d-flex align-items-center gap-3 mb-3">
-                <div style="width:68px; height:68px; border-radius:10px; overflow:hidden; border:2px solid #dc2626; flex-shrink:0; background:#fff; box-shadow:0 0 10px rgba(220,38,38,0.25);">
-                    <img src="${modalImg}" alt="Fief de Daimyō" style="width:100%; height:100%; object-fit:cover;">
-                </div>
                 <div>
                     <div style="font-weight:700; color:#1e293b; font-size:1.1rem;">
                         ${escapeHtml(data.planet_name)}

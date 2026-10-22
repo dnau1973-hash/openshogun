@@ -54,8 +54,11 @@ assertTest(str_contains($mapView, 'foret.jpg'), "Modale : Forêt de Cèdres util
 assertTest(str_contains($mapView, 'collines.jpg'), "Modale : Collines & Coteaux utilise collines.jpg");
 assertTest(str_contains($mapView, 'plaines.jpg'), "Modale : Plaines Fertiles utilise plaines.jpg");
 
-echo PHP_EOL . "[TEST 3] Vérification de l'harmonie du modèle visuel (68x68px, arrondi, bordure & ombre)..." . PHP_EOL;
-assertTest(str_contains($mapView, 'width:68px; height:68px; border-radius:10px;'), "Format de vignette uniforme 68x68px avec border-radius:10px");
+echo PHP_EOL . "[TEST 3] Vérification du bandeau illustré en haut de modale (même modèle que la modale Pêcheur)..." . PHP_EOL;
+assertTest(str_contains($mapView, 'id="mapModalHero"'), "Bandeau illustré #mapModalHero présent en haut de la modale");
+assertTest(str_contains($mapView, 'id="mapModalHeroImg"'), "Image du bandeau #mapModalHeroImg présente");
+assertTest(str_contains($mapView, 'function refreshMapModalHero()'), "Synchronisation du bandeau avant ouverture (refreshMapModalHero)");
+assertTest(!str_contains($mapView, 'width:68px; height:68px;'), "Anciennes vignettes latérales 68x68px supprimées");
 assertTest(str_contains($mapView, 'object-fit:cover;'), "Mise à l'échelle propre des images via object-fit:cover");
 
 echo PHP_EOL . "========================================================================" . PHP_EOL;
