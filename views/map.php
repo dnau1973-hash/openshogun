@@ -4,12 +4,20 @@
  * OpenShogun - Carte interactive plein format avec déplacement fluide & donjons authentiques
  */
 require_once __DIR__ . '/../core/QuestEngine.php';
+require_once __DIR__ . '/../core/Database.php';
+require_once __DIR__ . '/../core/GameConfig.php';
 
 $centerX = isset($_GET['x']) ? (int)$_GET['x'] : (int)$planet['coord_x'];
 $centerY = isset($_GET['y']) ? (int)$_GET['y'] : (int)$planet['coord_y'];
 
 $questEngine = new QuestEngine();
 $questEngine->recordAction((int)$user['id'], 'visit_map');
+
+$dbMap = Database::getConnection();
+$stPec = $dbMap->prepare("SELECT count FROM planet_units WHERE planet_id = ? AND unit_code = 'pecheur'");
+$stPec->execute([(int)$planet['id']]);
+$stationedPecheurs = (int)$stPec->fetchColumn() ?: 0;
+$gameSpeedFactor = max(1, (float)GameConfig::get('game_speed', defined('SPEED_FACTOR') ? SPEED_FACTOR : 5));
 
 $queueTitle = 'Mouvements & Chantiers';
 ob_start();
@@ -118,6 +126,142 @@ ob_start();
     </div>
 </div>
 
+<!-- =====================================================
+     MODAL CARTE — Expédition de Pêche Directe (Craft & Récolte Fluide)
+     ===================================================== -->
+<div id="mapFishingModal" style="
+    display: none;
+    position: fixed; inset: 0; z-index: 9050;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+" onclick="if(event.target===this) closeQuickFishingModal();">
+
+    <div class="card shadow-lg" style="
+        background: #ffffff;
+        border: 1px solid #06b6d4;
+        border-radius: 12px;
+        width: 100%; max-width: 520px;
+        max-height: 90vh; overflow-y: auto;
+        position: relative;
+        animation: mapModalIn 0.2s ease;
+        color: #1e293b;
+    ">
+        <!-- En-tête -->
+        <div class="card-header d-flex justify-content-between align-items-center py-2.5 px-3 border-bottom bg-cyan-lt" style="border-radius: 12px 12px 0 0;">
+            <div class="d-flex align-items-center gap-2 flex-fill min-w-0">
+                <span class="avatar avatar-xs bg-cyan text-white rounded-circle" style="width:26px; height:26px; font-size:0.75rem;">
+                    <i class="fa-solid fa-fish"></i>
+                </span>
+                <h3 class="card-title m-0 text-cyan-fg font-weight-bold" style="font-size: 1.05rem;" id="fishingModalTitle">
+                    Dépêcher des Pêcheurs Féodaux
+                </h3>
+            </div>
+            <button type="button" class="btn-close ms-2" onclick="closeQuickFishingModal()" aria-label="Fermer"></button>
+        </div>
+
+        <!-- Corps -->
+        <div class="card-body p-3">
+            <!-- Illustration & Cible -->
+            <div class="position-relative overflow-hidden rounded mb-3 border border-cyan-subtle shadow-2xs" style="height: 135px; background:#0f172a;">
+                <img src="/public/assets/units/pecheur.jpg" alt="Pêcheur Féodal" style="width:100%; height:100%; object-fit:cover; object-position: center 25%;">
+                <div style="position:absolute; inset:0; background: linear-gradient(to top, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.25) 55%, transparent 100%);"></div>
+                <div style="position:absolute; bottom:8px; left:12px; right:12px;" class="d-flex justify-content-between align-items-end text-white">
+                    <div class="min-w-0 me-2">
+                        <div class="fw-bold small text-truncate" id="fishingModalDestName">Lac d'Eaux Vives</div>
+                        <div class="text-white-50 font-monospace" style="font-size:0.75rem;">
+                            <span id="fishingModalDestCoords">[X : Y]</span> &bull; <span id="fishingModalDist">--</span>
+                        </div>
+                    </div>
+                    <span class="badge bg-cyan text-white font-monospace shadow-2xs" id="fishingModalStockBadge" style="font-size:0.75rem;">
+                        <i class="fa-solid fa-fish me-1"></i>Stock : --
+                    </span>
+                </div>
+            </div>
+
+            <p class="small text-secondary mb-3" style="line-height:1.45;">
+                Dépêchez vos <strong>Pêcheurs Féodaux (Ryōshi 🐟)</strong> pour poser leurs nasses et filets sur ce sanctuaire d'eau douce. Les cargaisons de poisson frais seront directement acheminées et entreposées dans votre fief.
+            </p>
+
+            <!-- Disponibilité Garnison -->
+            <div class="d-flex justify-content-between align-items-center p-2 rounded bg-surface-secondary border mb-3 small">
+                <span class="fw-semibold text-dark">
+                    <i class="fa-solid fa-person-rifle text-primary me-1"></i>Pêcheurs en garnison :
+                </span>
+                <span class="badge bg-cyan text-white font-monospace px-2 py-1" style="font-size:0.8rem;" id="fishingModalAvailCount">
+                    <?= number_format($stationedPecheurs) ?> Ryōshi
+                </span>
+            </div>
+
+            <!-- Formulaire de saisie du nombre de pêcheurs -->
+            <div id="fishingFormContainer">
+                <div class="bg-light p-3 rounded border mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1.5">
+                        <label class="form-label fw-bold small text-dark mb-0">Effectif de Pêcheurs à mobiliser :</label>
+                        <span class="badge bg-cyan-lt text-cyan font-monospace" style="font-size:0.72rem;">
+                            Disponible : <strong id="fishingModalAvailNum"><?= $stationedPecheurs ?></strong>
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 mb-2.5">
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-2.5" onclick="adjustFishingCount(-1)">-1</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-2" onclick="adjustFishingCount(-5)">-5</button>
+                        <input type="number" id="inputFishingCount" class="form-control text-center font-monospace fw-bold fs-4" 
+                               min="1" max="<?= $stationedPecheurs ?>" value="<?= min($stationedPecheurs, 1) ?>" 
+                               oninput="updateFishingEstimates()" style="max-width: 140px;">
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-2" onclick="adjustFishingCount(5)">+5</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-2.5" onclick="adjustFishingCount(1)">+1</button>
+                        <button type="button" class="btn btn-sm btn-outline-cyan font-monospace px-2.5 ms-auto fw-bold" onclick="setFishingCountMax()">Max</button>
+                    </div>
+
+                    <!-- Métriques de capture estimée & capacité -->
+                    <div class="d-flex flex-column gap-1.5 p-2 rounded bg-white border font-monospace small" style="font-size:0.75rem;">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary"><i class="fa-solid fa-fish text-cyan me-1"></i>Prise estimée :</span>
+                            <strong class="text-dark" id="fishingEstCatch">-- Poisson</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary"><i class="fa-solid fa-boxes-stacked text-warning me-1"></i>Capacité de fret totale :</span>
+                            <strong class="text-dark" id="fishingEstCargo">-- unités</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary"><i class="fa-regular fa-clock text-info me-1"></i>Durée totale de l'expédition :</span>
+                            <strong class="text-dark" id="fishingEstDuration">--</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message d'alerte si 0 pêcheur -->
+            <div id="fishingNoUnitsAlert" class="alert alert-warning p-2.5 small mb-3 <?= ($stationedPecheurs > 0) ? 'd-none' : '' ?>">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-warning fs-3"></i>
+                    <div>
+                        <strong>Aucun Pêcheur Féodal en garnison !</strong><br>
+                        Pour dépêcher cette expédition lacustre, vous devez former des <strong>Pêcheurs (Ryōshi 🐟)</strong> au Dojo Militaire.
+                        <div class="mt-2">
+                            <a href="/?page=barracks" class="btn btn-sm btn-warning text-dark font-monospace py-0.5 px-2">
+                                <i class="fa-solid fa-torii-gate me-1"></i>Former au Dojo &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutons de validation -->
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                <button type="button" class="btn btn-outline-secondary" onclick="closeQuickFishingModal()">Annuler</button>
+                <button type="button" class="btn btn-cyan text-white fw-bold shadow-sm" id="btnLaunchQuickFishing" 
+                        onclick="submitQuickFishing()" <?= ($stationedPecheurs <= 0) ? 'disabled' : '' ?>>
+                    <i class="fa-solid fa-paper-plane me-1"></i>Dépêcher l'Expédition de Pêche
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 @keyframes mapModalIn {
     from { opacity:0; transform: scale(0.96) translateY(6px); }
@@ -128,6 +272,11 @@ ob_start();
 <script src="/public/js/galaxy_map.js?v=<?= file_exists(__DIR__ . '/../public/js/galaxy_map.js') ? filemtime(__DIR__ . '/../public/js/galaxy_map.js') : time() ?>"></script>
 <script>
 let galaxyMap = null;
+const mapPlayerX = <?= (int)$planet['coord_x'] ?>;
+const mapPlayerY = <?= (int)$planet['coord_y'] ?>;
+let stationedPecheurs = <?= (int)$stationedPecheurs ?>;
+const mapGameSpeed = <?= (float)$gameSpeedFactor ?>;
+let currentFishingTarget = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     galaxyMap = new GalaxyMapController('galaxyMapContainer', {
@@ -573,7 +722,12 @@ window.selectPlanetTile = function(data) {
 
     // ── Terres Vierges Naturelles (Plaines, Collines, Lacs, etc.) ─────────────
     if (data.empty) {
-        const isLake = (data.terrain_type === 'lake' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac')));
+        const isLake = (data.terrain_type === 'lake' || (data.terrain_name && (
+            data.terrain_name.toLowerCase().includes('lac') ||
+            data.terrain_name.toLowerCase().includes('eau') ||
+            data.terrain_name.toLowerCase().includes('calme') ||
+            data.terrain_name.toLowerCase().includes('vive')
+        )));
         const isMountain = (data.terrain_type === 'mountain' || (data.terrain_name && data.terrain_name.toLowerCase().includes('montagne')));
 
         const currentStock = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
@@ -657,9 +811,9 @@ window.selectPlanetTile = function(data) {
                             <i class="fa-solid fa-ban me-1"></i>Réserve de Poisson Épuisée
                         </button>
                     ` : `
-                        <a href="?page=fleet&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=fishing" class="btn btn-cyan text-white font-weight-bold">
+                        <button type="button" class="btn btn-cyan text-white font-weight-bold" onclick="openQuickFishingModal(${data.coord_x}, ${data.coord_y}, null, null, '${(data.terrain_name || 'Lac d\'Eaux Calmes').replace(/'/g, "\\'")}', ${currentStock})">
                             <i class="fa-solid fa-fish me-1"></i>Dépêcher une Expédition de Pêche &rarr;
-                        </a>
+                        </button>
                     `
                 ) : (isMountain ? (
                     isMountainDepleted ? `
@@ -721,7 +875,13 @@ window.selectPlanetTile = function(data) {
 
     // ── Oasis Naturelle ─────────────────────────────────────────
     if (data.is_oasis) {
-        const isLakeOasis   = (data.oasis_type && data.oasis_type.indexOf('lake') !== -1);
+        const isLakeOasis   = (data.oasis_type && data.oasis_type.indexOf('lake') !== -1) ||
+                              (data.oasis_name && (
+                                  data.oasis_name.toLowerCase().includes('lac') ||
+                                  data.oasis_name.toLowerCase().includes('eau') ||
+                                  data.oasis_name.toLowerCase().includes('calme') ||
+                                  data.oasis_name.toLowerCase().includes('vive')
+                              ));
         const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
         const isLakeDepleted = data.lake_depleted || (currentStock <= 0);
@@ -807,7 +967,9 @@ window.selectPlanetTile = function(data) {
                                 <i class="fa-solid fa-ban me-1"></i>Réserve de Poisson Épuisée
                             </button>
                         ` : `
-                            <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=fishing" class="btn btn-cyan font-weight-bold text-white"><i class="fa-solid fa-fish me-1"></i>Dépêcher des Pêcheurs</a>
+                            <button type="button" class="btn btn-cyan font-weight-bold text-white" onclick="openQuickFishingModal(${data.coord_x}, ${data.coord_y}, null, ${data.oasis_id}, '${(data.oasis_name || 'Oasis Lacustre').replace(/'/g, "\\'")}', ${currentStock})">
+                                <i class="fa-solid fa-fish me-1"></i>Dépêcher des Pêcheurs &rarr;
+                            </button>
                         `
                     ) : (isOwn ? `
                         <a href="?page=fleet&target_type=oasis&target_id=${data.oasis_id}&mission=occupy" class="btn btn-primary"><i class="fa-solid fa-shield-halved me-1"></i>Renforcer</a>
@@ -825,7 +987,17 @@ window.selectPlanetTile = function(data) {
 
     // ── Terres Neutres (planète sans joueur ou parcelle libre répertoriée) ─────
     if (!data.user_id) {
-        const isLakePlanet      = (data.terrain_type === 'lake' || data.planet_type === 'oceanic' || (data.terrain_name && data.terrain_name.toLowerCase().includes('lac')) || data.is_lake);
+        const isLakePlanet      = (data.terrain_type === 'lake' || data.planet_type === 'oceanic' || data.is_lake || (data.terrain_name && (
+            data.terrain_name.toLowerCase().includes('lac') ||
+            data.terrain_name.toLowerCase().includes('eau') ||
+            data.terrain_name.toLowerCase().includes('calme') ||
+            data.terrain_name.toLowerCase().includes('vive')
+        )) || (data.planet_name && (
+            data.planet_name.toLowerCase().includes('lac') ||
+            data.planet_name.toLowerCase().includes('eau') ||
+            data.planet_name.toLowerCase().includes('calme') ||
+            data.planet_name.toLowerCase().includes('vive')
+        )));
         const isMountainPlanet  = (data.terrain_type === 'mountain' || (data.terrain_name && data.terrain_name.toLowerCase().includes('montagne')) || data.is_mountain);
 
         const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
@@ -910,9 +1082,9 @@ window.selectPlanetTile = function(data) {
                                 <i class="fa-solid fa-ban me-1"></i>Réserve de Poisson Épuisée
                             </button>
                         ` : `
-                            <a href="?page=fleet&target_id=${data.planet_id || ''}&target_x=${data.coord_x}&target_y=${data.coord_y}&mission=fishing" class="btn btn-cyan font-weight-bold text-white">
+                            <button type="button" class="btn btn-cyan font-weight-bold text-white" onclick="openQuickFishingModal(${data.coord_x}, ${data.coord_y}, ${data.planet_id || 'null'}, null, '${(data.planet_name || data.terrain_name || 'Lac d\'Eaux Vives').replace(/'/g, "\\'")}', ${currentStock})">
                                 <i class="fa-solid fa-fish me-1"></i>Dépêcher une Expédition de Pêche &rarr;
-                            </a>
+                            </button>
                         `
                     ) : (isMountainPlanet ? (
                         isMountainDepleted ? `
@@ -1041,6 +1213,216 @@ window.abandonOasisDirect = async function(oasisId) {
         }
     } catch (e) {
         showModalAlert('Erreur de communication avec le conseil féodal.', 'error');
+    }
+};
+
+// ── Fonctions Expédition de Pêche Rapide Directe depuis la Carte ──────────
+window.openQuickFishingModal = function(targetX, targetY, planetId, oasisId, targetName, fishStock) {
+    closeMapModal();
+    currentFishingTarget = {
+        x: parseInt(targetX, 10),
+        y: parseInt(targetY, 10),
+        planetId: planetId ? parseInt(planetId, 10) : null,
+        oasisId: oasisId ? parseInt(oasisId, 10) : null,
+        name: targetName || "Lac d'Eaux Vives",
+        stock: (fishStock !== null && fishStock !== undefined) ? parseInt(fishStock, 10) : null
+    };
+
+    // Remplir les informations textuelles
+    const nameEl = document.getElementById('fishingModalDestName');
+    if (nameEl) nameEl.textContent = currentFishingTarget.name;
+
+    const coordsEl = document.getElementById('fishingModalDestCoords');
+    if (coordsEl) coordsEl.textContent = `[${currentFishingTarget.x} : ${currentFishingTarget.y}]`;
+
+    const dx = currentFishingTarget.x - mapPlayerX;
+    const dy = currentFishingTarget.y - mapPlayerY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const distEl = document.getElementById('fishingModalDist');
+    if (distEl) distEl.textContent = `${dist.toFixed(1)} lieue(s)`;
+
+    const stockEl = document.getElementById('fishingModalStockBadge');
+    if (stockEl) {
+        stockEl.innerHTML = `<i class="fa-solid fa-fish me-1"></i>Stock : ${currentFishingTarget.stock !== null ? Number(currentFishingTarget.stock).toLocaleString() : 'Abondant'}`;
+    }
+
+    const availCountEl = document.getElementById('fishingModalAvailCount');
+    if (availCountEl) availCountEl.textContent = `${stationedPecheurs.toLocaleString()} Ryōshi`;
+
+    const availNumEl = document.getElementById('fishingModalAvailNum');
+    if (availNumEl) availNumEl.textContent = stationedPecheurs;
+
+    const inputCount = document.getElementById('inputFishingCount');
+    if (inputCount) {
+        inputCount.max = stationedPecheurs;
+        inputCount.value = stationedPecheurs > 0 ? Math.min(stationedPecheurs, 5) : 0;
+    }
+
+    const noAlert = document.getElementById('fishingNoUnitsAlert');
+    if (noAlert) {
+        if (stationedPecheurs > 0) noAlert.classList.add('d-none');
+        else noAlert.classList.remove('d-none');
+    }
+
+    const launchBtn = document.getElementById('btnLaunchQuickFishing');
+    if (launchBtn) {
+        launchBtn.disabled = (stationedPecheurs <= 0);
+        launchBtn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>Dépêcher l\'Expédition de Pêche';
+    }
+
+    updateFishingEstimates();
+
+    const fModal = document.getElementById('mapFishingModal');
+    if (fModal) {
+        fModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeQuickFishingModal = function() {
+    const fModal = document.getElementById('mapFishingModal');
+    if (fModal) fModal.style.display = 'none';
+    document.body.style.overflow = '';
+};
+
+// Fermeture avec Échap aussi pour le modal de pêche
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeQuickFishingModal();
+});
+
+window.adjustFishingCount = function(delta) {
+    const input = document.getElementById('inputFishingCount');
+    if (!input || stationedPecheurs <= 0) return;
+    let val = (parseInt(input.value, 10) || 0) + delta;
+    val = Math.max(1, Math.min(val, stationedPecheurs));
+    input.value = val;
+    updateFishingEstimates();
+};
+
+window.setFishingCountMax = function() {
+    const input = document.getElementById('inputFishingCount');
+    if (!input || stationedPecheurs <= 0) return;
+    input.value = stationedPecheurs;
+    updateFishingEstimates();
+};
+
+window.updateFishingEstimates = function() {
+    const input = document.getElementById('inputFishingCount');
+    if (!input) return;
+    let count = parseInt(input.value, 10) || 0;
+    if (stationedPecheurs > 0) {
+        count = Math.max(1, Math.min(count, stationedPecheurs));
+    } else {
+        count = 0;
+    }
+    input.value = count;
+
+    // Calculs
+    let estFish = count * 20;
+    if (currentFishingTarget && currentFishingTarget.stock !== null) {
+        estFish = Math.min(estFish, currentFishingTarget.stock);
+    }
+    const catchEl = document.getElementById('fishingEstCatch');
+    if (catchEl) catchEl.textContent = `${estFish.toLocaleString()} Poisson${estFish > 1 ? 's' : ''}`;
+
+    const cargoCap = count * 100;
+    const cargoEl = document.getElementById('fishingEstCargo');
+    if (cargoEl) cargoEl.textContent = `${cargoCap.toLocaleString()} unités`;
+
+    const durEl = document.getElementById('fishingEstDuration');
+    if (durEl && currentFishingTarget) {
+        const dx = currentFishingTarget.x - mapPlayerX;
+        const dy = currentFishingTarget.y - mapPlayerY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        // Durée aller : vitesse 14 km/h
+        const flightSec = Math.max(30, Math.round((10 + (3500 / 100) * Math.sqrt((10 * dist) / 14)) / mapGameSpeed));
+        const siteSec = Math.max(60, Math.round(3600 / mapGameSpeed));
+        const totalSec = (flightSec * 2) + siteSec;
+
+        const m = Math.floor(totalSec / 60);
+        const s = totalSec % 60;
+        const h = Math.floor(m / 60);
+        const remM = m % 60;
+        if (h > 0) {
+            durEl.textContent = `${h}h ${remM.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+        } else {
+            durEl.textContent = `${m}m ${s.toString().padStart(2, '0')}s`;
+        }
+    }
+};
+
+window.submitQuickFishing = async function() {
+    if (!currentFishingTarget) return;
+    const input = document.getElementById('inputFishingCount');
+    const count = parseInt(input ? input.value : 0, 10);
+    if (!count || count <= 0) {
+        showModalAlert('Veuillez mobiliser au moins 1 Pêcheur Féodal.', 'warning', 'Effectif Requis');
+        return;
+    }
+    if (count > stationedPecheurs) {
+        showModalAlert('Votre garnison ne compte pas assez de pêcheurs disponibles.', 'warning', 'Garnison Insuffisante');
+        return;
+    }
+
+    const btn = document.getElementById('btnLaunchQuickFishing');
+    const prevHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Dépêche en cours...';
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('target_x', currentFishingTarget.x);
+        formData.append('target_y', currentFishingTarget.y);
+        if (currentFishingTarget.planetId) {
+            formData.append('target_planet_id', currentFishingTarget.planetId);
+        }
+        if (currentFishingTarget.oasisId) {
+            formData.append('target_oasis_id', currentFishingTarget.oasisId);
+        }
+        formData.append('mission_type', 'fishing');
+        formData.append('fleet[pecheur]', count);
+        formData.append('cargo_metal', 0);
+        formData.append('cargo_crystal', 0);
+        formData.append('cargo_deuterium', 0);
+
+        const res = await fetch('/api/fleet.php', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data && data.success) {
+            stationedPecheurs = Math.max(0, stationedPecheurs - count);
+            const availCountEl = document.getElementById('fishingModalAvailCount');
+            if (availCountEl) availCountEl.textContent = `${stationedPecheurs.toLocaleString()} Ryōshi`;
+            const availNumEl = document.getElementById('fishingModalAvailNum');
+            if (availNumEl) availNumEl.textContent = stationedPecheurs;
+
+            closeQuickFishingModal();
+            await showModalAlert(
+                `Expédition dépêchée avec succès ! ${count} Pêcheurs Féodaux font voile vers le lac [${currentFishingTarget.x} : ${currentFishingTarget.y}]. Les prises de poisson seront livrées directement dans votre Grenier à Riz Fortifié.`,
+                'success',
+                'Expédition Halieutique Dépêchée'
+            );
+
+            if (galaxyMap && typeof galaxyMap.fetchMapData === 'function') {
+                galaxyMap.fetchMapData();
+            }
+        } else {
+            showModalAlert(data.error || data.message || "Erreur lors de l'envoi de l'expédition de pêche.", 'error', 'Expédition Refusée');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = prevHtml;
+            }
+        }
+    } catch (err) {
+        showModalAlert("Erreur de communication avec le serveur féodal.", 'error', 'Erreur Réseau');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = prevHtml;
+        }
     }
 };
 </script>

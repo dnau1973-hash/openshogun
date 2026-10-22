@@ -125,7 +125,7 @@ foreach ($availableShips as $s) {
         ];
         $s['meta'] = $meta;
         $stationedSiege[$code] = $s;
-    } elseif ($cnt > 0) {
+    } else {
         $otherShips[$code] = $s;
     }
 }
@@ -203,6 +203,9 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
             </button>
             <button type="button" class="btn btn-outline-primary py-0 px-2 garnison-filter-btn" data-target="infantry" onclick="filterGarnison('infantry', this)" style="font-size:0.72rem;">
                 <i class="fa-solid fa-person-rifle me-1"></i>Dojo (<?= $totalSoldiers ?>)
+            </button>
+            <button type="button" class="btn btn-outline-success py-0 px-2 garnison-filter-btn" data-target="other" onclick="filterGarnison('other', this)" style="font-size:0.72rem;">
+                <i class="fa-solid fa-horse me-1"></i>Cavalerie &amp; Logistique (<?= $totalOtherEngines ?>)
             </button>
         </div>
 
@@ -426,53 +429,125 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
     </div>
 
     <!-- ====================================================
-         3. SECTION CAVALERIE & CONVOIS (SI PRÉSENTS)
+         3. SECTION CAVALERIE, ÉCLAIREURS & LOGISTIQUE
          ==================================================== -->
     <?php if (!empty($otherShips)): ?>
         <div class="garnison-section mb-3" id="garnison-sec-other">
-            <div class="d-flex align-items-center justify-content-between p-1.5 px-2 rounded mb-2 bg-light border-start border-3 border-success">
+            <div class="d-flex align-items-center justify-content-between p-1.5 px-2 rounded mb-2" style="background: linear-gradient(90deg, rgba(16,185,129,0.1), rgba(6,182,212,0.05)); border-left: 3px solid #10b981;">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="avatar avatar-xs rounded bg-success-lt text-success" style="width:24px; height:24px; font-size:0.75rem;">
+                    <span class="avatar avatar-xs rounded bg-success text-white shadow-xs" style="width:24px; height:24px; font-size:0.75rem;">
                         <i class="fa-solid fa-horse"></i>
                     </span>
-                    <strong class="text-dark" style="font-size: 0.8rem;">Cavalerie &amp; Convois</strong>
+                    <div>
+                        <strong class="d-block text-dark" style="font-size: 0.82rem;">Cavalerie, Shinobis &amp; Convois</strong>
+                        <small class="text-secondary" style="font-size: 0.68rem;">Éclaireurs furtifs, convois logistiques &amp; escadrons montés (Cliquer pour voir détails)</small>
+                    </div>
                 </div>
-                <span class="badge bg-success-lt font-monospace fw-bold" style="font-size: 0.72rem;"><?= number_format($totalOtherEngines) ?></span>
+                <div class="text-end">
+                    <span class="badge <?= ($totalOtherEngines > 0) ? 'bg-success text-white' : 'bg-secondary-lt' ?> font-monospace fw-bold" style="font-size: 0.72rem;">
+                        <?= number_format($totalOtherEngines) ?> unité(s)
+                    </span>
+                </div>
             </div>
-            <div class="d-flex flex-column gap-1">
+            <div class="d-flex flex-column gap-1.5">
                 <?php foreach ($otherShips as $os): ?>
                     <?php
-                        $count = (int)($os['stationed_count'] ?? 0);
-                        $imgFile = !empty($os['image']) ? $os['image'] : ($os['code'] . '.jpg');
+                        $count    = (int)($os['stationed_count'] ?? 0);
+                        $hasUnits = ($count > 0);
+                        $code     = $os['code'];
+                        $imgFile  = !empty($os['image']) ? $os['image'] : ($code . '.jpg');
                         $diskFile = __DIR__ . '/../../public/assets/units/' . $imgFile;
-                        $imgSrc = file_exists($diskFile) ? ('/public/assets/units/' . $imgFile . '?v=' . filemtime($diskFile)) : '/public/assets/tiles/tile_shipyard.png';
+                        $imgSrc   = file_exists($diskFile) ? ('/public/assets/units/' . $imgFile . '?v=' . filemtime($diskFile)) : '/public/assets/tiles/tile_shipyard.png';
+
+                        $isSpy       = ($code === 'spy_probe' || stripos($os['name'], 'shinobi') !== false || stripos($os['name'], 'éclaireur') !== false);
+                        $isTransport = (str_starts_with($code, 'transporter') || stripos($os['name'], 'chariot') !== false || stripos($os['name'], 'convoi') !== false);
+
+                        if ($isSpy) {
+                            $roleBadge   = 'Shinobi & Renseignement';
+                            $descDefault = 'Éclaireur furtif spécialisé dans l\'infiltration des fiefs rivaux pour espionner leurs stocks de riz, minerais et armées en garnison.';
+                            $tipDefault  = 'Envoyez vos éclaireurs espionner les domaines cibles avant tout raid ou siège castral.';
+                        } elseif ($isTransport) {
+                            $roleBadge   = 'Logistique & Ravitaillement';
+                            $descDefault = 'Chariot de transport à haute capacité d\'emport pour convoyer des vivres, du bois et des minerais entre vos provinces ou honorer les trocs du marché.';
+                            $tipDefault  = 'Indispensable pour affréter des convois marchands et ravitailler vos avant-postes en denrées.';
+                        } else {
+                            $roleBadge   = 'Cavalerie & Mobilité';
+                            $descDefault = 'Escadron monté rapide capable de mener des frappes de contournement et de pourchasser les fuyards.';
+                            $tipDefault  = 'Excellente vitesse de déplacement, idéale pour les raids éclair sur les oasis sauvages.';
+                        }
+
                         $otherModalData = [
                             'name'            => $os['name'],
                             'short_name'      => $os['name'],
-                            'role_badge'      => 'Cavalerie & Logistique',
+                            'role_badge'      => $roleBadge,
                             'badge_class'     => 'bg-success',
                             'image_url'       => $imgSrc,
-                            'description'     => !empty($os['description']) ? $os['description'] : 'Escadron monté ou convoi de transport de ravitaillement.',
-                            'lore_title'      => 'Écuries & Convois Féodaux :',
+                            'description'     => !empty($os['description']) ? $os['description'] : $descDefault,
+                            'lore_title'      => 'Écuries & Logistique du Fief :',
                             'stationed_count' => $count,
                             'is_siege'        => false,
                             'attack'          => (int)($os['attack'] ?? 0),
                             'defense'         => (int)($os['defense'] ?? 0) + (int)($os['shield'] ?? 0),
                             'speed'           => (int)($os['speed'] ?? 0),
                             'cargo'           => (int)($os['cargo_capacity'] ?? 0),
-                            'tactical_tip'    => 'Idéal pour acheminer d\'importantes cargaisons ou mener des frappes de contournement rapides.'
+                            'tactical_tip'    => $tipDefault
                         ];
                         $otherJson = htmlspecialchars(json_encode($otherModalData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8');
                     ?>
-                    <div class="d-flex justify-content-between align-items-center px-2 py-1 rounded border bg-surface garnison-unit-row"
-                         style="font-size:0.75rem;"
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded border bg-surface garnison-unit-row <?= !$hasUnits ? 'opacity-50 bg-light-lt' : 'shadow-xs border-success-subtle' ?>"
+                         style="min-height:44px;"
                          onclick="openGarrisonUnitModal(<?= $otherJson ?>)"
-                         title="Cliquer pour afficher les détails">
-                        <span class="fw-semibold text-truncate"><?= htmlspecialchars($os['name']) ?></span>
-                        <strong class="font-monospace text-success"><?= number_format($count) ?></strong>
+                         title="Cliquer pour afficher l'illustration HD et les détails">
+                        <div class="d-flex align-items-center gap-2 text-truncate me-2">
+                            <div class="position-relative flex-shrink-0 garnison-thumb" style="width:32px; height:32px; border-radius:6px; overflow:hidden; border:1px solid <?= $hasUnits ? '#10b981' : '#cbd5e1' ?>;">
+                                <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($os['name']) ?>" style="width:100%; height:100%; object-fit:cover;">
+                                <?php if ($hasUnits): ?>
+                                    <span class="position-absolute bottom-0 end-0 bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:12px; height:12px; font-size:8px;">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="text-truncate">
+                                <span class="fw-semibold text-dark text-truncate d-block" style="font-size:0.78rem;" title="<?= htmlspecialchars($os['name']) ?>">
+                                    <?= htmlspecialchars($os['name']) ?>
+                                </span>
+                                <div class="d-flex align-items-center gap-2 text-secondary" style="font-size:0.67rem;">
+                                    <?php if ($isSpy): ?>
+                                        <span title="Infiltration Shinobi"><i class="fa-solid fa-user-ninja text-secondary me-0.5"></i>Espionnage</span>
+                                        <span title="Vitesse de reconnaissance"><i class="fa-solid fa-person-running text-info me-0.5"></i>Vit: <?= $os['speed'] ?></span>
+                                    <?php elseif ($isTransport): ?>
+                                        <span title="Capacité d'emport de fret"><i class="fa-solid fa-boxes-stacked text-warning me-0.5"></i>Fret: <?= number_format($os['cargo_capacity']) ?></span>
+                                        <span title="Vitesse du convoi"><i class="fa-solid fa-truck-moving text-secondary me-0.5"></i>Vit: <?= $os['speed'] ?></span>
+                                    <?php else: ?>
+                                        <span><i class="fa-solid fa-khanda text-danger me-0.5"></i><?= $os['attack'] ?></span>
+                                        <span><i class="fa-solid fa-shield-halved text-success me-0.5"></i><?= (int)$os['defense'] + (int)$os['shield'] ?></span>
+                                        <span title="Vitesse de chevauchée"><i class="fa-solid fa-horse text-secondary me-0.5"></i>Vit: <?= $os['speed'] ?></span>
+                                    <?php endif; ?>
+                                    <span class="d-none d-sm-inline text-muted">&bull; <?= htmlspecialchars($roleBadge) ?></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            <?php if ($hasUnits): ?>
+                                <span class="badge bg-success text-white font-monospace px-2 py-1 shadow-xs" style="font-size:0.8rem;">
+                                    <?= number_format($count) ?>
+                                </span>
+                            <?php else: ?>
+                                <a href="?page=shipyard" class="btn btn-outline-secondary py-0 px-1 text-muted" style="font-size:0.68rem; border-style:dashed;" onclick="event.stopPropagation();" title="Mobiliser dans les écuries / atelier">
+                                    0 <i class="fa-solid fa-plus ms-0.5 text-success"></i>
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>
+
+            <?php if ($totalOtherEngines === 0): ?>
+                <div class="p-2 mt-1 rounded bg-light text-center small text-muted border border-dashed" style="font-size:0.72rem;">
+                    <i class="fa-solid fa-circle-info text-info me-1"></i>Aucune unité de cavalerie ou logistique en garnison.
+                    <a href="?page=shipyard" class="text-success fw-bold text-decoration-underline ms-1">Mobiliser à l'Atelier</a>
+                </div>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 
@@ -853,7 +928,7 @@ function closeGarrisonUnitModal() {
 function filterGarnison(category, btn) {
     if (!btn) return;
     document.querySelectorAll('.garnison-filter-btn').forEach(function(b) {
-        b.classList.remove('active', 'btn-danger', 'btn-primary', 'btn-secondary');
+        b.classList.remove('active', 'btn-danger', 'btn-primary', 'btn-success', 'btn-secondary');
         b.classList.add('btn-outline-secondary');
     });
     btn.classList.add('active');
@@ -863,6 +938,9 @@ function filterGarnison(category, btn) {
     } else if (category === 'infantry') {
         btn.classList.add('btn-primary');
         btn.classList.remove('btn-outline-primary', 'btn-outline-secondary');
+    } else if (category === 'other') {
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-success', 'btn-outline-secondary');
     } else {
         btn.classList.add('btn-secondary');
         btn.classList.remove('btn-outline-secondary');
@@ -880,6 +958,10 @@ function filterGarnison(category, btn) {
         if (secSiege) secSiege.classList.add('d-none');
         if (secInfantry) secInfantry.classList.remove('d-none');
         if (secOther) secOther.classList.add('d-none');
+    } else if (category === 'other') {
+        if (secSiege) secSiege.classList.add('d-none');
+        if (secInfantry) secInfantry.classList.add('d-none');
+        if (secOther) secOther.classList.remove('d-none');
     } else {
         if (secSiege) secSiege.classList.remove('d-none');
         if (secInfantry) secInfantry.classList.remove('d-none');
