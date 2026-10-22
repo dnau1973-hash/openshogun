@@ -870,6 +870,12 @@ class FleetEngine {
         $stmtShips->execute([$targetPlanetId]);
         $ships = $stmtShips->fetchAll(PDO::FETCH_KEY_PAIR);
 
+        $stmtUnits = $this->db->prepare("SELECT unit_code, count FROM planet_units WHERE planet_id = ? AND count > 0");
+        $stmtUnits->execute([$targetPlanetId]);
+        $units = $stmtUnits->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        $allTroops = array_merge($ships, $units);
+
         $reportData = [
             'type' => 'spy',
             'planet_name' => $targetPlanet['name'],
@@ -879,7 +885,9 @@ class FleetEngine {
                 'crystal' => (int)$targetPlanet['crystal'],
                 'deuterium' => (int)$targetPlanet['deuterium'],
             ],
-            'fleet' => $ships,
+            'fleet' => $allTroops,
+            'ships' => $ships,
+            'units' => $units,
             'buildings' => $buildings
         ];
 

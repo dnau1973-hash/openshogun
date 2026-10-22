@@ -20,11 +20,11 @@ $fleetEngine = new FleetEngine();
 
 // 1. Inscription d'un joueur Terran
 echo "1. Inscription joueur 'TerranCommander'...\n";
-$regResult = $auth->register('TerranCommander', 'terran@opengalaxy.local', 'password123', 'terran');
+$regResult = $auth->register('TerranCommander', 'terran@opengalaxy.local', 'Password123!', 'terran');
 if (!$regResult['success'] && strpos($regResult['error'], 'déjà utilisé') === false) {
     die("Échec inscription : " . $regResult['error'] . "\n");
 }
-$auth->login('TerranCommander', 'password123');
+$auth->login('TerranCommander', 'Password123!');
 $user = $auth->getCurrentUser();
 $planet = $auth->getCurrentPlanet();
 echo "-> Joueur connecté ID: {$user['id']}, Faction: {$user['faction']}, Planète ID: {$planet['id']} [{$planet['coord_x']}:{$planet['coord_y']}]\n\n";
@@ -56,7 +56,7 @@ echo "5. Test fabrication de vaisseaux au chantier...\n";
 // Assurons-nous d'avoir un chantier niveau 1 et des ressources pour tester
 $db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level) VALUES (?, 'shipyard', 2) ON DUPLICATE KEY UPDATE level = 2")->execute([$planet['id']]);
 $db->prepare("UPDATE planets SET metal = 5000, crystal = 5000, deuterium = 3000 WHERE id = ?")->execute([$planet['id']]);
-$shipResult = $shipyardEngine->buildShips((int)$planet['id'], 'spy_probe', 3, $user['faction']);
+$shipResult = $shipyardEngine->buildShips((int)$planet['id'], 'transporter_light', 3, $user['faction']);
 echo "-> Commande vaisseau : " . ($shipResult['success'] ? "SUCCÈS" : "ÉCHEC") . "\n";
 $db->prepare("UPDATE shipyard_queue SET finishes_at = UNIX_TIMESTAMP() - 1 WHERE planet_id = ?")->execute([$planet['id']]);
 $planetEngine->updatePlanet((int)$planet['id']);
@@ -64,6 +64,20 @@ $stmtShips = $db->prepare("SELECT ship_code, count FROM planet_ships WHERE plane
 $stmtShips->execute([$planet['id']]);
 $ships = $stmtShips->fetchAll(PDO::FETCH_KEY_PAIR);
 echo "-> Flotte en hangar : " . json_encode($ships) . "\n\n";
+
+// 5b. Test entraînement Éclaireur Shinobi au Dojo
+echo "5b. Test entraînement de l'Éclaireur Shinobi au Dojo...\n";
+require_once __DIR__ . '/../core/BarracksEngine.php';
+$barracksEngine = new BarracksEngine();
+$db->prepare("INSERT INTO planet_buildings (planet_id, building_type, level) VALUES (?, 'barracks', 2) ON DUPLICATE KEY UPDATE level = 2")->execute([$planet['id']]);
+$spyResult = $barracksEngine->trainUnits((int)$planet['id'], 'spy_probe', 2, $user['faction']);
+echo "-> Entraînement Shinobi : " . ($spyResult['success'] ? "SUCCÈS" : "ÉCHEC") . "\n";
+$db->prepare("UPDATE barracks_queue SET finishes_at = UNIX_TIMESTAMP() - 1 WHERE planet_id = ?")->execute([$planet['id']]);
+$planetEngine->updatePlanet((int)$planet['id']);
+$stmtUnits = $db->prepare("SELECT unit_code, count FROM planet_units WHERE planet_id = ?");
+$stmtUnits->execute([$planet['id']]);
+$units = $stmtUnits->fetchAll(PDO::FETCH_KEY_PAIR);
+echo "-> Garnison Dojo : " . json_encode($units) . "\n\n";
 
 // 6. Test d'envoi et résolution de mission spatiale (Raid)
 echo "6. Test mission spatiale (Raid)...\n";

@@ -47,6 +47,9 @@ $playerPlanet = $db->query("SELECT * FROM planets WHERE user_id = {$player['id']
 echo "Bot : {$bot['username']} [ID: {$bot['id']}] (Fief: {$botPlanet['name']})\n";
 echo "Joueur : {$player['username']} [ID: {$player['id']}] (Fief: {$playerPlanet['name']})\n";
 
+// Nettoyage préalable des tests antérieurs
+$db->exec("DELETE FROM bot_retaliations WHERE trigger_mission_id IN (999991, 999992) OR bot_id = {$bot['id']}");
+
 // 3. Test Réciprocité d'Espionnage : scheduleSpyRetaliation
 $dummyMissionId = 999991;
 $retaliationSpyId = $botEngine->scheduleSpyRetaliation(
@@ -123,3 +126,4 @@ $db->exec("DELETE FROM bot_retaliations WHERE id IN ($retaliationSpyId, $retalia
 echo "\n========================================================\n";
 echo "🎉 TOUS LES TESTS DE RIPOSTE DES IA SONT VALIDÉS AVEC SUCCÈS !\n";
 echo "========================================================\n";
+

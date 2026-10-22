@@ -4,6 +4,7 @@
  */
 require_once __DIR__ . '/../core/BarracksEngine.php';
 require_once __DIR__ . '/../core/PlanetEngine.php';
+require_once __DIR__ . '/../core/AiPromptHelper.php';
 
 $barracksEngine = new BarracksEngine();
 $planetEngine = new PlanetEngine();
@@ -234,6 +235,15 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                             4 => 'Garde du Daimyō'
                         ];
                         $roleText = $roleLabels[$u['tier']] ?? 'Guerrier Féodal';
+                        if ($u['code'] === 'spy_probe') {
+                            $roleText = 'Infiltration & Espionnage';
+                        } elseif ($u['code'] === 'colonizer') {
+                            $roleText = 'Fondation & Expansion';
+                        } elseif ($u['code'] === 'pecheur') {
+                            $roleText = 'Pêche & Ravitaillement';
+                        } elseif ($u['code'] === 'mineur') {
+                            $roleText = 'Extraction des Cimes';
+                        }
                     ?>
                     <div class="card unit-card <?= !$u['can_train'] ? 'unit-locked' : '' ?>" style="margin:0; background:var(--bg-surface, #fdfbf7); overflow:hidden; border:1px solid var(--border-color); border-radius:10px; display:flex; flex-direction:column; box-shadow:0 6px 18px rgba(0,0,0,0.05); transition:transform 0.2s ease, box-shadow 0.2s ease;">
 

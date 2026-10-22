@@ -362,7 +362,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                         $imgSrc = '/public/assets/units/' . $t['code'] . '.svg';
                     }
 
-                    $roleBadge = match((int)($t['tier'] ?? 1)) {
+                    $roleBadge = ($t['code'] === 'spy_probe') ? 'Infiltration & Renseignement' : match((int)($t['tier'] ?? 1)) {
                         1 => 'Conscrit & Ligne',
                         2 => 'Spécialiste de Ligne',
                         3 => 'Guerrier d\'Élite',
@@ -373,6 +373,7 @@ $totalFortifiedDefense = (int)($totalDefensePower * $wallBonusFactor) + ($wallLe
                         'pecheur' => 'Ouvrier halieutique indispensable pour mener des expéditions de pêche sur les parcelles de lac.',
                         'mineur' => 'Mineur de roche et métaux précieux mobilisable pour des expéditions sur les gisements montagnards.',
                         'colonizer' => 'Pionniers et maîtres charpentiers permettant de fonder un nouveau village castral indépendant.',
+                        'spy_probe' => 'Éclaireur Shinobi furtif spécialisé dans l\'espionnage et l\'infiltration rapide des fiefs rivaux.',
                         default => 'Entraîné au Dojo, ce guerrier défend loyalement votre domaine castral et marche sous votre bannière lors des campagnes militaires.'
                     };
 

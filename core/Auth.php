@@ -593,7 +593,6 @@ class Auth {
                 INSERT INTO planet_ships (planet_id, ship_code, count) 
                 VALUES (?, ?, ?)
             ");
-            $stmtShip->execute([$planetId, 'spy_probe', 2]);
             $stmtShip->execute([$planetId, 'transporter_light', 1]);
 
             // 6. Garnison initiale
@@ -608,6 +607,7 @@ class Auth {
                 VALUES (?, ?, ?)
             ");
             $stmtUnit->execute([$planetId, $starter['code'], $starter['count']]);
+            $stmtUnit->execute([$planetId, 'spy_probe', 2]);
 
             // 7. Héros initial
             $heroName = "Samouraï " . ucfirst($username);

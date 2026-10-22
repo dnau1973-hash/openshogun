@@ -119,7 +119,7 @@ class BotEngine {
                 INSERT INTO planet_ships (planet_id, ship_code, count) VALUES (?, 'transporter_light', 3)
             ")->execute([$planetId]);
             $this->db->prepare("
-                INSERT INTO planet_ships (planet_id, ship_code, count) VALUES (?, 'spy_probe', 4)
+                INSERT INTO planet_units (planet_id, unit_code, count) VALUES (?, 'spy_probe', 4)
             ")->execute([$planetId]);
 
             if ($this->db->inTransaction()) {
@@ -404,13 +404,13 @@ class BotEngine {
         $botId = (int)$bot['id'];
 
         // S'assurer que le bot a au moins 1 éclaireur shinobi
-        $stmtProbe = $this->db->prepare("SELECT count FROM planet_ships WHERE planet_id = ? AND ship_code = 'spy_probe'");
+        $stmtProbe = $this->db->prepare("SELECT count FROM planet_units WHERE planet_id = ? AND unit_code = 'spy_probe'");
         $stmtProbe->execute([$planetId]);
         $probeCount = (int)$stmtProbe->fetchColumn();
 
         if ($probeCount < 1) {
             $this->db->prepare("
-                INSERT INTO planet_ships (planet_id, ship_code, count) 
+                INSERT INTO planet_units (planet_id, unit_code, count) 
                 VALUES (?, 'spy_probe', 3) 
                 ON DUPLICATE KEY UPDATE count = count + 3
             ")->execute([$planetId]);
@@ -465,7 +465,7 @@ class BotEngine {
         if ((int)$stmtCool->fetchColumn() > 0) return null;
 
         // Déduire 1 éclaireur shinobi
-        $this->db->prepare("UPDATE planet_ships SET count = count - 1 WHERE planet_id = ? AND ship_code = 'spy_probe'")
+        $this->db->prepare("UPDATE planet_units SET count = count - 1 WHERE planet_id = ? AND unit_code = 'spy_probe'")
             ->execute([$planetId]);
 
         // Calcul de la durée de vol
@@ -927,7 +927,7 @@ class BotEngine {
                 INSERT INTO planet_ships (planet_id, ship_code, count) VALUES (?, 'transporter_light', 3)
             ")->execute([$planetId]);
             $this->db->prepare("
-                INSERT INTO planet_ships (planet_id, ship_code, count) VALUES (?, 'spy_probe', 4)
+                INSERT INTO planet_units (planet_id, unit_code, count) VALUES (?, 'spy_probe', 4)
             ")->execute([$planetId]);
 
             if ($this->db->inTransaction()) {
@@ -1283,7 +1283,7 @@ class BotEngine {
             if ($retaliationType === 'spy') {
                 $probeCount = (int)($fleet['spy_probe'] ?? 1);
                 $this->db->prepare("
-                    INSERT INTO planet_ships (planet_id, ship_code, count)
+                    INSERT INTO planet_units (planet_id, unit_code, count)
                     VALUES (?, 'spy_probe', ?)
                     ON DUPLICATE KEY UPDATE count = count + VALUES(count)
                 ")->execute([$botPlanetId, $probeCount]);

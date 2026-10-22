@@ -296,6 +296,16 @@ foreach ($stationedUnits as $u) {
     }
 }
 
+// Vérifier la présence d'Éclaireurs Shinobis dans la garnison
+$hasSpyAvailable = false;
+$availableSpyCount = 0;
+foreach ($stationedUnits as $u) {
+    if ($u['unit_code'] === 'spy_probe' && (int)$u['count'] > 0) {
+        $hasSpyAvailable = true;
+        $availableSpyCount += (int)$u['count'];
+    }
+}
+
 // Emplacement du Tenshu pour orientation directe
 $stmtTenshu = $db->prepare("SELECT slot FROM planet_buildings WHERE planet_id = ? AND building_type = 'hq'");
 $stmtTenshu->execute([$planet['id']]);
@@ -448,6 +458,19 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                             </a>
                                         </div>
                                     </div>
+                                <?php elseif ($preselectedMission === 'spy' && !$hasSpyAvailable): ?>
+                                    <div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
+                                        <span class="fs-1 flex-shrink-0"><i class="fa-solid fa-user-ninja text-danger"></i></span>
+                                        <div class="flex-fill">
+                                            <strong class="d-block mb-1">Aucun Éclaireur Shinobi Furtif (🥷) en garnison !</strong>
+                                            <p class="mb-2 small">
+                                                Pour infiltrer et espionner un fief adverse, vous devez recruter un <strong>Éclaireur Shinobi Furtif</strong> au <strong>Dojo Militaire</strong>.
+                                            </p>
+                                            <a href="?page=barracks" class="btn btn-sm btn-danger text-white fw-bold">
+                                                <i class="fa-solid fa-user-ninja me-1"></i>Former des Shinobis au Dojo &rarr;
+                                            </a>
+                                        </div>
+                                    </div>
                                 <?php endif; ?>
 
                                 <?php if ($preselectedMission === 'colonize' && !$hasColonistAvailable): ?>
@@ -525,6 +548,8 @@ $tenshuSlot = (int)$stmtTenshu->fetchColumn() ?: 25;
                                                         $defaultUnitVal = (string)$u['count'];
                                                     } elseif ($preselectedMission === 'mining' && $u['unit_code'] === 'mineur' && (int)$u['count'] > 0) {
                                                         $defaultUnitVal = (string)$u['count'];
+                                                    } elseif ($preselectedMission === 'spy' && $u['unit_code'] === 'spy_probe' && (int)$u['count'] > 0) {
+                                                        $defaultUnitVal = '1';
                                                     }
                                                 ?>
                                                 <div class="list-group-item d-flex align-items-center justify-content-between p-2 border-start border-start-3 border-danger">

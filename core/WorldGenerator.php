@@ -454,7 +454,7 @@ class WorldGenerator {
             INSERT INTO planet_ships (planet_id, ship_code, count) VALUES (?, ?, ?)
         ");
         $stmtShip->execute([$capitalPlanetId, 'transporter_light', 3]);
-        $stmtShip->execute([$capitalPlanetId, 'spy_probe', 5]);
+        $stmtUnit->execute([$capitalPlanetId, 'spy_probe', 5]);
 
         // 8b. Initialiser le Héros Samouraï de départ pour l'Admin
         try {
@@ -520,9 +520,9 @@ class WorldGenerator {
                 $stUnitInfo = $starterUnits[$uFaction] ?? $starterUnits['terran'];
                 $stmtUnit->execute([$uPlanetId, $stUnitInfo['code'], $stUnitInfo['count']]);
 
-                // Vaisseaux éclaireurs
+                // Vaisseaux et éclaireurs
                 $stmtShip->execute([$uPlanetId, 'transporter_light', 1]);
-                $stmtShip->execute([$uPlanetId, 'spy_probe', 2]);
+                $stmtUnit->execute([$uPlanetId, 'spy_probe', 2]);
 
                 // Héros Samouraï
                 if (isset($heroEngine)) {

@@ -5,6 +5,7 @@
  */
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Database.php';
+require_once __DIR__ . '/../core/AiPromptHelper.php';
 require_once __DIR__ . '/../config/game_constants.php';
 
 $auth = new Auth();
@@ -109,6 +110,34 @@ $unitTactics = [
         'strengths' => 'Meilleures défenses du jeu (140 infanterie / 160 cavalerie !), attaque formidable (200), point d\'ancrage absolu.',
         'weaknesses' => 'Unité la plus coûteuse à former (650 bois, 500 pierre, 300 riz), temps de formation important.',
         'quote' => '« La patience est la clé de la domination sous le Ciel. » — Tokugawa Ieyasu'
+    ],
+    'spy_probe' => [
+        'role' => 'Éclaireur Shinobi Furtif',
+        'lore_detail' => 'Infiltrateur d\'élite agile opérant seul dans les ténèbres. Glissant le long des toitures et des douves sans éveiller l\'attention des sentinelles, il recueille des rapports secrets sur les défenses, les bâtiments et les réserves des fiefs rivaux.',
+        'strengths' => 'Vitesse absolue (20 000), coût dérisoire, rapporte les données stratégiques complètes sans déclarer la guerre.',
+        'weaknesses' => 'Éliminé immédiatement s\'il est intercepté par la garde d\'alerte ennemie.',
+        'quote' => '« Voir sans être vu, savoir avant que le premier tambour de guerre ne résonne. »'
+    ],
+    'colonizer' => [
+        'role' => 'Pionnier Féodal (Colon)',
+        'lore_detail' => 'Rassemblement solennel de maîtres-charpentiers, architectes, forgerons, cultivateurs et moines bénédictins. Emportant plans de construction, plants sacrés et outils précieux, cette caravane fonde un nouveau fief castral sur une terre vierge.',
+        'strengths' => 'Permet de fonder un nouveau château complet avec ses 18 parcelles de ressources et son donjon.',
+        'weaknesses' => 'Unité consommée lors de la fondation, formation longue.',
+        'quote' => '« Planter la première poutre, c\'est faire naître un empire pour les générations futures. »'
+    ],
+    'pecheur' => [
+        'role' => 'Pêcheur Féodal (Ryōshi)',
+        'lore_detail' => 'Artisans des berges et des roseaux naviguant sur des barques traditionnelles en bois de cèdre. Équipés de filets tressés et de nasses d\'osier, ils tirent du poisson frais des lacs féodaux pour nourrir la garnison.',
+        'strengths' => 'Indispensable pour récolter le poisson des lacs, très économique.',
+        'weaknesses' => 'Capacités martiales minimales.',
+        'quote' => '« L\'eau claire des monts nourrit le courage des guerriers. »'
+    ],
+    'mineur' => [
+        'role' => 'Mineur des Cimes (Kōfu)',
+        'lore_detail' => 'Terrassiers robustes arpentant les crêtes et carrières escarpées. Armés de pioches et de masses renforcées, ils extraient le minerai de fer, le soufre et le salpêtre nécessaires à la poudre à canon et aux armures.',
+        'strengths' => 'Extrait les gisements précieux des montagnes.',
+        'weaknesses' => 'Lent en combat direct.',
+        'quote' => '« Du cœur de la roche jaillit la force du fer. »'
     ]
 ];
 
@@ -247,6 +276,19 @@ $clansMeta = [
         'bg_gradient' => 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(253, 251, 247, 0.98) 100%)',
         'badge' => '<i class="fa-solid fa-torii-gate text-primary me-1"></i>Cachettes secrètes doublées, vitesse de marche +20% & Défenses imprenables',
         'icon' => '<i class="fa-solid fa-torii-gate text-primary"></i>'
+    ],
+    'all' => [
+        'id' => 'all',
+        'name' => 'Corps Féodal & Éclaireurs Impériaux',
+        'daimyo' => 'Toutes Factions & Seigneurs Féodaux',
+        'province' => 'Domaines Impériaux de Kyoto & Terroirs Communs',
+        'mon' => 'Kiku-jin (Sceau Impérial)',
+        'doctrine' => 'Infiltration Shinobi, Expansion Castrale & Exploitation des Terroirs',
+        'color' => '#059669',
+        'border' => '#047857',
+        'bg_gradient' => 'linear-gradient(135deg, rgba(5, 150, 105, 0.08) 0%, rgba(253, 251, 247, 0.98) 100%)',
+        'badge' => '<i class="fa-solid fa-user-ninja text-success me-1"></i>Espionnage rapide, extraction minière, pêche et fondation de fiefs',
+        'icon' => '<i class="fa-solid fa-user-ninja text-success"></i>'
     ]
 ];
 
