@@ -911,7 +911,6 @@ function updateHudResources(planet) {
     if (planet.roof_tiles !== undefined) updateEl('res-val-roof-tiles', 'bar-roof-tiles', planet.roof_tiles, planet.roof_tiles_max || 15000);
 }
 </script>
-<script src="/public/js/audio_manager.js"></script>
 <!-- Tabler JS -->
 <script src="/public/js/tabler/tabler.min.js"></script>
 <script>
