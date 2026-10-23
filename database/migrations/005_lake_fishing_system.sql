@@ -6,9 +6,9 @@ ALTER TABLE `planets`
     ADD COLUMN IF NOT EXISTS `fish` DOUBLE NOT NULL DEFAULT 0 AFTER `deuterium_max`,
     ADD COLUMN IF NOT EXISTS `fish_max` INT UNSIGNED NOT NULL DEFAULT 15000 AFTER `fish`;
 
--- 2. Mise à jour de l'énumération mission_type dans fleet_missions pour inclure 'fishing'
+-- 2. Mise à jour de la colonne mission_type dans fleet_missions (VARCHAR 50 pour tous les types de missions sans conflit ni tronquage)
 ALTER TABLE `fleet_missions`
-    MODIFY COLUMN `mission_type` ENUM('attack','raid','transport','spy','colonize','occupy','adventure','fishing') NOT NULL;
+    MODIFY COLUMN `mission_type` VARCHAR(50) NOT NULL DEFAULT 'attack';
 
 -- 3. Ajout de la technologie de recherche 'fishing_tech' (Halieutique Féodale)
 INSERT INTO `researches` (`code`, `name`, `metal_cost`, `crystal_cost`, `deuterium_cost`, `base_time`, `description`)

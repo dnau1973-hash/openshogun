@@ -1479,9 +1479,9 @@ class PlanetEngine {
                 }
             } catch (Exception $eRes) {}
 
-            // 15. Type de mission 'fishing' et 'mining' dans fleet_missions
+            // 15. Type de mission (VARCHAR 50 pour tous les types de missions sans conflit ni tronquage)
             try {
-                $this->db->exec("ALTER TABLE `fleet_missions` MODIFY COLUMN `mission_type` ENUM('attack','transport','occupy','colonize','spy','adventure','raid','fishing','mining') NOT NULL");
+                $this->db->exec("ALTER TABLE `fleet_missions` MODIFY COLUMN `mission_type` VARCHAR(50) NOT NULL DEFAULT 'attack'");
             } catch (Exception $eEnum) {}
 
             // 16. Table lake_fish_stocks pour la gestion finie des réserves halieutiques

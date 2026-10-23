@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS `fleet_missions` (
   `target_planet_id` int(10) unsigned DEFAULT NULL,
   `target_oasis_id` int(10) unsigned DEFAULT NULL,
   `adventure_id` int(10) unsigned DEFAULT NULL,
-  `mission_type` enum('attack','raid','transport','spy','colonize','occupy','adventure') NOT NULL,
+  `mission_type` varchar(50) NOT NULL DEFAULT 'attack',
   `fleet_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`fleet_data`)),
   `cargo_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`cargo_data`)),
   `has_hero` tinyint(1) NOT NULL DEFAULT 0,
