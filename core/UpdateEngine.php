@@ -405,7 +405,15 @@ class UpdateEngine {
             $db = Database::getConnection();
             $migResult = MigrationEngine::run($db);
             if (!empty($migResult['executed_count']) && $migResult['executed_count'] > 0) {
-                $logs[] = "✅ {$migResult['executed_count']} migration(s) appliquée(s) avec succès : " . implode(', ', $migResult['executed'] ?? []);
+                $migNames = array_map(function($m) {
+                    if (is_array($m)) {
+                        $v = $m['version'] ?? 'inconnue';
+                        $ms = isset($m['duration_ms']) ? " ({$m['duration_ms']}ms)" : '';
+                        return $v . $ms;
+                    }
+                    return (string)$m;
+                }, $migResult['executed'] ?? []);
+                $logs[] = "✅ {$migResult['executed_count']} migration(s) appliquée(s) avec succès : " . implode(', ', $migNames);
             } else {
                 $logs[] = "✅ Schéma de base de données déjà synchronisé et à jour.";
             }
