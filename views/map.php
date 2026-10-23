@@ -124,14 +124,14 @@ ob_start();
     <div class="card shadow-lg border-0 overflow-hidden" style="
         background: #ffffff;
         border-radius: 12px;
-        width: 100%; max-width: 580px;
+        width: 100%; max-width: 820px;
         max-height: 90vh; overflow-y: auto;
         position: relative;
         animation: mapModalIn 0.2s ease;
         color: #1e293b;
     ">
         <!-- 1. Illustration en haut (Bandeau HD avec overlay dégradé, titre, badges et bouton fermer) -->
-        <div class="position-relative overflow-hidden" style="width: 100%; height: 185px; background: #0f172a; flex-shrink: 0;">
+        <div class="position-relative overflow-hidden" style="width: 100%; height: 200px; background: #0f172a; flex-shrink: 0;">
             <img id="mapModalBannerImg" src="/public/assets/map/plaines.jpg?v=1" alt="Illustration Parcelle" style="width: 100%; height: 100%; object-fit: cover; object-position: center 35%;">
             <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
@@ -184,14 +184,14 @@ ob_start();
     <div class="card shadow-lg border-0 overflow-hidden" style="
         background: #ffffff;
         border-radius: 12px;
-        width: 100%; max-width: 540px;
+        width: 100%; max-width: 680px;
         max-height: 90vh; overflow-y: auto;
         position: relative;
         animation: mapModalIn 0.2s ease;
         color: #1e293b;
     ">
         <!-- 1. Illustration en haut (Bandeau HD avec overlay dégradé, titre, badges et bouton fermer) -->
-        <div class="position-relative overflow-hidden" style="width: 100%; height: 185px; background: #0f172a; flex-shrink: 0;">
+        <div class="position-relative overflow-hidden" style="width: 100%; height: 200px; background: #0f172a; flex-shrink: 0;">
             <img src="/public/assets/units/pecheur.jpg" alt="Pêcheurs Féodaux" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%;">
             <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
@@ -320,14 +320,14 @@ ob_start();
     <div class="card shadow-lg border-0 overflow-hidden" style="
         background: #ffffff;
         border-radius: 12px;
-        width: 100%; max-width: 540px;
+        width: 100%; max-width: 680px;
         max-height: 90vh; overflow-y: auto;
         position: relative;
         animation: mapModalIn 0.2s ease;
         color: #1e293b;
     ">
         <!-- 1. Illustration en haut (Bandeau HD avec overlay dégradé, titre, badges et bouton fermer) -->
-        <div class="position-relative overflow-hidden" style="width: 100%; height: 185px; background: #0f172a; flex-shrink: 0;">
+        <div class="position-relative overflow-hidden" style="width: 100%; height: 200px; background: #0f172a; flex-shrink: 0;">
             <img src="/public/assets/units/mineur.jpg" alt="Mineurs des Cimes" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%;">
             <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
@@ -797,17 +797,17 @@ function getMapModalIllustration(data) {
     if (data.is_oasis) {
         const oType = (data.oasis_type || '').toLowerCase();
         const oName = (data.oasis_name || '').toLowerCase();
-        if (oType.includes('lake') || oName.includes('lac') || oName.includes('eau')) {
-            return '/public/assets/map/lac.jpg?v=1';
-        }
-        if (oType.includes('forest') || oName.includes('forêt') || oName.includes('bois')) {
-            return '/public/assets/map/foret.jpg?v=1';
+        if (oType.includes('hills') || oName.includes('colline') || oName.includes('coteau')) {
+            return '/public/assets/map/collines.jpg?v=1';
         }
         if (oType.includes('mountain') || oType.includes('rock') || oName.includes('montagne') || oName.includes('pic')) {
             return '/public/assets/map/pics.jpg?v=1';
         }
-        if (oType.includes('hills') || oName.includes('colline')) {
-            return '/public/assets/map/collines.jpg?v=1';
+        if (oType.includes('forest') || oName.includes('forêt') || oName.includes('bois')) {
+            return '/public/assets/map/foret.jpg?v=1';
+        }
+        if (oType.includes('lake') || oName.includes('lac') || /\beaux?\b/i.test(oName)) {
+            return '/public/assets/map/lac.jpg?v=1';
         }
         return '/public/assets/map/oasis.jpg?v=1';
     }
@@ -816,8 +816,9 @@ function getMapModalIllustration(data) {
     const tType = (data.terrain_type || data.planet_type || '').toLowerCase();
     const tName = (data.terrain_name || data.planet_name || '').toLowerCase();
 
-    if (tType === 'lake' || tType === 'oceanic' || data.is_lake || tName.includes('lac') || tName.includes('eau') || tName.includes('calme') || tName.includes('vive')) {
-        return '/public/assets/map/lac.jpg?v=1';
+    // Priorité explicite aux reliefs pour ne jamais confondre 'coteaux' (qui contient 'eau') avec un lac
+    if (tType === 'hills' || tName.includes('colline') || tName.includes('coteau') || tName.includes('terrasse')) {
+        return '/public/assets/map/collines.jpg?v=1';
     }
     if (tType === 'mountain' || data.is_mountain || tName.includes('montagne') || tName.includes('pic') || tName.includes('crête') || tName.includes('rocheux')) {
         return '/public/assets/map/pics.jpg?v=1';
@@ -825,8 +826,8 @@ function getMapModalIllustration(data) {
     if (tType === 'forest' || tName.includes('forêt') || tName.includes('cèdre') || tName.includes('bois') || tName.includes('sugi')) {
         return '/public/assets/map/foret.jpg?v=1';
     }
-    if (tType === 'hills' || tName.includes('colline') || tName.includes('coteau') || tName.includes('terrasse')) {
-        return '/public/assets/map/collines.jpg?v=1';
+    if (tType === 'lake' || tType === 'oceanic' || data.is_lake || tName.includes('lac') || /\beaux?\b/i.test(tName)) {
+        return '/public/assets/map/lac.jpg?v=1';
     }
     return '/public/assets/map/plaines.jpg?v=1';
 }
@@ -965,15 +966,25 @@ window.selectPlanetTile = function(data) {
 
     // ── Terres Vierges Naturelles (Plaines, Collines, Lacs, etc.) ─────────────
     if (data.empty) {
-        const isLake = (data.terrain_type === 'lake' || (data.terrain_name && (
-            data.terrain_name.toLowerCase().includes('lac') ||
-            data.terrain_name.toLowerCase().includes('eau') ||
-            data.terrain_name.toLowerCase().includes('calme') ||
-            data.terrain_name.toLowerCase().includes('vive')
+        const isHills = (data.terrain_type === 'hills' || (data.terrain_name && (
+            data.terrain_name.toLowerCase().includes('colline') ||
+            data.terrain_name.toLowerCase().includes('coteau') ||
+            data.terrain_name.toLowerCase().includes('terrasse')
         )));
-        const isMountain = (data.terrain_type === 'mountain' || (data.terrain_name && data.terrain_name.toLowerCase().includes('montagne')));
-        const isForest = (data.terrain_type === 'forest' || (data.terrain_name && (data.terrain_name.toLowerCase().includes('forêt') || data.terrain_name.toLowerCase().includes('cèdre'))));
-        const isHills = (data.terrain_type === 'hills' || (data.terrain_name && data.terrain_name.toLowerCase().includes('colline')));
+        const isMountain = (data.terrain_type === 'mountain' || (data.terrain_name && (
+            data.terrain_name.toLowerCase().includes('montagne') ||
+            data.terrain_name.toLowerCase().includes('pic') ||
+            data.terrain_name.toLowerCase().includes('rocheux')
+        )));
+        const isForest = (data.terrain_type === 'forest' || (data.terrain_name && (
+            data.terrain_name.toLowerCase().includes('forêt') ||
+            data.terrain_name.toLowerCase().includes('cèdre') ||
+            data.terrain_name.toLowerCase().includes('bois')
+        )));
+        const isLake = !isHills && !isMountain && !isForest && (data.terrain_type === 'lake' || data.is_lake || (data.terrain_name && (
+            data.terrain_name.toLowerCase().includes('lac') ||
+            /\beaux?\b/i.test(data.terrain_name)
+        )));
 
         const currentStock = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
@@ -1130,13 +1141,16 @@ window.selectPlanetTile = function(data) {
 
     // ── Oasis Naturelle ─────────────────────────────────────────
     if (data.is_oasis) {
-        const isLakeOasis   = (data.oasis_type && data.oasis_type.indexOf('lake') !== -1) ||
+        const isHillsOasis  = (data.oasis_type && data.oasis_type.indexOf('hills') !== -1) ||
+                              (data.oasis_name && (
+                                  data.oasis_name.toLowerCase().includes('colline') ||
+                                  data.oasis_name.toLowerCase().includes('coteau')
+                              ));
+        const isLakeOasis   = !isHillsOasis && ((data.oasis_type && data.oasis_type.indexOf('lake') !== -1) ||
                               (data.oasis_name && (
                                   data.oasis_name.toLowerCase().includes('lac') ||
-                                  data.oasis_name.toLowerCase().includes('eau') ||
-                                  data.oasis_name.toLowerCase().includes('calme') ||
-                                  data.oasis_name.toLowerCase().includes('vive')
-                              ));
+                                  /\beaux?\b/i.test(data.oasis_name)
+                              )));
         const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
         const isLakeDepleted = data.lake_depleted || (currentStock <= 0);
@@ -1256,20 +1270,24 @@ window.selectPlanetTile = function(data) {
 
     // ── Terres Neutres (planète sans joueur ou parcelle libre répertoriée) ─────
     if (!data.user_id) {
-        const isLakePlanet      = (data.terrain_type === 'lake' || data.planet_type === 'oceanic' || data.is_lake || (data.terrain_name && (
-            data.terrain_name.toLowerCase().includes('lac') ||
-            data.terrain_name.toLowerCase().includes('eau') ||
-            data.terrain_name.toLowerCase().includes('calme') ||
-            data.terrain_name.toLowerCase().includes('vive')
+        const isHillsPlanet     = (data.terrain_type === 'hills' || (data.terrain_name && (
+            data.terrain_name.toLowerCase().includes('colline') ||
+            data.terrain_name.toLowerCase().includes('coteau') ||
+            data.terrain_name.toLowerCase().includes('terrasse')
         )) || (data.planet_name && (
-            data.planet_name.toLowerCase().includes('lac') ||
-            data.planet_name.toLowerCase().includes('eau') ||
-            data.planet_name.toLowerCase().includes('calme') ||
-            data.planet_name.toLowerCase().includes('vive')
+            data.planet_name.toLowerCase().includes('colline') ||
+            data.planet_name.toLowerCase().includes('coteau') ||
+            data.planet_name.toLowerCase().includes('terrasse')
         )));
         const isMountainPlanet  = (data.terrain_type === 'mountain' || (data.terrain_name && data.terrain_name.toLowerCase().includes('montagne')) || data.is_mountain);
         const isForestPlanet    = (data.terrain_type === 'forest' || (data.terrain_name && (data.terrain_name.toLowerCase().includes('forêt') || data.terrain_name.toLowerCase().includes('cèdre'))));
-        const isHillsPlanet     = (data.terrain_type === 'hills' || (data.terrain_name && data.terrain_name.toLowerCase().includes('colline')));
+        const isLakePlanet      = !isHillsPlanet && !isMountainPlanet && !isForestPlanet && (data.terrain_type === 'lake' || data.planet_type === 'oceanic' || data.is_lake || (data.terrain_name && (
+            data.terrain_name.toLowerCase().includes('lac') ||
+            /\beaux?\b/i.test(data.terrain_name)
+        )) || (data.planet_name && (
+            data.planet_name.toLowerCase().includes('lac') ||
+            /\beaux?\b/i.test(data.planet_name)
+        )));
 
         const currentStock  = (data.fish_stock !== null && data.fish_stock !== undefined) ? parseInt(data.fish_stock, 10) : 0;
         const initialStock  = (data.fish_initial !== null && data.fish_initial !== undefined) ? parseInt(data.fish_initial, 10) : (currentStock || 25000);
@@ -1292,10 +1310,14 @@ window.selectPlanetTile = function(data) {
             ? '<span class="badge bg-cyan text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-water me-1"></i>EAUX COMMUNAUTAIRES</span>'
             : (isMountainPlanet
                 ? '<span class="badge bg-warning text-dark fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-mountain me-1"></i>SANCTUAIRE DES CIMES</span>'
-                : '<span class="badge bg-primary text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-compass me-1"></i>DOMAINE LIBRE</span>');
+                : (isHillsPlanet
+                    ? '<span class="badge bg-lime text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-mound me-1"></i>COLLINES</span>'
+                    : (isForestPlanet
+                        ? '<span class="badge bg-success text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-tree me-1"></i>FORÊT FÉODALE</span>'
+                        : '<span class="badge bg-primary text-white fw-bold px-2 py-1 shadow-sm" style="font-size:0.75rem;"><i class="fa-solid fa-compass me-1"></i>DOMAINE LIBRE</span>')));
 
-        const tName = data.planet_name || (isLakePlanet ? "Lac d'Eaux Vives" : (isMountainPlanet ? "Pics Rocheux & Montagnes" : "Domaine Libre"));
-        const tDesc = `Type de terrain : ${data.planet_type || (isLakePlanet ? 'oceanic' : (isMountainPlanet ? 'mountain' : 'terrestrial'))}`;
+        const tName = data.planet_name || (isLakePlanet ? "Lac d'Eaux Vives" : (isMountainPlanet ? "Pics Rocheux & Montagnes" : (isHillsPlanet ? "Collines & Coteaux" : (isForestPlanet ? "Forêt de Cèdres (Sugi)" : "Domaine Libre"))));
+        const tDesc = `Type de terrain : ${data.planet_type || (isLakePlanet ? 'oceanic' : (isMountainPlanet ? 'mountain' : (isHillsPlanet ? 'hills' : (isForestPlanet ? 'forest' : 'terrestrial'))))}`;
 
         setMapModalHeader(modalImg, catBadge, escapeHtml(tName), tDesc, `[${data.coord_x} : ${data.coord_y}]`);
 
