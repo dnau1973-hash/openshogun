@@ -109,6 +109,41 @@ class MigrationEngine {
     }
 
     /**
+     * Vérifie rapidement si des migrations sont en attente et les applique si nécessaire.
+     * Détecte instantanément l'ajout de nouvelles migrations SQL après un git pull.
+     */
+    public static function autoMigrateIfPending(PDO $pdo): array {
+        static $alreadyChecked = false;
+        if ($alreadyChecked) {
+            return ['success' => true, 'executed_count' => 0];
+        }
+        $alreadyChecked = true;
+
+        try {
+            self::ensureMigrationTable($pdo);
+            $available = self::getAvailableMigrations();
+            if (empty($available)) {
+                return ['success' => true, 'executed_count' => 0];
+            }
+
+            // Vérification ultra-rapide par comparaison du nombre de migrations
+            $stmt = $pdo->query("SELECT COUNT(*) FROM `" . self::TABLE_NAME . "`");
+            $appliedCount = (int)$stmt->fetchColumn();
+
+            if ($appliedCount === count($available)) {
+                // Toutes les migrations disponibles sont déjà appliquées
+                return ['success' => true, 'executed_count' => 0];
+            }
+
+            // Des migrations sont en attente : exécuter l'application automatique
+            return self::run($pdo);
+        } catch (\Throwable $e) {
+            error_log("[MigrationEngine::autoMigrateIfPending] " . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Exécute toutes les migrations en attente
      */
     public static function run(PDO $pdo, ?callable $logger = null): array {

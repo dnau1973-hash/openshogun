@@ -102,9 +102,13 @@ if ($planet) {
     $planet = $planetEngine->updatePlanet((int)$planet['id']);
     
     // Simulation autonome des PNJ / Bots (espionnage, raids, chantiers)
-    require_once __DIR__ . '/../../core/BotEngine.php';
-    $botEngine = new BotEngine();
-    $botEngine->tickPeriodicSimulation();
+    try {
+        require_once __DIR__ . '/../../core/BotEngine.php';
+        $botEngine = new BotEngine();
+        $botEngine->tickPeriodicSimulation();
+    } catch (\Throwable $e) {
+        error_log("[BotEngine Simulation Error in header.php] " . $e->getMessage());
+    }
     
     // Vérifier les flottes en mouvement pour l'alerte HUD (avec détails des fiefs et clans)
     $db = Database::getConnection();

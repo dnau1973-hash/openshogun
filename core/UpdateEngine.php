@@ -397,6 +397,22 @@ class UpdateEngine {
 
         // Nettoyage de l'Opcache si actif
         $logs[] = "🔄 [4/4] Rafraîchissement du cache applicatif...";
+        // Exécution automatique des migrations SQL en attente
+        $logs[] = "🗄️ [4/5] Vérification et application des migrations SQL...";
+        try {
+            require_once __DIR__ . '/Database.php';
+            require_once __DIR__ . '/MigrationEngine.php';
+            $db = Database::getConnection();
+            $migResult = MigrationEngine::run($db);
+            if (!empty($migResult['executed_count']) && $migResult['executed_count'] > 0) {
+                $logs[] = "✅ {$migResult['executed_count']} migration(s) appliquée(s) avec succès : " . implode(', ', $migResult['executed'] ?? []);
+            } else {
+                $logs[] = "✅ Schéma de base de données déjà synchronisé et à jour.";
+            }
+        } catch (\Throwable $migErr) {
+            $logs[] = "⚠️ Attention lors de l'application des migrations : " . $migErr->getMessage();
+        }
+
         if (function_exists('opcache_reset')) {
             @opcache_reset();
             $logs[] = "Cache OPcache réinitialisé.";

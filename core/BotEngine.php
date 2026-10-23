@@ -16,6 +16,53 @@ class BotEngine {
     public function __construct() {
         $this->db = Database::getConnection();
         $this->planetEngine = new PlanetEngine();
+        $this->ensureShinobiUnitExists();
+    }
+
+    /**
+     * Garantit la présence de l'unité spy_probe dans la table `units`
+     * (Auto-migration et auto-réparation pour éviter les erreurs de clé étrangère 1452)
+     */
+    public function ensureShinobiUnitExists(): void {
+        static $checked = false;
+        if ($checked) return;
+        $checked = true;
+
+        try {
+            $stmt = $this->db->prepare("SELECT 1 FROM units WHERE code = 'spy_probe'");
+            $stmt->execute();
+            if (!$stmt->fetchColumn()) {
+                // Tenter d'exécuter la migration 009 via MigrationEngine
+                require_once __DIR__ . '/MigrationEngine.php';
+                MigrationEngine::autoMigrateIfPending($this->db);
+
+                // Vérifier si spy_probe est maintenant présent
+                $stmtAgain = $this->db->prepare("SELECT 1 FROM units WHERE code = 'spy_probe'");
+                $stmtAgain->execute();
+                if (!$stmtAgain->fetchColumn()) {
+                    // Auto-réparation directe en fallback
+                    $this->db->exec("
+                        INSERT INTO `units` (
+                            `code`, `name`, `faction`, `tier`, `icon`, `image`, 
+                            `metal_cost`, `crystal_cost`, `deuterium_cost`, `rice_flour_cost`, 
+                            `attack`, `def_infantry`, `def_mech`, `speed`, `cargo_capacity`, 
+                            `base_train_time`, `description`
+                        ) VALUES (
+                            'spy_probe', 
+                            'Éclaireur Shinobi Furtif', 
+                            'all', 
+                            1, 
+                            '🥷', 
+                            'eclaireur_shinobi_furtif.jpg', 
+                            0, 1000, 200, 0, 1, 10, 5, 20000, 5, 90, 
+                            'Messager discret et éclaireur rapide capable d\'espionner un fief lointain en silence.'
+                        ) ON DUPLICATE KEY UPDATE `code` = `code`;
+                    ");
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log("[BotEngine::ensureShinobiUnitExists] " . $e->getMessage());
+        }
     }
 
     /**
@@ -217,8 +264,12 @@ class BotEngine {
         if (($now - $lastTick) >= $interval) {
             // Mettre à jour l'horodatage du dernier cycle
             GameConfig::set('bot_last_tick_time', $now);
-            $cycleRes = $this->executeBotCycle();
-            $report = array_merge($report, $cycleRes);
+            try {
+                $cycleRes = $this->executeBotCycle();
+                $report = array_merge($report, $cycleRes);
+            } catch (\Throwable $e) {
+                error_log("[BotEngine::tickPeriodicSimulation] Erreur cycle IA: " . $e->getMessage());
+            }
             return $report;
         }
 
@@ -336,24 +387,36 @@ class BotEngine {
                 $chosenUnit = $possibleUnits[array_rand($possibleUnits)];
                 $recruitCount = rand(5, 15);
 
-                $this->db->prepare("
-                    INSERT INTO planet_units (planet_id, unit_code, count)
-                    VALUES (?, ?, ?)
-                    ON DUPLICATE KEY UPDATE count = count + VALUES(count)
-                ")->execute([$planetId, $chosenUnit, $recruitCount]);
-                $report['troops_trained'] += $recruitCount;
+                try {
+                    $this->db->prepare("
+                        INSERT INTO planet_units (planet_id, unit_code, count)
+                        VALUES (?, ?, ?)
+                        ON DUPLICATE KEY UPDATE count = count + VALUES(count)
+                    ")->execute([$planetId, $chosenUnit, $recruitCount]);
+                    $report['troops_trained'] += $recruitCount;
+                } catch (\Throwable $e) {
+                    error_log("[BotEngine::executeBotCycle] Erreur recrutement unité {$chosenUnit}: " . $e->getMessage());
+                }
 
                 // 4. Infiltration Shinobi & Espionnage (Reconnaissance - suspendue si passif)
                 if (!$isPassive) {
-                    $spyRes = $this->launchBotEspionage($bot, $planet, $allTargets, $aggressiveness);
-                    if ($spyRes) {
-                        $report['spies_dispatched'][] = $spyRes;
+                    try {
+                        $spyRes = $this->launchBotEspionage($bot, $planet, $allTargets, $aggressiveness);
+                        if ($spyRes) {
+                            $report['spies_dispatched'][] = $spyRes;
+                        }
+                    } catch (\Throwable $e) {
+                        error_log("[BotEngine::executeBotCycle] Erreur espionnage bot: " . $e->getMessage());
                     }
 
                     // 5. Raids et Incursions Militaires (suspendues si passif)
-                    $raidRes = $this->launchBotRaid($bot, $planet, $allTargets, $aggressiveness);
-                    if ($raidRes) {
-                        $report['raids_dispatched'][] = $raidRes;
+                    try {
+                        $raidRes = $this->launchBotRaid($bot, $planet, $allTargets, $aggressiveness);
+                        if ($raidRes) {
+                            $report['raids_dispatched'][] = $raidRes;
+                        }
+                    } catch (\Throwable $e) {
+                        error_log("[BotEngine::executeBotCycle] Erreur raid bot: " . $e->getMessage());
                     }
                 }
             }
@@ -409,12 +472,18 @@ class BotEngine {
         $probeCount = (int)$stmtProbe->fetchColumn();
 
         if ($probeCount < 1) {
-            $this->db->prepare("
-                INSERT INTO planet_units (planet_id, unit_code, count) 
-                VALUES (?, 'spy_probe', 3) 
-                ON DUPLICATE KEY UPDATE count = count + 3
-            ")->execute([$planetId]);
-            $probeCount = 3;
+            $this->ensureShinobiUnitExists();
+            try {
+                $this->db->prepare("
+                    INSERT INTO planet_units (planet_id, unit_code, count) 
+                    VALUES (?, 'spy_probe', 3) 
+                    ON DUPLICATE KEY UPDATE count = count + 3
+                ")->execute([$planetId]);
+                $probeCount = 3;
+            } catch (\Throwable $e) {
+                error_log("[BotEngine::launchBotEspionage] Erreur insertion spy_probe: " . $e->getMessage());
+                return null;
+            }
         }
 
         // Filtrer les cibles valides dans un rayon de 45 lieues (en excluant les seigneurs sous immunité)

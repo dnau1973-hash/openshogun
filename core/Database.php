@@ -24,6 +24,9 @@ class Database {
             ];
             try {
                 self::$instance = new PDO($dsn, $user, $pass, $options);
+                // Auto-application transparente des migrations SQL après mise à jour (git pull)
+                require_once __DIR__ . '/MigrationEngine.php';
+                MigrationEngine::autoMigrateIfPending(self::$instance);
             } catch (PDOException $e) {
                 die('Erreur de connexion MySQL : ' . htmlspecialchars($e->getMessage()));
             }
@@ -54,6 +57,9 @@ class Database {
         ];
         try {
             self::$instance = new PDO($dsn, $user, $pass, $options);
+            // Auto-application transparente des migrations SQL après mise à jour (git pull)
+            require_once __DIR__ . '/MigrationEngine.php';
+            MigrationEngine::autoMigrateIfPending(self::$instance);
             return self::$instance;
         } catch (Throwable $e) {
             return null;
