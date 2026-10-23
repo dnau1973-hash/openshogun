@@ -124,14 +124,14 @@ ob_start();
     <div class="card shadow-lg border-0 overflow-hidden" style="
         background: #ffffff;
         border-radius: 12px;
-        width: 100%; max-width: 820px;
+        width: 100%; max-width: 1100px;
         max-height: 90vh; overflow-y: auto;
         position: relative;
         animation: mapModalIn 0.2s ease;
         color: #1e293b;
     ">
         <!-- 1. Illustration en haut (Bandeau HD avec overlay dégradé, titre, badges et bouton fermer) -->
-        <div class="position-relative overflow-hidden" style="width: 100%; height: 200px; background: #0f172a; flex-shrink: 0;">
+        <div class="position-relative overflow-hidden" style="width: 100%; height: 230px; background: #0f172a; flex-shrink: 0;">
             <img id="mapModalBannerImg" src="/public/assets/map/plaines.jpg?v=1" alt="Illustration Parcelle" style="width: 100%; height: 100%; object-fit: cover; object-position: center 35%;">
             <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
@@ -162,7 +162,7 @@ ob_start();
         </div>
 
         <!-- 2. Corps de la Modale -->
-        <div id="mapModalBody" class="card-body p-3" style="color: #334155;">
+        <div id="mapModalBody" class="card-body p-4" style="color: #334155;">
             <!-- Rempli dynamiquement par JavaScript -->
         </div>
     </div>
@@ -184,14 +184,14 @@ ob_start();
     <div class="card shadow-lg border-0 overflow-hidden" style="
         background: #ffffff;
         border-radius: 12px;
-        width: 100%; max-width: 680px;
+        width: 100%; max-width: 860px;
         max-height: 90vh; overflow-y: auto;
         position: relative;
         animation: mapModalIn 0.2s ease;
         color: #1e293b;
     ">
         <!-- 1. Illustration en haut (Bandeau HD avec overlay dégradé, titre, badges et bouton fermer) -->
-        <div class="position-relative overflow-hidden" style="width: 100%; height: 200px; background: #0f172a; flex-shrink: 0;">
+        <div class="position-relative overflow-hidden" style="width: 100%; height: 220px; background: #0f172a; flex-shrink: 0;">
             <img src="/public/assets/units/pecheur.jpg" alt="Pêcheurs Féodaux" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%;">
             <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
@@ -320,14 +320,14 @@ ob_start();
     <div class="card shadow-lg border-0 overflow-hidden" style="
         background: #ffffff;
         border-radius: 12px;
-        width: 100%; max-width: 680px;
+        width: 100%; max-width: 860px;
         max-height: 90vh; overflow-y: auto;
         position: relative;
         animation: mapModalIn 0.2s ease;
         color: #1e293b;
     ">
         <!-- 1. Illustration en haut (Bandeau HD avec overlay dégradé, titre, badges et bouton fermer) -->
-        <div class="position-relative overflow-hidden" style="width: 100%; height: 200px; background: #0f172a; flex-shrink: 0;">
+        <div class="position-relative overflow-hidden" style="width: 100%; height: 220px; background: #0f172a; flex-shrink: 0;">
             <img src="/public/assets/units/mineur.jpg" alt="Mineurs des Cimes" style="width: 100%; height: 100%; object-fit: cover; object-position: center 25%;">
             <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.35) 50%, transparent 100%);"></div>
 
@@ -364,10 +364,8 @@ ob_start();
         </div>
 
         <!-- 2. Corps de la Modale -->
-        <div class="card-body p-3 p-md-4">
+        <div class="card-body p-4">
             <p class="small text-secondary mb-3" style="line-height:1.45;">
-                Dépêchez vos <strong>Mineurs des Cimes (Kōfu ⛏️)</strong> pour gravir ces crêtes granitiques et volcaniques. Les cargaisons de <strong>Soufre</strong>, <strong>Nitrate (Salpêtre)</strong> et <strong>Sable de Fer (Satetsu)</strong> seront directement acheminées et stockées dans votre fief.
-            </p>
                 Dépêchez vos <strong>Mineurs des Cimes (Kōfu ⛏️)</strong> pour gravir ces crêtes granitiques et volcaniques. Les cargaisons de <strong>Soufre</strong>, <strong>Nitrate (Salpêtre)</strong> et <strong>Sable de Fer (Satetsu)</strong> seront directement acheminées et stockées dans votre fief.
             </p>
 
@@ -567,7 +565,7 @@ function renderRuralPlotsGrid(ruralPlots) {
                 </strong>
                 <span class="badge bg-success text-white font-weight-bold" style="font-size:0.72rem;">9 Parcelles de Terroir</span>
             </div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:0.5rem;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:0.65rem;">
     `;
 
     for (const [stype, pInfo] of Object.entries(ruralPlots)) {
@@ -579,7 +577,7 @@ function renderRuralPlotsGrid(ruralPlots) {
             : 'border:1px solid #cbd5e1; background:#ffffff;';
 
         html += `
-            <div style="${borderStyle} border-radius:8px; padding:0.5rem 0.65rem; display:flex; align-items:center; justify-content:space-between; gap:0.4rem;">
+            <div style="${borderStyle} border-radius:8px; padding:0.65rem 0.85rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
                 <div class="d-flex align-items-center gap-2 min-w-0">
                     <span style="color:${meta.color}; font-size:1.1rem; width:20px; text-align:center;"><i class="fa-solid ${meta.icon}"></i></span>
                     <div class="lh-1 text-truncate">

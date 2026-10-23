@@ -20,9 +20,9 @@ echo "========================================================================" 
 $mapView = file_get_contents(dirname(__DIR__) . '/views/map.php');
 
 echo "[TEST 1] Vérification de l'élargissement des dimensions maximales des modales de carte..." . PHP_EOL;
-assertTest(str_contains($mapView, 'max-width: 820px;'), "Modale d'inspection de parcelle #mapTileModal élargie à 820px (anciennement 580px)");
-assertTest(str_contains($mapView, 'max-width: 680px;'), "Modales d'expéditions Pêche & Mineurs élargies à 680px (anciennement 540px)");
-assertTest(str_contains($mapView, 'height: 200px;'), "Bandeau d'illustration HD rehaussé à 200px pour un équilibre visuel parfait");
+assertTest(str_contains($mapView, 'max-width: 1100px;'), "Modale d'inspection de parcelle #mapTileModal encore élargie à 1100px (format grand écran spacieux)");
+assertTest(str_contains($mapView, 'max-width: 860px;'), "Modales d'expéditions Pêche & Mineurs élargies à 860px");
+assertTest(str_contains($mapView, 'height: 230px;'), "Bandeau d'illustration HD rehaussé à 230px pour un équilibre visuel parfait");
 
 echo PHP_EOL . "[TEST 2] Vérification de la détection de terrain 'Collines & Coteaux' dans views/map.php..." . PHP_EOL;
 // Vérifier que la regex \beaux?\b est utilisée plutôt que includes('eau') qui capturait 'coteaux'
@@ -40,3 +40,4 @@ assertTest(str_contains($mapView, "collines.jpg"), "Les collines renvoient toujo
 echo PHP_EOL . "========================================================================" . PHP_EOL;
 echo " TOUS LES TESTS DE GESTION DES COLLINES & ÉLARGISSEMENT SONT 100% VALIDÉS !" . PHP_EOL;
 echo "========================================================================" . PHP_EOL;
+
