@@ -77,7 +77,7 @@ $allowedTabs = [
     'dev_tickets', 'dev_backend_tasks'
 ];
 $currentTab = in_array($_GET['tab'] ?? '', $allowedTabs, true) ? $_GET['tab'] : 'dashboard';
-$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates', 'users', 'apache_logs'], true) ? $_GET['subtab'] : 'overview';
+$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates', 'users', 'apache_logs', 'terminal'], true) ? $_GET['subtab'] : 'overview';
 $analyticsPeriod = in_array($_GET['period'] ?? '', ['today', '7d', '30d', 'all'], true) ? (string)$_GET['period'] : '30d';
 
 // 2. Préparation des données selon l'onglet
@@ -359,6 +359,10 @@ if ($currentTab === 'dashboard') {
         $apacheLogService = new ApacheLogService();
         $apacheLogData = $apacheLogService->getLogViewData($_GET);
         extract($apacheLogData);
+    } elseif ($currentSubTab === 'terminal') {
+        require_once __DIR__ . '/../core/WebTerminalService.php';
+        $terminalService = new WebTerminalService();
+        $terminalSysInfo = $terminalService->getSystemMetrics();
     }
 } elseif ($currentTab === 'elevate_research') {
     require_once __DIR__ . '/../core/ResearchElevateService.php';
@@ -975,6 +979,13 @@ ActivityTracker::logView($userId, 'gamestudio', $currentTab);
                             <div>
                                 <div>Logs d'Erreur Apache</div>
                                 <div class="small text-secondary">Visualisation en direct &amp; diagnostic du serveur web</div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item d-flex align-items-center gap-2 <?= ($currentTab === 'general' && $currentSubTab === 'terminal') ? 'active fw-bold' : '' ?>" href="?page=gamestudio&tab=general&subtab=terminal">
+                            <i class="fa-solid fa-terminal text-success"></i>
+                            <div>
+                                <div>Terminal Web</div>
+                                <div class="small text-secondary">Console système, bash &amp; commandes en direct</div>
                             </div>
                         </a>
                     </div>

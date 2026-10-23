@@ -5,7 +5,7 @@
  */
 
 $currentPageSlug = $page ?? 'gamestudio';
-$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates', 'users', 'apache_logs'], true) ? $_GET['subtab'] : 'overview';
+$currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'backups', 'updates', 'users', 'apache_logs', 'terminal'], true) ? $_GET['subtab'] : 'overview';
 ?>
 
 <div class="gamestudio-general">
@@ -74,6 +74,14 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'b
                     <i class="fa-solid fa-file-waveform text-danger"></i>
                     <span>Logs d'Erreur Apache</span>
                     <span class="badge bg-danger-lt ms-1 font-monospace">Error Log</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="?page=gamestudio&tab=general&subtab=terminal" 
+                   class="nav-link py-2 px-3 d-flex align-items-center justify-content-center gap-2 <?= $currentSubTab === 'terminal' ? 'active fw-bold text-success border-bottom-0' : 'text-secondary' ?>">
+                    <i class="fa-solid fa-terminal text-success"></i>
+                    <span>Terminal Web</span>
+                    <span class="badge bg-success-lt ms-1 font-monospace">CLI</span>
                 </a>
             </li>
         </ul>
@@ -807,5 +815,10 @@ $currentSubTab = in_array($_GET['subtab'] ?? '', ['overview', 'world_config', 'b
         <!-- SOUS-ONGLET 6 : LOGS D'ERREUR APACHE & DIAGNOSTIC SERVEUR          -->
         <!-- ═══════════════════════════════════════════════════════════════════ -->
         <?php require __DIR__ . '/general_apache_logs.php'; ?>
+    <?php elseif ($currentSubTab === 'terminal'): ?>
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- SOUS-ONGLET 7 : TERMINAL WEB & CONSOLE SYSTÈME                     -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <?php require __DIR__ . '/general_terminal.php'; ?>
     <?php endif; ?>
 </div>

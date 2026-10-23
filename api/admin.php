@@ -817,6 +817,35 @@ try {
             }
             break;
 
+        // Terminal Web & Console Système
+        case 'execute_terminal_command':
+            if (!$isAdmin) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'error' => 'Accès restreint aux Administrateurs du Shōgunat.']);
+                exit;
+            }
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Méthode HTTP invalide (POST attendu).");
+            }
+            require_once __DIR__ . '/../core/WebTerminalService.php';
+            $terminalService = new WebTerminalService();
+            $cmd = (string)($_POST['command'] ?? '');
+            $res = $terminalService->executeCommand($cmd);
+            echo json_encode(['success' => true, 'result' => $res]);
+            break;
+
+        case 'get_terminal_sysinfo':
+            if (!$isAdmin) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'error' => 'Accès restreint aux Administrateurs du Shōgunat.']);
+                exit;
+            }
+            require_once __DIR__ . '/../core/WebTerminalService.php';
+            $terminalService = new WebTerminalService();
+            $sysinfo = $terminalService->getSystemMetrics();
+            echo json_encode(['success' => true, 'sysinfo' => $sysinfo]);
+            break;
+
         default:
             throw new Exception("Action inconnue.");
     }

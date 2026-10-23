@@ -60,3 +60,4 @@ assertTest(str_contains($headerContent, "BotEngine Simulation Error in header.ph
 echo PHP_EOL . "========================================================================" . PHP_EOL;
 echo " TOUS LES TESTS DE SÉCURITÉ ET D'AUTO-MIGRATION SONT 100% VALIDES !" . PHP_EOL;
 echo "========================================================================" . PHP_EOL;
+
