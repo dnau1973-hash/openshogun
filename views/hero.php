@@ -280,6 +280,17 @@ if (!function_exists('renderRelicBonusesHtml')) {
         </div>
     </div>
 <?php elseif ($hero['status'] === 'reviving'): ?>
+    <?php
+        $reviveFinish = (int)($hero['revive_finish_time'] ?? 0);
+        $reviveRemaining = max(0, $reviveFinish - time());
+        $rD = floor($reviveRemaining / 86400);
+        $rH = floor(($reviveRemaining % 86400) / 3600);
+        $rM = floor(($reviveRemaining % 3600) / 60);
+        $rS = $reviveRemaining % 60;
+        $reviveFmt = ($rD > 0)
+            ? sprintf('%dj %02d:%02d:%02d', $rD, $rH, $rM, $rS)
+            : sprintf('%02d:%02d:%02d', $rH, $rM, $rS);
+    ?>
     <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <div class="d-flex align-items-center gap-2">
             <span style="font-size: 1.8rem;"><i class="fa-solid fa-hourglass-half text-warning"></i></span>
@@ -292,8 +303,8 @@ if (!function_exists('renderRelicBonusesHtml')) {
         </div>
         <div class="d-flex align-items-center gap-2">
             <span class="small text-secondary font-weight-bold">Fin dans :</span>
-            <span class="badge bg-warning text-dark font-monospace py-2 px-3 fs-5" data-countdown="<?= $hero['revive_finish_time'] ?>">
-                Calcul...
+            <span class="badge bg-warning text-dark font-monospace py-2 px-3 fs-5" id="heroRevivingCountdown" data-countdown="<?= $reviveFinish ?>">
+                <?= $reviveRemaining > 0 ? $reviveFmt : 'Terminé !' ?>
             </span>
         </div>
     </div>
@@ -962,6 +973,35 @@ if (!function_exists('renderRelicBonusesHtml')) {
 </div>
 
 <script>
+// Compte à rebours dédié pour la régénération du héros (au cas où la boucle globale serait différée)
+(function initHeroRevivingTicker() {
+    const el = document.getElementById('heroRevivingCountdown');
+    if (!el) return;
+    const target = parseInt(el.getAttribute('data-countdown'), 10);
+    if (!target || isNaN(target) || target <= 0) return;
+
+    function tickHeroRevive() {
+        const now = Math.floor(Date.now() / 1000);
+        const rem = target - now;
+        if (rem <= 0) {
+            el.innerText = 'Régénération terminée !';
+            setTimeout(() => window.location.reload(), 1500);
+            return;
+        }
+        const d = Math.floor(rem / 86400);
+        const h = Math.floor((rem % 86400) / 3600);
+        const m = Math.floor((rem % 3600) / 60);
+        const s = rem % 60;
+        if (d > 0) {
+            el.innerText = `${d}j ${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        } else {
+            el.innerText = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+    }
+    tickHeroRevive();
+    setInterval(tickHeroRevive, 1000);
+})();
+
 // Gestion de l'attribution des points
 let unassignedAvailable = <?= (int)$hero['unassigned_points'] ?>;
 const pointsToAdd = {

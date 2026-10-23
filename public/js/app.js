@@ -365,7 +365,8 @@ function initCountdownTimers() {
     });
 
     // Ticker centralisé — orchestre la mise à jour des instances et des timers autonomes
-    const interval = setInterval(() => {
+    let interval = null;
+    const tick = () => {
         const now = Math.floor(Date.now() / 1000);
         let hasActiveBars   = false;
         let hasActiveTimers = false;
@@ -380,8 +381,8 @@ function initCountdownTimers() {
         timers.forEach(el => {
             // Skip si ce timer est déjà géré par une instance ProgressBar
             if (managedTimerEls.has(el)) return;
-            // Skip si le timer est dans un conteneur ProgressBar connu
-            if (el.closest('.building-progress-wrapper, .queue-item, .queue-progress-box, .alert')) return;
+            // Skip si le timer est dans un conteneur ProgressBar connu (file de construction)
+            if (el.closest('.building-progress-wrapper, .queue-item, .queue-progress-box')) return;
 
             const target    = parseInt(el.dataset.countdown, 10);
             if (isNaN(target) || target <= 0) return;
@@ -396,8 +397,12 @@ function initCountdownTimers() {
             }
         });
 
-        if (!hasActiveBars && !hasActiveTimers) clearInterval(interval);
-    }, 1000);
+        if (!hasActiveBars && !hasActiveTimers && interval) clearInterval(interval);
+    };
+
+    // Premier rafraîchissement immédiat pour éviter tout blocage sur "Calcul..."
+    tick();
+    interval = setInterval(tick, 1000);
 }
 
 function formatTime(seconds) {
