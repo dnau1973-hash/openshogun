@@ -595,6 +595,38 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 if (!function_exists('getAdventureIllustrationUrl')) {
                     function getAdventureIllustrationUrl(string $name): string {
                         $normalized = mb_strtolower($name);
+
+                        // Détection prioritaire des illustrations dédiées aux nouvelles expéditions
+                        $specificMap = [
+                            'source chaude onsen'     => 'aventure_source_chaude_onsen_herboristes',
+                            'campement médical'       => 'aventure_campement_secret_moines_guerisseurs',
+                            'campement medical'       => 'aventure_campement_secret_moines_guerisseurs',
+                            'fortin brûlé'            => 'aventure_fortin_brule_pirates_woko',
+                            'fortin brule'            => 'aventure_fortin_brule_pirates_woko',
+                            'forgeron masamune'       => 'aventure_clairiere_forgeron_masamune',
+                            'esprits renards kitsune' => 'aventure_caverne_esprits_kitsune',
+                            'moines sōhei'            => 'aventure_cascade_dojo_moines_sohei',
+                            'moines sohei'            => 'aventure_cascade_dojo_moines_sohei',
+                            'cendres volcaniques'     => 'aventure_forteresse_cendres_volcaniques',
+                            'éclaireurs ashigaru'     => 'aventure_bosquet_brumeux_ashigaru',
+                            'eclaireurs ashigaru'     => 'aventure_bosquet_brumeux_ashigaru',
+                            'chevaux sauvages'        => 'aventure_garnison_chevaux_sauvages',
+                            'démon rouge'             => 'aventure_pic_glace_demon_aka_oni',
+                            'demon rouge'             => 'aventure_pic_glace_demon_aka_oni'
+                        ];
+
+                        foreach ($specificMap as $keyword => $fileBase) {
+                            if (str_contains($normalized, $keyword)) {
+                                foreach (['.jpeg', '.jpg', '.png', '.webp'] as $ext) {
+                                    $rel = '/public/assets/adventures/' . $fileBase . $ext;
+                                    $fsPath = __DIR__ . '/..' . $rel;
+                                    if (file_exists($fsPath)) {
+                                        return $rel;
+                                    }
+                                }
+                            }
+                        }
+
                         if (str_contains($normalized, 'sanctuaire') || str_contains($normalized, 'kitsune') || str_contains($normalized, 'renard')) {
                             return '/public/assets/adventures/aventure_sanctuaire_shinto_abandonne.jpeg';
                         }
