@@ -7,7 +7,8 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 ### Ajouté & Amélioré (Added & Improved)
 - **Nouvelles Expéditions Provinciales Féodales pour le Samouraï (`core/HeroEngine.php`, `views/hero.php`) :**
   * **Catalogue d'Aventures Doublé (20 Templates)** : Ajout de 10 nouvelles aventures historiques et légendaires japonaises (Tourbières Hantées d'Oze, Forteresse des Takeda, Tombeau des Minamoto, Sanctuaire du Mont Tateyama, Marais de Beppu, Temple Brûlé de Nobunaga, Île de Miyajima, Cratère de Sakurajima, Vallée aux Statues Jizō, Palais du Dragon Ryūgū-jō).
-  * **Iconographie & Estampes Immersives** : Chaque nouvelle expédition dispose de sa vignette et de son estampe panoramique grand format dans la modale de préparation et confirmation de départ.
+  * **Iconographie & Estampes Immersives Dédiées** : Intégration de 10 nouvelles illustrations originales en haute résolution (`1920×1080` au format 16:9) dans `public/assets/adventures/`, avec détection prioritaire automatique et badges de transparence de prompt IA (`AiPromptHelper`) affichés sur chaque carte d'expédition.
+  * **Enrichissement du Grimoire des Prompts (`views/partials/grimoire_prompts_data.php`)** : Indexation complète des 10 prompts et métadonnées artistiques pour l'Atelier Pédagogique.
 - **Nouvel Objet Consommable : Bandages de Soin Féodaux (*Hōtai* 🩹) (`core/HeroEngine.php`, `api/hero.php`, `views/hero.php`) :**
   * **Soin Immédiat (+25% PV)** : Utilisable depuis le dojo/fief pour soigner immédiatement le Héros blessé (jusqu'à 100% de PV) sans attendre la régénération passive ou dépenser de ressources massives.
   * **Bouton d'Action Express & Modale d'Arsenal** : Action directe « Panser (X) » sur la jauge de santé du Héros, bouton « Soigner » dans le coffre d'inventaire et vue détaillée avec description féodale.
