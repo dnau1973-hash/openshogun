@@ -139,62 +139,13 @@ try {
         ]
     ];
 
-    // Définir les 4 quadrants avec plages de coordonnées
-    $quadrants = [
-        'NO' => ['min_x' => -28, 'max_x' => -4, 'min_y' => 4, 'max_y' => 28],
-        'NE' => ['min_x' => 4, 'max_x' => 28, 'min_y' => 4, 'max_y' => 28],
-        'SO' => ['min_x' => -28, 'max_x' => -4, 'min_y' => -28, 'max_y' => -4],
-        'SE' => ['min_x' => 4, 'max_x' => 28, 'min_y' => -28, 'max_y' => -4],
-    ];
-
-    $stmtInsertOasis = $db->prepare("
-        INSERT INTO `oases` 
-        (`coord_x`, `coord_y`, `oasis_type`, `name`, `bonus_wood`, `bonus_stone`, `bonus_rice`, `res_wood`, `res_stone`, `res_rice`, `res_max`, `last_loot_time`)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 1500, 1500, 1500, 5000, UNIX_TIMESTAMP())
-        ON DUPLICATE KEY UPDATE name = VALUES(name)
-    ");
-
-    $stmtInsertAnimal = $db->prepare("
-        INSERT INTO `oasis_units` (`oasis_id`, `unit_code`, `count`, `is_wild`)
-        VALUES (?, ?, ?, 1)
-        ON DUPLICATE KEY UPDATE count = VALUES(count)
-    ");
-
-    $totalSpawned = 0;
-    foreach ($quadrants as $qName => $qRange) {
-        foreach ($oasisTemplates as $tpl) {
-            // Trouver des coordonnées libres dans ce quadrant
-            $placed = false;
-            for ($attempt = 0; $attempt < 60; $attempt++) {
-                $ox = rand($qRange['min_x'], $qRange['max_x']);
-                $oy = rand($qRange['min_y'], $qRange['max_y']);
-                $k = $ox . ':' . $oy;
-
-                if (!isset($usedCoords[$k])) {
-                    $usedCoords[$k] = true;
-                    $stmtInsertOasis->execute([
-                        $ox, $oy, $tpl['type'], $tpl['name'], 
-                        $tpl['wood'], $tpl['stone'], $tpl['rice']
-                    ]);
-                    $oasisId = (int)$db->lastInsertId();
-                    if ($oasisId === 0) {
-                        $s = $db->prepare("SELECT id FROM oases WHERE coord_x = ? AND coord_y = ?");
-                        $s->execute([$ox, $oy]);
-                        $oasisId = (int)$s->fetchColumn();
-                    }
-
-                    // Insérer les animaux sauvages
-                    foreach ($tpl['animals'] as $animCode => $animCount) {
-                        $stmtInsertAnimal->execute([$oasisId, $animCode, $animCount]);
-                    }
-
-                    $placed = true;
-                    $totalSpawned++;
-                    break;
-                }
-            }
-        }
-    }
+    // Déploiement homogène via OasisEngine
+    require_once __DIR__ . '/../core/OasisEngine.php';
+    require_once __DIR__ . '/../core/GameConfig.php';
+    $oasisEngine = new OasisEngine($db);
+    $density = (float)GameConfig::get('oasis_density_percent', 2.0);
+    $res = $oasisEngine->spawnOasesByDensity($density, null, true);
+    $totalSpawned = $res['spawned'] ?? 0;
 
     echo "   ✓ {$totalSpawned} Oasis créées et peuplées d'animaux sauvages.\n";
     echo "\n=== MIGRATION DES OASIS RÉUSSIE AVEC SUCCÈS ! ===\n";

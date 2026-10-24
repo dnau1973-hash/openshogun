@@ -379,22 +379,65 @@ class OasisEngine {
     }
 
     /**
-     * Fait réapparaître une nouvelle oasis sauvage lors de la capture d'une oasis par un joueur
+     * Fait réapparaître une nouvelle oasis sauvage lors de la capture d'une oasis par un joueur.
+     * L'apparition respecte la zone régionale d'origine pour éviter tout recentrage vers le cœur.
      */
     public function spawnReplacementWildOasis(int $nearX, int $nearY): ?array {
+        require_once __DIR__ . '/GameConfig.php';
+        $radius = (int)GameConfig::getWorldRadius();
         $usedCoords = $this->getOccupiedCoordinates();
         $templates = self::getOasisTemplates();
         $template = $templates[array_rand($templates)];
 
-        // Déterminer le quadrant d'origine pour respawn dans le même secteur
-        $minX = ($nearX >= 0) ? 4 : -28;
-        $maxX = ($nearX >= 0) ? 28 : -4;
-        $minY = ($nearY >= 0) ? 4 : -28;
-        $maxY = ($nearY >= 0) ? 28 : -4;
+        // Récupérer les coordonnées de toutes les oasis pour maintenir la distance minimale
+        $existingOasesStmt = $this->db->query("SELECT coord_x, coord_y FROM oases");
+        $oasisCoordsList = [];
+        while ($row = $existingOasesStmt->fetch()) {
+            $oasisCoordsList[] = [(int)$row['coord_x'], (int)$row['coord_y']];
+        }
 
-        for ($attempt = 0; $attempt < 100; $attempt++) {
+        // 1. Définir une fenêtre régionale autour de la position capturée (rayon local ~12 cases)
+        $localRadius = 12;
+        $minX = max(-$radius, $nearX - $localRadius);
+        $maxX = min($radius, $nearX + $localRadius);
+        $minY = max(-$radius, $nearY - $localRadius);
+        $maxY = min($radius, $nearY + $localRadius);
+
+        for ($attempt = 0; $attempt < 60; $attempt++) {
             $x = rand($minX, $maxX);
             $y = rand($minY, $maxY);
+            if ($x === 0 && $y === 0) continue;
+            $k = $x . ':' . $y;
+
+            if (!isset($usedCoords[$k])) {
+                $tooClose = false;
+                foreach ($oasisCoordsList as $oc) {
+                    $dx = $x - $oc[0];
+                    $dy = $y - $oc[1];
+                    if (($dx * $dx + $dy * $dy) < 9) { // distance euclidienne >= 3
+                        $tooClose = true;
+                        break;
+                    }
+                }
+                if (!$tooClose) {
+                    $oasisId = $this->spawnWildOasisAt($x, $y, $template);
+                    if ($oasisId) {
+                        return $this->getOasisById($oasisId);
+                    }
+                }
+            }
+        }
+
+        // 2. Définir le quadrant élargi si la zone locale est encombrée
+        $qMinX = ($nearX >= 0) ? 2 : -$radius;
+        $qMaxX = ($nearX >= 0) ? $radius : -2;
+        $qMinY = ($nearY >= 0) ? 2 : -$radius;
+        $qMaxY = ($nearY >= 0) ? $radius : -2;
+
+        for ($attempt = 0; $attempt < 60; $attempt++) {
+            $x = rand($qMinX, $qMaxX);
+            $y = rand($qMinY, $qMaxY);
+            if ($x === 0 && $y === 0) continue;
             $k = $x . ':' . $y;
 
             if (!isset($usedCoords[$k])) {
@@ -405,10 +448,10 @@ class OasisEngine {
             }
         }
 
-        // Fallback large sur toute la carte
-        for ($attempt = 0; $attempt < 100; $attempt++) {
-            $x = rand(-28, 28);
-            $y = rand(-28, 28);
+        // 3. Fallback large sur toute la carte de -$radius à +$radius
+        for ($attempt = 0; $attempt < 80; $attempt++) {
+            $x = rand(-$radius, $radius);
+            $y = rand(-$radius, $radius);
             if ($x === 0 && $y === 0) continue;
             $k = $x . ':' . $y;
 
@@ -424,19 +467,26 @@ class OasisEngine {
     }
 
     /**
-     * Génère ou rééquilibre les oasis sauvages selon un pourcentage de densité sur la carte
-     * ex: 2.0% sur un rayon de 28 cases (~3249 cases au total => ~65 oasis)
+     * Génère ou rééquilibre les oasis de manière homogène sur toute l'étendue de la carte.
+     * Utilise une stratification spatiale par grille (jittered grid) et une contrainte
+     * de distance minimale répulsive pour éviter tout regroupement ou recentrage.
+     *
+     * @param float $percent Densité cible (ex: 2.0%)
+     * @param int|null $radius Rayon de la carte (défaut: GameConfig::getWorldRadius())
+     * @param bool $clearExistingUnoccupied Si true, supprime les oasis sauvages non annexées avant de régénérer
+     * @return array Rapport de génération
      */
-    public function spawnOasesByDensity(float $percent, int $radius = 28, bool $clearExistingUnoccupied = false): array {
-        $radius = max(10, min(50, $radius));
+    public function spawnOasesByDensity(float $percent, ?int $radius = null, bool $clearExistingUnoccupied = false): array {
+        require_once __DIR__ . '/GameConfig.php';
+        $radius = $radius !== null ? max(10, min(50, $radius)) : (int)GameConfig::getWorldRadius();
         $percent = max(0.5, min(20.0, $percent));
 
         if ($clearExistingUnoccupied) {
-            // Nettoie uniquement les oasis non occupées par des joueurs
+            // Nettoie uniquement les oasis non occupées/annexées par des joueurs
             $this->db->exec("DELETE FROM oases WHERE owner_planet_id IS NULL");
         }
 
-        // Calcul du nombre cible d'oasis
+        // Calcul du nombre cible d'oasis selon la surface totale (2R + 1)^2
         $totalTiles = (int)pow(($radius * 2) + 1, 2);
         $targetCount = max(4, min(250, (int)round($totalTiles * ($percent / 100.0))));
 
@@ -449,57 +499,175 @@ class OasisEngine {
                 'target_count' => $targetCount,
                 'spawned' => 0,
                 'total_now' => $currentTotal,
+                'radius' => $radius,
                 'percent' => $percent,
                 'message' => "La carte contient déjà $currentTotal oasis (densité cible de $percent% atteinte)."
             ];
         }
 
         $usedCoords = $this->getOccupiedCoordinates();
-        $templates = self::getOasisTemplates();
+        // Coordonnées absolues du centre impérial
+        $usedCoords['0:0'] = true;
 
-        // 4 quadrants
-        $quadrants = [
-            'NO' => ['min_x' => -$radius, 'max_x' => -3, 'min_y' => 3, 'max_y' => $radius],
-            'NE' => ['min_x' => 3, 'max_x' => $radius, 'min_y' => 3, 'max_y' => $radius],
-            'SO' => ['min_x' => -$radius, 'max_x' => -3, 'min_y' => -$radius, 'max_y' => -3],
-            'SE' => ['min_x' => 3, 'max_x' => $radius, 'min_y' => -$radius, 'max_y' => -3],
-        ];
-        $qKeys = array_keys($quadrants);
+        // Récupérer les coordonnées de toutes les oasis existantes pour tester la distance minimale
+        $existingOasesStmt = $this->db->query("SELECT coord_x, coord_y FROM oases");
+        $oasisCoordsList = [];
+        while ($row = $existingOasesStmt->fetch()) {
+            $oasisCoordsList[] = [(int)$row['coord_x'], (int)$row['coord_y']];
+        }
+
+        $templates = self::getOasisTemplates();
+        $tplCount = count($templates);
+
+        // Découpage en grille spatiale régulière M x M cellules pour couvrir toute la carte de -R à +R
+        $gridSize = (int)max(2, ceil(sqrt($targetCount)));
+        $cellWidth = (($radius * 2) + 1) / (float)$gridSize;
+
+        // Générer la liste de toutes les cellules (col, row)
+        $cells = [];
+        for ($r = 0; $r < $gridSize; $r++) {
+            for ($c = 0; $c < $gridSize; $c++) {
+                $cells[] = [
+                    'c' => $c,
+                    'r' => $r,
+                    'min_x' => (int)floor(-$radius + ($c * $cellWidth)),
+                    'max_x' => (int)floor(-$radius + (($c + 1) * $cellWidth) - 1),
+                    'min_y' => (int)floor(-$radius + ($r * $cellWidth)),
+                    'max_y' => (int)floor(-$radius + (($r + 1) * $cellWidth) - 1),
+                ];
+            }
+        }
+
+        // Mélanger l'ordre des cellules pour une attribution variée des templates féodaux
+        shuffle($cells);
+
+        $minDistance = 3.0; // Distance euclidienne minimale entre deux oasis
+        $minDistSq = $minDistance * $minDistance;
 
         $spawned = 0;
-        for ($i = 0; $i < $needed; $i++) {
-            $qKey = $qKeys[$i % 4];
-            $qRange = $quadrants[$qKey];
-            $tpl = $templates[$i % count($templates)];
+        $tplIndex = 0;
 
+        // Phase 1 : Placer 1 oasis par cellule spatiale (stratification homogène)
+        foreach ($cells as $cell) {
+            if ($spawned >= $needed) {
+                break;
+            }
+
+            $tpl = $templates[$tplIndex % $tplCount];
             $placed = false;
-            for ($attempt = 0; $attempt < 60; $attempt++) {
-                $ox = rand($qRange['min_x'], $qRange['max_x']);
-                $oy = rand($qRange['min_y'], $qRange['max_y']);
-                $k = $ox . ':' . $oy;
 
-                if (!isset($usedCoords[$k])) {
-                    $usedCoords[$k] = true;
+            // Essais avec Jitter aléatoire dans la cellule
+            for ($attempt = 0; $attempt < 35; $attempt++) {
+                $ox = rand($cell['min_x'], $cell['max_x']);
+                $oy = rand($cell['min_y'], $cell['max_y']);
+
+                // S'assurer qu'on reste dans les bornes du rayon
+                if ($ox < -$radius || $ox > $radius || $oy < -$radius || $oy > $radius) {
+                    continue;
+                }
+                if ($ox === 0 && $oy === 0) {
+                    continue;
+                }
+
+                $k = $ox . ':' . $oy;
+                if (isset($usedCoords[$k])) {
+                    continue;
+                }
+
+                // Vérifier la distance minimale avec toutes les oasis déjà déployées
+                $tooClose = false;
+                foreach ($oasisCoordsList as $oc) {
+                    $dx = $ox - $oc[0];
+                    $dy = $oy - $oc[1];
+                    if (($dx * $dx + $dy * $dy) < $minDistSq) {
+                        $tooClose = true;
+                        break;
+                    }
+                }
+
+                if (!$tooClose) {
                     $oid = $this->spawnWildOasisAt($ox, $oy, $tpl);
                     if ($oid) {
+                        $usedCoords[$k] = true;
+                        $oasisCoordsList[] = [$ox, $oy];
                         $spawned++;
+                        $tplIndex++;
                         $placed = true;
                         break;
                     }
                 }
             }
 
-            // Fallback global si le quadrant est très dense
+            // Si aucune coordonnée respectant $minDistance n'a été trouvée dans la cellule,
+            // on effectue un second passage en assouplissant légèrement la distance ($minDistSq = 4 => dist = 2)
             if (!$placed) {
-                for ($attempt = 0; $attempt < 60; $attempt++) {
-                    $ox = rand(-$radius, $radius);
-                    $oy = rand(-$radius, $radius);
+                for ($attempt = 0; $attempt < 20; $attempt++) {
+                    $ox = rand($cell['min_x'], $cell['max_x']);
+                    $oy = rand($cell['min_y'], $cell['max_y']);
+
+                    if ($ox < -$radius || $ox > $radius || $oy < -$radius || $oy > $radius || ($ox === 0 && $oy === 0)) {
+                        continue;
+                    }
                     $k = $ox . ':' . $oy;
-                    if (!isset($usedCoords[$k])) {
-                        $usedCoords[$k] = true;
+                    if (isset($usedCoords[$k])) {
+                        continue;
+                    }
+
+                    $tooClose = false;
+                    foreach ($oasisCoordsList as $oc) {
+                        $dx = $ox - $oc[0];
+                        $dy = $oy - $oc[1];
+                        if (($dx * $dx + $dy * $dy) < 4) { // distance >= 2
+                            $tooClose = true;
+                            break;
+                        }
+                    }
+
+                    if (!$tooClose) {
                         $oid = $this->spawnWildOasisAt($ox, $oy, $tpl);
                         if ($oid) {
+                            $usedCoords[$k] = true;
+                            $oasisCoordsList[] = [$ox, $oy];
                             $spawned++;
+                            $tplIndex++;
+                            $placed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Phase 2 : Si la cible n'est pas encore atteinte, balayage homogène avec distance minimale
+        if ($spawned < $needed) {
+            $remaining = $needed - $spawned;
+            for ($i = 0; $i < $remaining; $i++) {
+                $tpl = $templates[$tplIndex % $tplCount];
+
+                for ($attempt = 0; $attempt < 80; $attempt++) {
+                    $ox = rand(-$radius, $radius);
+                    $oy = rand(-$radius, $radius);
+                    if ($ox === 0 && $oy === 0) continue;
+                    $k = $ox . ':' . $oy;
+                    if (isset($usedCoords[$k])) continue;
+
+                    $tooClose = false;
+                    foreach ($oasisCoordsList as $oc) {
+                        $dx = $ox - $oc[0];
+                        $dy = $oy - $oc[1];
+                        if (($dx * $dx + $dy * $dy) < 4) {
+                            $tooClose = true;
+                            break;
+                        }
+                    }
+
+                    if (!$tooClose) {
+                        $oid = $this->spawnWildOasisAt($ox, $oy, $tpl);
+                        if ($oid) {
+                            $usedCoords[$k] = true;
+                            $oasisCoordsList[] = [$ox, $oy];
+                            $spawned++;
+                            $tplIndex++;
                             break;
                         }
                     }
@@ -513,8 +681,9 @@ class OasisEngine {
             'target_count' => $targetCount,
             'spawned' => $spawned,
             'total_now' => $newTotal,
+            'radius' => $radius,
             'percent' => $percent,
-            'message' => "Génération terminée : $spawned nouvelles oasis créées (Total sur la carte : $newTotal)."
+            'message' => "Génération homogène terminée : $spawned nouvelles oasis créées réparties équitablement de -$radius à +$radius (Total sur la carte : $newTotal)."
         ];
     }
 
@@ -539,6 +708,17 @@ class OasisEngine {
 
         $totalWildAnimals = array_sum($animalsSummary);
 
+        // Analyse de la dissémination géographique
+        $radius = (int)GameConfig::getWorldRadius();
+        $quadrants = [
+            'NO' => (int)$this->db->query("SELECT COUNT(*) FROM oases WHERE coord_x < 0 AND coord_y > 0")->fetchColumn(),
+            'NE' => (int)$this->db->query("SELECT COUNT(*) FROM oases WHERE coord_x > 0 AND coord_y > 0")->fetchColumn(),
+            'SO' => (int)$this->db->query("SELECT COUNT(*) FROM oases WHERE coord_x < 0 AND coord_y < 0")->fetchColumn(),
+            'SE' => (int)$this->db->query("SELECT COUNT(*) FROM oases WHERE coord_x > 0 AND coord_y < 0")->fetchColumn(),
+        ];
+        $frontierThreshold = (int)round($radius * 0.6);
+        $frontierOases = (int)$this->db->query("SELECT COUNT(*) FROM oases WHERE ABS(coord_x) >= $frontierThreshold OR ABS(coord_y) >= $frontierThreshold")->fetchColumn();
+
         return [
             'total_oases' => $totalOases,
             'captured_oases' => $capturedOases,
@@ -546,7 +726,10 @@ class OasisEngine {
             'animals_summary' => $animalsSummary,
             'total_wild_animals' => $totalWildAnimals,
             'density_percent' => (float)GameConfig::get('oasis_density_percent', 2.0),
-            'respawn_on_capture' => (bool)GameConfig::get('oasis_respawn_on_capture', true)
+            'respawn_on_capture' => (bool)GameConfig::get('oasis_respawn_on_capture', true),
+            'world_radius' => $radius,
+            'quadrants' => $quadrants,
+            'frontier_oases' => $frontierOases
         ];
     }
 }

@@ -55,7 +55,7 @@
                                             Rayon de Couverture Carte :
                                         </label>
                                         <div class="input-group" style="width: 110px;">
-                                            <input type="number" id="dev_repop_radius" min="10" max="50" value="28" class="form-control text-center font-weight-bold">
+                                            <input type="number" id="dev_repop_radius" min="10" max="50" value="<?= (int)GameConfig::getWorldRadius() ?>" class="form-control text-center font-weight-bold">
                                             <span class="input-group-text px-1 text-muted">tuiles</span>
                                         </div>
                                     </div>
@@ -71,7 +71,7 @@
                                     </div>
                                 </div>
                                 <div class="text-secondary small mt-2">
-                                    <i class="fa-solid fa-circle-info text-info me-1"></i>Les oasis sont automatiquement réparties de façon équitable entre les 4 quadrants géographiques (NO, NE, SO, SE) sans empiéter sur les fiefs ni les 12 donjons authentiques.
+                                    <i class="fa-solid fa-circle-info text-info me-1"></i>Dissémination homogène garantie : la carte est divisée en cellules régulières avec décalage maîtrisé (jitter) et distance minimale de séparation ($\ge 3$ tuiles) pour couvrir l'ensemble du domaine de $-<?= (int)GameConfig::getWorldRadius() ?>$ à $+<?= (int)GameConfig::getWorldRadius() ?>$ sans concentration centrale.
                                 </div>
                             </div>
 

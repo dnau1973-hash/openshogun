@@ -559,7 +559,7 @@ try {
 
             $oasisEngine = new OasisEngine();
             $density = max(0.5, min(20.0, (float)($_POST['density_percent'] ?? GameConfig::get('oasis_density_percent', 2.0))));
-            $radius = max(10, min(50, (int)($_POST['radius'] ?? 28)));
+            $radius = max(10, min(50, (int)($_POST['radius'] ?? GameConfig::getWorldRadius())));
             $clearUnoccupied = !empty($_POST['clear_unoccupied']) && ($_POST['clear_unoccupied'] === '1' || $_POST['clear_unoccupied'] === 'true');
 
             GameConfig::set('oasis_density_percent', $density);

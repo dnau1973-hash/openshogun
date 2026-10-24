@@ -3,6 +3,15 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.39.0] - 2026-10-24
+### Ajouté & Amélioré (Added & Improved)
+- **Refonte Algorithmique de la Dissémination Homogène des Oasis (`core/OasisEngine.php`, `core/WorldGenerator.php`, `views/studio/game-elevate-designer/oasis-ecosystem.php`, `api/admin.php`, `api/dev_team.php`, `database/migrations/010_rebalance_homogeneous_oases.php`) :**
+  * **Stratification Spatiale par Grille avec Décalage (Jittered Grid)** : Élimination définitive de l'effet d'amas et de concentration artificielle des oasis au cœur de la carte. La surface totale est partitionnée en cellules régulières adaptées à la densité cible avec décalage aléatoire interne maîtrisé.
+  * **Élargissement au Rayon Réel du Monde (`GameConfig::getWorldRadius()`)** : Remplacement de l'ancien rayon tronqué à 28 cases par le rayon officiel dynamique (35 cases ou plus), étendant la présence d'oasis naturelles jusqu'aux frontières les plus lointaines (de $-R$ à $+R$) pour une équité territoriale parfaite entre tous les Daimyōs.
+  * **Distance Répulsive Minimale ($D_{\min} \ge 3$ tuiles)** : Garantie mathématique qu'aucune paire d'oasis ne puisse apparaître collée ou en grappe dense sur des coordonnées adjacentes.
+  * **Respawn Régional Équilibré** : Lors de la capture d'une oasis sauvage par un joueur, la nouvelle oasis réapparaît dans la même province géographique sans dériver systématiquement vers le centre impérial.
+  * **Migration Automatisée (`010_rebalance_homogeneous_oases.php`) & Outils Game Studio** : Redistribution instantanée et transparente de toutes les oasis sauvages existantes sur le serveur, avec préservation intégrale des fiefs et oasis annexées par les joueurs.
+
 ## [1.38.0] - 2026-10-24
 ### Supprimé (Removed)
 - **Suppression Totale de la Modale de Transparence des Prompts IA & des Badges Étincelles (`core/AiPromptHelper.php`, `views/partials/footer.php`, `views/partials/header.php`, `views/pedagogy.php`, `views/partials/admin_pedagogy.php`, `views/hero.php`, `views/barracks.php`, `views/building.php`, `views/field.php`, `views/shipyard.php`, `views/docs.php`, `views/poster.php`, `views/view_resource.php`, `public/css/style.css`) :**

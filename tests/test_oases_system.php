@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Test Automatisé : Système d'Oasis Inoccupées, Faune Sauvage, Pillage et Annexions Féodales
  * OpenShogun
