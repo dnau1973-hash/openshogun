@@ -5,6 +5,10 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 
 ## [1.36.0] - 2026-10-21
 ### Ajouté & Amélioré (Added & Improved)
+- **Harmonisation du Hub des Ressources sous le Carrousel (`views/partials/header.php`) :**
+  * **Regroupement des Vivres Féodaux** : Le Poisson Frais (`#pillResFish`), la Farine de Riz (`#pillResFlour`) et le Saké Impérial (`#pillResSake`) sont désormais directement regroupés avec les denrées de base (Riz, Thé, Soja) dans la section Vivres.
+  * **Regroupement des Matériaux de Construction** : Les Poutres de Charpente (`#pillResBeams`) et les Tuiles Impériales Kawara (`#pillResTiles`) sont ordonnées logiquement avec le Bois, le Granit et l'Argile.
+  * **Navigation & Défilement Synchronisés** : Le bouton de saut d'accès rapide « Vivres » (`#pillResRice`) et le curseur Scrubber couvrent désormais l'ensemble des 6 denrées alimentaires de manière contiguë et fluide.
 - **Ambiance Météorologique & Saisons Dynamiques (`core/EnvironmentThemeEngine.php`, `views/resources.php`, `views/city.php`) :**
   * **Détection Calendaire Automatique** : Printemps (Mars-Mai), Été (Juin-Août), Automne (Septembre-Novembre), Hiver (Décembre-Février).
   * **Cycle Diurne / Nocturne** : Basculement automatique jour (07h00-19h59) et nuit féodale (20h00-06h59).

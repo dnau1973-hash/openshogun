@@ -1770,7 +1770,137 @@ $navItems = [
                         </div>
                     </div>
 
-                    <!-- 4. RIZ IMPÉRIAL -->
+                    <!-- 4. POUTRES DE CHARPENTE -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResBeams" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Poutres de Charpente : cliquer pour le détail de production et l'accès à la Scierie">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-hammer text-orange"></i> Poutres
+                                </span>
+                                <span class="font-monospace text-orange fw-semibold" style="font-size:0.65rem;">Niv. <?= $sawmillLvl ?></span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-wooden-beams"
+                                      data-current="<?= $beamsStock ?>"
+                                      data-max="<?= $beamsMax ?>">
+                                    <?= number_format((int)$beamsStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctBeams) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResBeams" style="min-width:295px; z-index:1095;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-orange-lt text-orange rounded"><i class="fa-solid fa-hammer"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Poutres de Charpente</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Atelier de Charpenterie &bull; Niv. <?= $sawmillLvl ?>/<?= $sawmillMaxLvl ?></div>
+                                    </div>
+                                </div>
+                                <span class="badge <?= $sawmillLvl >= 10 ? 'bg-success-lt text-success' : 'bg-warning-lt text-warning' ?> font-monospace">
+                                    <?= $sawmillLvl >= 10 ? 'Actif' : 'Niv. 10 req.' ?>
+                                </span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Entrepôt (Niv. <?= $storageLvl ?>/<?= $storageMaxLvl ?>) :</span>
+                                    <strong class="text-dark"><?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Remplissage :</span>
+                                    <span class="<?= $pctBeams >= 95 ? 'text-danger fw-bold' : 'text-secondary' ?>"><?= (int)round($pctBeams) ?>% de capacité</span>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Bâtiment producteur :</span>
+                                    <span class="text-dark fw-bold">Charpenterie (Niv. <?= $sawmillLvl ?>/<?= $sawmillMaxLvl ?>)</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Production :</span>
+                                    <span class="<?= $sawmillLvl >= 10 ? 'text-success fw-bold' : 'text-warning fw-bold' ?>">
+                                        <?= $sawmillLvl >= 10 ? 'Façonnage sur commande' : 'Débloqué au Niv. 10' ?>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Bonus Bois associé :</span>
+                                    <span class="text-success fw-bold">+<?= $sawmillBonus ?>% récolte</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=sawmill" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-hammer me-1"></i>Scierie (Niv. <?= $sawmillLvl ?>)</a>
+                                <a href="?page=building&code=storage" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-warehouse me-1"></i>Entrepôt (Niv. <?= $storageLvl ?>)</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. TUILES IMPÉRIALES (KAWARA) -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResTiles" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Tuiles Impériales (Kawara 瓦) : cliquer pour le détail et l'accès aux fours">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-shapes text-secondary"></i> Tuiles
+                                </span>
+                                <span class="font-monospace <?= $stonemasonLvl >= 20 ? 'text-success' : 'text-secondary' ?> fw-semibold" style="font-size:0.65rem;">Niv. <?= $stonemasonLvl ?></span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-roof-tiles"
+                                      data-current="<?= $roofTilesStock ?>"
+                                      data-max="<?= $roofTilesMax ?>">
+                                    <?= number_format((int)$roofTilesStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctRoofTiles) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-secondary" id="bar-roof-tiles" style="width:<?= $pctRoofTiles ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResTiles" style="min-width:305px; z-index:1095;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-dark text-white rounded">🧱</span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Tuiles Impériales (Kawara)</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Tailleuse &amp; Maçonnerie &bull; Niv. <?= $stonemasonLvl ?>/<?= $stonemasonMaxLvl ?></div>
+                                    </div>
+                                </div>
+                                <span class="badge <?= $stonemasonLvl >= 20 ? 'bg-success-lt text-success' : 'bg-secondary-lt text-secondary' ?> font-monospace">
+                                    <?= $stonemasonLvl >= 20 ? 'Four Actif' : 'Niv. 20 req.' ?>
+                                </span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Tuiles Hongawara (Stock) :</span>
+                                    <strong class="text-dark"><?= number_format((int)$roofTilesStock) ?> / <?= number_format($roofTilesMax) ?></strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Tuiles Onigawara (Faîtage) :</span>
+                                    <strong class="text-danger"><?= number_format($onigawaraStock) ?> 👹</strong>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Four Kawara-gama :</span>
+                                    <span class="text-dark fw-bold"><?= $stonemasonLvl >= 20 ? 'Opérationnel (Palier 20)' : 'Verrouillé (' . $stonemasonLvl . '/20)' ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Usage suprême :</span>
+                                    <span class="text-secondary fw-bold">Couverture du Grand Dōjō (Fin de Jeu)</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=stonemason#tileCraftSection" class="btn btn-xs btn-dark flex-fill"><i class="fa-solid fa-fire-burner me-1"></i>Fours Kawara</a>
+                                <a href="?page=city" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-torii-gate me-1"></i>Grand Dōjō</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. RIZ IMPÉRIAL -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResRice" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
                                 title="Riz Impérial (Koku) : cliquer pour le détail de production">
@@ -1857,7 +1987,7 @@ $navItems = [
                         </div>
                     </div>
 
-                    <!-- 5. FEUILLES DE THÉ -->
+                    <!-- 7. FEUILLES DE THÉ -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResTea" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
                                 title="Feuilles de Thé : cliquer pour le détail de production">
@@ -1926,7 +2056,7 @@ $navItems = [
                         </div>
                     </div>
 
-                    <!-- 6. GOUSSES DE SOJA -->
+                    <!-- 8. GOUSSES DE SOJA -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResSoy" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
                                 title="Gousses de Soja : cliquer pour le détail de production">
@@ -1991,7 +2121,195 @@ $navItems = [
                         </div>
                     </div>
 
-                    <!-- 7. NIVEAU DE SÉRÉNITé SHINTŌ -->
+                    <!-- 9. POISSON FRAIS -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResFish" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Poisson Frais : cliquer pour le détail et les raccourcis">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-fish text-cyan"></i> Poisson
+                                </span>
+                                <span class="font-monospace text-cyan fw-semibold" style="font-size:0.65rem;">Kura N.<?= $tankLvl ?></span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-fish"
+                                      data-current="<?= $fishStock ?>"
+                                      data-max="<?= $fishMax ?>">
+                                    <?= number_format((int)$fishStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctFish) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-cyan" id="bar-fish" style="width:<?= $pctFish ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResFish" style="min-width:295px; z-index:1095;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-cyan-lt text-cyan rounded"><i class="fa-solid fa-fish"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Poisson Frais</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Grenier Kura &bull; Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?></div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-cyan-lt text-cyan font-monospace"><?= (int)round($pctFish) ?>%</span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Grenier Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
+                                    <strong class="text-dark"><?= number_format((int)$fishStock) ?> / <?= number_format($fishMax) ?></strong>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Marché Féodal :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $marketLvl ?> / <?= $marketMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Provenance :</span>
+                                    <span class="text-cyan fw-bold">Flottilles de Pêche &amp; Côtes</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Usage :</span>
+                                    <span class="text-dark fw-bold">Alimentation &amp; Croissance</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=resources" class="btn btn-xs btn-cyan flex-fill"><i class="fa-solid fa-fish me-1"></i>Terroirs</a>
+                                <a href="?page=building&code=tank" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-wheat-awn me-1"></i>Grenier (Niv. <?= $tankLvl ?>)</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10. FARINE DE RIZ -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResFlour" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Farine de Riz (Komeko) : cliquer pour le détail et l'accès à la Meunerie">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-bowl-rice text-secondary"></i> Farine
+                                </span>
+                                <span class="font-monospace <?= $grainMillLvl >= 5 ? 'text-success' : 'text-secondary' ?> fw-semibold" style="font-size:0.65rem;">Niv. <?= $grainMillLvl ?></span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-rice-flour"
+                                      data-current="<?= $flourStock ?>"
+                                      data-max="<?= $flourMax ?>">
+                                    <?= number_format((int)$flourStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctFlour) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResFlour" style="min-width:295px; z-index:1095;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-secondary-lt text-secondary rounded"><i class="fa-solid fa-bowl-rice"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Farine de Riz (Komeko)</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Meunerie &amp; Brasserie &bull; Niv. <?= $grainMillLvl ?>/<?= $grainMillMaxLvl ?></div>
+                                    </div>
+                                </div>
+                                <span class="badge <?= $grainMillLvl >= 5 ? 'bg-success-lt text-success' : 'bg-warning-lt text-warning' ?> font-monospace">
+                                    <?= $grainMillLvl >= 5 ? 'Débloqué' : 'Niv. 5 req.' ?>
+                                </span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Grenier Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
+                                    <strong class="text-dark"><?= number_format((int)$flourStock) ?> / <?= number_format($flourMax) ?></strong>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Meunerie &amp; Brasserie :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $grainMillLvl ?> / <?= $grainMillMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Statut de mouture :</span>
+                                    <span class="<?= $grainMillLvl >= 5 ? 'text-success fw-bold' : 'text-warning fw-bold' ?>">
+                                        <?= $grainMillLvl >= 5 ? 'Meules actives (sur commande)' : 'Requiert Meunerie Niv. 5' ?>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Usage :</span>
+                                    <span class="text-dark fw-bold">Rations d'expédition &amp; Siège</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-secondary flex-fill"><i class="fa-solid fa-bowl-rice me-1"></i>Meunerie (Niv. <?= $grainMillLvl ?>)</a>
+                                <a href="?page=building&code=tank" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-wheat-awn me-1"></i>Grenier (Niv. <?= $tankLvl ?>)</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 11. SAKÉ IMPÉRIAL -->
+                    <div class="dropdown">
+                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResSake" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                title="Saké Impérial : cliquer pour le détail et l'accès à la Brasserie">
+                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
+                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
+                                    <i class="fa-solid fa-wine-bottle text-purple"></i> Saké
+                                </span>
+                                <span class="badge bg-purple-lt text-purple font-monospace py-0 px-1" style="font-size:0.58rem;">Niv. <?= $grainMillLvl ?></span>
+                            </div>
+                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
+                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
+                                      id="res-val-sake"
+                                      data-current="<?= $sakeStock ?>"
+                                      data-max="<?= $sakeMax ?>">
+                                    <?= number_format((int)$sakeStock) ?>
+                                </span>
+                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctSake) ?>%</span>
+                            </div>
+                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
+                                <div class="progress-bar bg-purple" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResSake" style="min-width:295px; z-index:1095;">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-xs bg-purple-lt text-purple rounded"><i class="fa-solid fa-wine-bottle"></i></span>
+                                    <div class="lh-1">
+                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Saké Impérial</div>
+                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Brasserie Sakagura &bull; Niv. <?= $grainMillLvl ?>/<?= $grainMillMaxLvl ?></div>
+                                    </div>
+                                </div>
+                                <span class="badge <?= $grainMillLvl >= 10 ? 'bg-purple-lt text-purple' : 'bg-warning-lt text-warning' ?> font-monospace">
+                                    <?= $grainMillLvl >= 10 ? '+15% Moral' : 'Niv. 10 req.' ?>
+                                </span>
+                            </div>
+                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Caves / Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
+                                    <strong class="text-dark"><?= number_format((int)$sakeStock) ?> / <?= number_format($sakeMax) ?></strong>
+                                </div>
+                                <hr class="my-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Meunerie &amp; Brasserie :</span>
+                                    <span class="text-dark fw-bold">Niv. <?= $grainMillLvl ?> / <?= $grainMillMaxLvl ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Statut de brassage :</span>
+                                    <span class="<?= $grainMillLvl >= 10 ? 'text-purple fw-bold' : 'text-warning fw-bold' ?>">
+                                        <?= $grainMillLvl >= 10 ? 'Fermentation active' : 'Requiert Brasserie Niv. 10' ?>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Effet domaine :</span>
+                                    <span class="text-purple fw-bold">Moral +15% &amp; Banquets Matsuri</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 pt-1">
+                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-purple flex-fill"><i class="fa-solid fa-wine-bottle me-1"></i>Brasserie (Niv. <?= $grainMillLvl ?>)</a>
+                                <a href="?page=city" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-torii-gate me-1"></i>Banquets</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 12. NIVEAU DE SÉRÉNITé SHINTŌ -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle <?= !$eOk ? 'border-danger bg-danger-lt' : '' ?>" type="button" id="pillResSerenity" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
                                 title="Sérénité Shintō : cliquer pour le bilan énergétique et spirituel">
@@ -2062,75 +2380,7 @@ $navItems = [
                         </div>
                     </div>
 
-                    <!-- 8. POUTRES DE CHARPENTE -->
-                    <div class="dropdown">
-                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResBeams" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Poutres de Charpente : cliquer pour le détail de production et l'accès à la Scierie">
-                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
-                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
-                                    <i class="fa-solid fa-hammer text-orange"></i> Poutres
-                                </span>
-                                <span class="font-monospace text-orange fw-semibold" style="font-size:0.65rem;">Niv. <?= $sawmillLvl ?></span>
-                            </div>
-                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
-                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
-                                      id="res-val-wooden-beams"
-                                      data-current="<?= $beamsStock ?>"
-                                      data-max="<?= $beamsMax ?>">
-                                    <?= number_format((int)$beamsStock) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctBeams) ?>%</span>
-                            </div>
-                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
-                                <div class="progress-bar bg-orange" id="bar-wooden-beams" style="width:<?= $pctBeams ?>%;"></div>
-                            </div>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResBeams" style="min-width:295px; z-index:1095;">
-                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="avatar avatar-xs bg-orange-lt text-orange rounded"><i class="fa-solid fa-hammer"></i></span>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Poutres de Charpente</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Atelier de Charpenterie &bull; Niv. <?= $sawmillLvl ?>/<?= $sawmillMaxLvl ?></div>
-                                    </div>
-                                </div>
-                                <span class="badge <?= $sawmillLvl >= 10 ? 'bg-success-lt text-success' : 'bg-warning-lt text-warning' ?> font-monospace">
-                                    <?= $sawmillLvl >= 10 ? 'Actif' : 'Niv. 10 req.' ?>
-                                </span>
-                            </div>
-                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Entrepôt (Niv. <?= $storageLvl ?>/<?= $storageMaxLvl ?>) :</span>
-                                    <strong class="text-dark"><?= number_format((int)$beamsStock) ?> / <?= number_format($beamsMax) ?></strong>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Remplissage :</span>
-                                    <span class="<?= $pctBeams >= 95 ? 'text-danger fw-bold' : 'text-secondary' ?>"><?= (int)round($pctBeams) ?>% de capacité</span>
-                                </div>
-                                <hr class="my-1">
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Bâtiment producteur :</span>
-                                    <span class="text-dark fw-bold">Charpenterie (Niv. <?= $sawmillLvl ?>/<?= $sawmillMaxLvl ?>)</span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Production :</span>
-                                    <span class="<?= $sawmillLvl >= 10 ? 'text-success fw-bold' : 'text-warning fw-bold' ?>">
-                                        <?= $sawmillLvl >= 10 ? 'Façonnage sur commande' : 'Débloqué au Niv. 10' ?>
-                                    </span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Bonus Bois associé :</span>
-                                    <span class="text-success fw-bold">+<?= $sawmillBonus ?>% récolte</span>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=sawmill" class="btn btn-xs btn-warning flex-fill"><i class="fa-solid fa-hammer me-1"></i>Scierie (Niv. <?= $sawmillLvl ?>)</a>
-                                <a href="?page=building&code=storage" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-warehouse me-1"></i>Entrepôt (Niv. <?= $storageLvl ?>)</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 9. CHARBON DE BOIS -->
+                    <!-- 13. CHARBON DE BOIS -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResCharcoal" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
                                 title="Charbon de Bois : cliquer pour le détail de production et l'accès au Four">
@@ -2196,7 +2446,7 @@ $navItems = [
                         </div>
                     </div>
 
-                    <!-- 10. SABLE DE FER (SATETSU) -->
+                    <!-- 14. SABLE DE FER (SATETSU) -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResIronSand" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
                                 title="Sable de Fer (Satetsu) : cliquer pour le détail de production et la Grande Forge">
@@ -2260,7 +2510,7 @@ $navItems = [
                         </div>
                     </div>
 
-                    <!-- 11. SOUFRE VOLCANIQUE -->
+                    <!-- 15. SOUFRE VOLCANIQUE -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResSulfur" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
                                 title="Soufre Volcanique : cliquer pour le détail et l'accès à l'atelier">
@@ -2324,7 +2574,7 @@ $navItems = [
                         </div>
                     </div>
 
-                    <!-- 12. NITRATE DE POTASSE -->
+                    <!-- 16. NITRATE DE POTASSE -->
                     <div class="dropdown">
                         <button class="hud-res-pill dropdown-toggle" type="button" id="pillResNitrate" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
                                 title="Nitrate de Potasse (Salpêtre) : cliquer pour le détail et l'accès à l'atelier">
@@ -2380,256 +2630,6 @@ $navItems = [
                             <div class="d-flex gap-1 pt-1">
                                 <a href="?page=building&code=stonemason#craftSection" class="btn btn-xs btn-info flex-fill"><i class="fa-solid fa-flask-vial me-1"></i>Tailleur (Niv. <?= $stonemasonLvl ?>)</a>
                                 <a href="?page=building&code=blacksmith#craftSection" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-fire-burner me-1"></i>Forge (Niv. <?= $blacksmithLvl ?>)</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 13. POISSON FRAIS -->
-                    <div class="dropdown">
-                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResFish" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Poisson Frais : cliquer pour le détail et les raccourcis">
-                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
-                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
-                                    <i class="fa-solid fa-fish text-cyan"></i> Poisson
-                                </span>
-                                <span class="font-monospace text-cyan fw-semibold" style="font-size:0.65rem;">Kura N.<?= $tankLvl ?></span>
-                            </div>
-                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
-                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
-                                      id="res-val-fish"
-                                      data-current="<?= $fishStock ?>"
-                                      data-max="<?= $fishMax ?>">
-                                    <?= number_format((int)$fishStock) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctFish) ?>%</span>
-                            </div>
-                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
-                                <div class="progress-bar bg-cyan" id="bar-fish" style="width:<?= $pctFish ?>%;"></div>
-                            </div>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResFish" style="min-width:295px; z-index:1095;">
-                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="avatar avatar-xs bg-cyan-lt text-cyan rounded"><i class="fa-solid fa-fish"></i></span>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Poisson Frais</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Grenier Kura &bull; Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?></div>
-                                    </div>
-                                </div>
-                                <span class="badge bg-cyan-lt text-cyan font-monospace"><?= (int)round($pctFish) ?>%</span>
-                            </div>
-                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Grenier Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
-                                    <strong class="text-dark"><?= number_format((int)$fishStock) ?> / <?= number_format($fishMax) ?></strong>
-                                </div>
-                                <hr class="my-1">
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Marché Féodal :</span>
-                                    <span class="text-dark fw-bold">Niv. <?= $marketLvl ?> / <?= $marketMaxLvl ?></span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Provenance :</span>
-                                    <span class="text-cyan fw-bold">Flottilles de Pêche &amp; Côtes</span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Usage :</span>
-                                    <span class="text-dark fw-bold">Alimentation &amp; Croissance</span>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-1 pt-1">
-                                <a href="?page=resources" class="btn btn-xs btn-cyan flex-fill"><i class="fa-solid fa-fish me-1"></i>Terroirs</a>
-                                <a href="?page=building&code=tank" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-wheat-awn me-1"></i>Grenier (Niv. <?= $tankLvl ?>)</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 14. FARINE DE RIZ -->
-                    <div class="dropdown">
-                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResFlour" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Farine de Riz (Komeko) : cliquer pour le détail et l'accès à la Meunerie">
-                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
-                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
-                                    <i class="fa-solid fa-bowl-rice text-secondary"></i> Farine
-                                </span>
-                                <span class="font-monospace <?= $grainMillLvl >= 5 ? 'text-success' : 'text-secondary' ?> fw-semibold" style="font-size:0.65rem;">Niv. <?= $grainMillLvl ?></span>
-                            </div>
-                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
-                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
-                                      id="res-val-rice-flour"
-                                      data-current="<?= $flourStock ?>"
-                                      data-max="<?= $flourMax ?>">
-                                    <?= number_format((int)$flourStock) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctFlour) ?>%</span>
-                            </div>
-                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
-                                <div class="progress-bar bg-secondary" id="bar-rice-flour" style="width:<?= $pctFlour ?>%;"></div>
-                            </div>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResFlour" style="min-width:295px; z-index:1095;">
-                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="avatar avatar-xs bg-secondary-lt text-secondary rounded"><i class="fa-solid fa-bowl-rice"></i></span>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Farine de Riz (Komeko)</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Meunerie &amp; Brasserie &bull; Niv. <?= $grainMillLvl ?>/<?= $grainMillMaxLvl ?></div>
-                                    </div>
-                                </div>
-                                <span class="badge <?= $grainMillLvl >= 5 ? 'bg-success-lt text-success' : 'bg-warning-lt text-warning' ?> font-monospace">
-                                    <?= $grainMillLvl >= 5 ? 'Débloqué' : 'Niv. 5 req.' ?>
-                                </span>
-                            </div>
-                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Grenier Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
-                                    <strong class="text-dark"><?= number_format((int)$flourStock) ?> / <?= number_format($flourMax) ?></strong>
-                                </div>
-                                <hr class="my-1">
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Meunerie &amp; Brasserie :</span>
-                                    <span class="text-dark fw-bold">Niv. <?= $grainMillLvl ?> / <?= $grainMillMaxLvl ?></span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Statut de mouture :</span>
-                                    <span class="<?= $grainMillLvl >= 5 ? 'text-success fw-bold' : 'text-warning fw-bold' ?>">
-                                        <?= $grainMillLvl >= 5 ? 'Meules actives (sur commande)' : 'Requiert Meunerie Niv. 5' ?>
-                                    </span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Usage :</span>
-                                    <span class="text-dark fw-bold">Rations d'expédition &amp; Siège</span>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-secondary flex-fill"><i class="fa-solid fa-bowl-rice me-1"></i>Meunerie (Niv. <?= $grainMillLvl ?>)</a>
-                                <a href="?page=building&code=tank" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-wheat-awn me-1"></i>Grenier (Niv. <?= $tankLvl ?>)</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 15. SAKÉ IMPÉRIAL -->
-                    <div class="dropdown">
-                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResSake" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Saké Impérial : cliquer pour le détail et l'accès à la Brasserie">
-                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
-                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
-                                    <i class="fa-solid fa-wine-bottle text-purple"></i> Saké
-                                </span>
-                                <span class="badge bg-purple-lt text-purple font-monospace py-0 px-1" style="font-size:0.58rem;">Niv. <?= $grainMillLvl ?></span>
-                            </div>
-                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
-                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
-                                      id="res-val-sake"
-                                      data-current="<?= $sakeStock ?>"
-                                      data-max="<?= $sakeMax ?>">
-                                    <?= number_format((int)$sakeStock) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctSake) ?>%</span>
-                            </div>
-                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
-                                <div class="progress-bar bg-purple" id="bar-sake" style="width:<?= $pctSake ?>%;"></div>
-                            </div>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResSake" style="min-width:295px; z-index:1095;">
-                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="avatar avatar-xs bg-purple-lt text-purple rounded"><i class="fa-solid fa-wine-bottle"></i></span>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Saké Impérial</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Brasserie Sakagura &bull; Niv. <?= $grainMillLvl ?>/<?= $grainMillMaxLvl ?></div>
-                                    </div>
-                                </div>
-                                <span class="badge <?= $grainMillLvl >= 10 ? 'bg-purple-lt text-purple' : 'bg-warning-lt text-warning' ?> font-monospace">
-                                    <?= $grainMillLvl >= 10 ? '+15% Moral' : 'Niv. 10 req.' ?>
-                                </span>
-                            </div>
-                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Caves / Kura (Niv. <?= $tankLvl ?>/<?= $tankMaxLvl ?>) :</span>
-                                    <strong class="text-dark"><?= number_format((int)$sakeStock) ?> / <?= number_format($sakeMax) ?></strong>
-                                </div>
-                                <hr class="my-1">
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Meunerie &amp; Brasserie :</span>
-                                    <span class="text-dark fw-bold">Niv. <?= $grainMillLvl ?> / <?= $grainMillMaxLvl ?></span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Statut de brassage :</span>
-                                    <span class="<?= $grainMillLvl >= 10 ? 'text-purple fw-bold' : 'text-warning fw-bold' ?>">
-                                        <?= $grainMillLvl >= 10 ? 'Fermentation active' : 'Requiert Brasserie Niv. 10' ?>
-                                    </span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Effet domaine :</span>
-                                    <span class="text-purple fw-bold">Moral +15% &amp; Banquets Matsuri</span>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=grain_mill" class="btn btn-xs btn-purple flex-fill"><i class="fa-solid fa-wine-bottle me-1"></i>Brasserie (Niv. <?= $grainMillLvl ?>)</a>
-                                <a href="?page=city" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-torii-gate me-1"></i>Banquets</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 16. TUILES IMPÉRIALES (KAWARA) -->
-                    <div class="dropdown">
-                        <button class="hud-res-pill dropdown-toggle" type="button" id="pillResTiles" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
-                                title="Tuiles Impériales (Kawara 瓦) : cliquer pour le détail et l'accès aux fours">
-                            <div class="d-flex align-items-center justify-content-between gap-2 w-100">
-                                <span class="d-inline-flex align-items-center gap-1 fw-bold text-dark" style="font-size:0.74rem;">
-                                    <i class="fa-solid fa-shapes text-secondary"></i> Tuiles
-                                </span>
-                                <span class="font-monospace <?= $stonemasonLvl >= 20 ? 'text-success' : 'text-secondary' ?> fw-semibold" style="font-size:0.65rem;">Niv. <?= $stonemasonLvl ?></span>
-                            </div>
-                            <div class="d-flex align-items-baseline justify-content-between gap-1 mt-0.5 font-monospace">
-                                <span class="fw-bold text-dark" style="font-size:0.86rem;"
-                                      id="res-val-roof-tiles"
-                                      data-current="<?= $roofTilesStock ?>"
-                                      data-max="<?= $roofTilesMax ?>">
-                                    <?= number_format((int)$roofTilesStock) ?>
-                                </span>
-                                <span class="text-muted" style="font-size:0.62rem;"><?= (int)round($pctRoofTiles) ?>%</span>
-                            </div>
-                            <div class="progress progress-xs mt-1 w-100" style="height:3px;">
-                                <div class="progress-bar bg-secondary" id="bar-roof-tiles" style="width:<?= $pctRoofTiles ?>%;"></div>
-                            </div>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-start hud-floating-menu shadow-lg p-3 border" aria-labelledby="pillResTiles" style="min-width:305px; z-index:1095;">
-                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="avatar avatar-xs bg-dark text-white rounded">🧱</span>
-                                    <div class="lh-1">
-                                        <div class="fw-bold text-dark" style="font-size:0.85rem;">Tuiles Impériales (Kawara)</div>
-                                        <div class="text-muted font-monospace" style="font-size:0.68rem;">Tailleuse &amp; Maçonnerie &bull; Niv. <?= $stonemasonLvl ?>/<?= $stonemasonMaxLvl ?></div>
-                                    </div>
-                                </div>
-                                <span class="badge <?= $stonemasonLvl >= 20 ? 'bg-success-lt text-success' : 'bg-secondary-lt text-secondary' ?> font-monospace">
-                                    <?= $stonemasonLvl >= 20 ? 'Four Actif' : 'Niv. 20 req.' ?>
-                                </span>
-                            </div>
-                            <div class="small font-monospace d-flex flex-column gap-1 mb-2">
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Tuiles Hongawara (Stock) :</span>
-                                    <strong class="text-dark"><?= number_format((int)$roofTilesStock) ?> / <?= number_format($roofTilesMax) ?></strong>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Tuiles Onigawara (Faîtage) :</span>
-                                    <strong class="text-danger"><?= number_format($onigawaraStock) ?> 👹</strong>
-                                </div>
-                                <hr class="my-1">
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Four Kawara-gama :</span>
-                                    <span class="text-dark fw-bold"><?= $stonemasonLvl >= 20 ? 'Opérationnel (Palier 20)' : 'Verrouillé (' . $stonemasonLvl . '/20)' ?></span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted">Usage suprême :</span>
-                                    <span class="text-secondary fw-bold">Couverture du Grand Dōjō (Fin de Jeu)</span>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-1 pt-1">
-                                <a href="?page=building&code=stonemason#tileCraftSection" class="btn btn-xs btn-dark flex-fill"><i class="fa-solid fa-fire-burner me-1"></i>Fours Kawara</a>
-                                <a href="?page=city" class="btn btn-xs btn-outline-secondary flex-fill"><i class="fa-solid fa-torii-gate me-1"></i>Grand Dōjō</a>
                             </div>
                         </div>
                     </div>
@@ -2825,7 +2825,7 @@ $navItems = [
                         <span class="text-muted text-uppercase font-monospace d-none d-md-inline me-1" style="font-size:0.62rem;">
                             <i class="fa-solid fa-compass text-primary me-1"></i>Accès rapide :
                         </span>
-                        <button type="button" class="hud-nav-btn active" data-nav-target="#pillResWood" title="Aller aux Matériaux de base (Bois, Granit, Argile, Poutres)">
+                        <button type="button" class="hud-nav-btn active" data-nav-target="#pillResWood" title="Aller aux Matériaux de base (Bois, Granit, Argile, Poutres, Tuiles)">
                             <i class="fa-solid fa-tree text-success me-1"></i><span>Matériaux</span>
                         </button>
                         <button type="button" class="hud-nav-btn" data-nav-target="#pillResRice" title="Aller aux Vivres &amp; Terroir (Riz, Thé, Soja, Poisson, Farine, Saké)">
