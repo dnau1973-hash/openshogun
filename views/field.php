@@ -273,8 +273,6 @@ $nextSlot = ($slot < 20) ? $slot + 1 : 1;
             <?php if ($fieldIllustrationUrl): ?>
             <div class="card-img-top position-relative" style="position:relative; cursor:pointer; overflow:hidden; max-height:220px;" title="Agrandir l'estampe">
                 <img src="<?= $fieldIllustrationUrl ?>" alt="<?= htmlspecialchars($info['name']) ?>" style="width:100%; height:220px; object-fit:cover; display:block;">                
-                <!-- Badge Transparence IA Prompts (« ? ») -->
-                <?= AiPromptHelper::renderBadge($fieldHeroRel, $info['name'], $fieldIllustrationUrl) ?>
             </div>
             <?php else: ?>
             <div style="height:120px; background:linear-gradient(135deg,rgba(146,64,14,0.15),rgba(22,101,52,0.1)); display:flex; align-items:center; justify-content:center; font-size:3rem;">

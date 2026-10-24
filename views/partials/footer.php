@@ -31,8 +31,6 @@
 <?php require_once __DIR__ . '/imperial_seal_modal.php'; ?>
 <!-- Modale des Chroniques Féodales du Sengoku (Événement Hebdomadaire) -->
 <?php require_once __DIR__ . '/weekly_event_modal.php'; ?>
-<!-- Modale de Transparence IA (Prompts & Traduction) -->
-<?php require_once __DIR__ . '/ai_prompt_modal.php'; ?>
 <!-- Modale Universelle Tabler.io : Renommage de Fief Féodal -->
 <?php require_once __DIR__ . '/rename_village_modal.php'; ?>
 <!-- Modale Interactive : Mode Apprentissage & Maître de la Sagesse (Shinōkōshō) -->
@@ -944,8 +942,6 @@ document.addEventListener("DOMContentLoaded", function () {
 function toggleTheme() {}
 </script>
 <?php require_once __DIR__ . '/chat_widget.php'; ?>
-<!-- Script Modale Transparence Prompts IA -->
-<script src="/public/js/ai_prompt_modal.js"></script>
 </body>
 </html>
 

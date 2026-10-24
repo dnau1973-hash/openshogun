@@ -458,9 +458,6 @@ $capitalCoordY = $capitalPlanet['coord_y'] ?? 0;
                                 </span>
                             </div>
                         </div>
-
-                        <!-- Badge Circulaire Transparence IA Prompts (« ? ») -->
-                        <?= class_exists('AiPromptHelper') ? AiPromptHelper::renderBadge($clan['illustration_file'], 'Chroniques Féodales du ' . $clan['name'], $clan['illustration']) : '' ?>
                     </div>
                 <?php endif; ?>
 

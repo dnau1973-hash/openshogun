@@ -3,6 +3,13 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.38.0] - 2026-10-24
+### Supprimé (Removed)
+- **Suppression Totale de la Modale de Transparence des Prompts IA & des Badges Étincelles (`core/AiPromptHelper.php`, `views/partials/footer.php`, `views/partials/header.php`, `views/pedagogy.php`, `views/partials/admin_pedagogy.php`, `views/hero.php`, `views/barracks.php`, `views/building.php`, `views/field.php`, `views/shipyard.php`, `views/docs.php`, `views/poster.php`, `views/view_resource.php`, `public/css/style.css`) :**
+  * **Suppression des Badges d'Illustration IA** : Élimination définitive de l'icône étincelle/baguette magique (`fa-wand-magic-sparkles`), du badge d'interrogation `?` et du libellé "Généré par IA" superposés sur toutes les estampes, héros, expéditions, bâtiments, parcelles et unités du site.
+  * **Suppression de la Modale de Prompts & Traduction (`views/partials/ai_prompt_modal.php`, `public/js/ai_prompt_modal.js`)** : Retrait complet de la fenêtre modale qui affichait le prompt descriptif en anglais, la traduction française, le modèle d'IA et les métadonnées de génération.
+  * **Nettoyage & Neutralisation CSS/JS Globale** : Retrait des inclusions de feuilles de style et scripts dédiés dans l'en-tête et le pied de page universels, avec règles de masquage strictes garantissant une interface féodale 100% immersive et épurée sans le moindre artéfact ou bouton d'information résiduel.
+
 ## [1.37.0] - 2026-10-24
 ### Ajouté & Amélioré (Added & Improved)
 - **Nouvelles Expéditions Provinciales Féodales pour le Samouraï (`core/HeroEngine.php`, `views/hero.php`) :**

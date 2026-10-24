@@ -591,8 +591,6 @@ if (!$isEmptyPlot) {
                     <?php if ($buildingIllustrationUrl): ?>
                         <div class="col-md-4 col-lg-3 position-relative" style="cursor:pointer; overflow:hidden; min-height:220px;" title="Agrandir l'estampe" onclick="openArtworkModal('<?= $buildingIllustrationUrl ?>', '<?= htmlspecialchars(addslashes($bInfo['name'])) ?>')">
                             <img src="<?= $buildingIllustrationUrl ?>" alt="<?= htmlspecialchars($bInfo['name']) ?>" style="width:100%; height:100%; object-fit:cover; display:block;">                        
-                            <!-- Badge Transparence IA Prompts (« ? ») -->
-                            <?= AiPromptHelper::renderBadge($heroImgRel, $bInfo['name'], $buildingIllustrationUrl) ?>
                         </div>
                     <?php else: ?>
                         <div class="col-md-4 col-lg-3 d-flex align-items-center justify-content-center" style="min-height:160px; background:linear-gradient(135deg,rgba(185,28,28,0.15),rgba(30,41,59,0.1)); font-size:3.5rem;">

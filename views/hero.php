@@ -682,7 +682,6 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                     <div style="position: absolute; top: 10px; left: 12px; right: 12px;" class="d-flex justify-content-between align-items-center">
                                         <span class="badge <?= $dbdg['class'] ?> fw-bold px-2 py-1 shadow-sm"><?= $dbdg['label'] ?></span>
                                         <div class="d-flex align-items-center gap-1">
-                                            <?= AiPromptHelper::renderBadge(basename($advImg), $adv['name']) ?>
                                             <span class="badge bg-dark bg-opacity-75 border border-light text-white font-monospace">[<?= $adv['coord_x'] ?> : <?= $adv['coord_y'] ?>]</span>
                                         </div>
                                     </div>
@@ -784,8 +783,6 @@ if (!function_exists('renderRelicBonusesHtml')) {
                             <div class="text-white font-weight-bold fs-5"><?= htmlspecialchars($hero['name']) ?></div>
                             <div class="text-warning small font-weight-bold">Niveau <?= $hero['level'] ?> &bull; <?= number_format($hero['effective']['combat_strength']) ?> pts</div>
                         </div>
-                        <!-- Badge Transparence IA Prompts (« ? ») -->
-                        <?= AiPromptHelper::renderBadge('hero_samurai.jpg', $hero['name']) ?>
                     </div>
                 </div>
 

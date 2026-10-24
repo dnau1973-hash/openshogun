@@ -264,9 +264,6 @@ $userClanName = $factionNames[$user['faction']] ?? 'Armée Provinciale';
                                 <i class="fa-solid fa-shield-halved text-success me-1"></i>Garnison : <?= number_format($u['stationed_count']) ?>
                             </div>
 
-                            <!-- Badge Transparence IA Prompts -->
-                            <?= AiPromptHelper::renderBadge($imgFile, $u['name'], $fullImg) ?>
-
                             <!-- Bouton Agrandir Loupe -->
                             <div style="position:absolute; bottom:8px; right:8px; background:rgba(28,25,23,0.75); backdrop-filter:blur(4px); color:#ffffff; border-radius:4px; padding:3px 8px; font-size:0.7rem; display:flex; align-items:center; gap:4px; border:1px solid rgba(255,255,255,0.2);">
                                 <i class="fa-solid fa-magnifying-glass me-1"></i>Vue détaillée

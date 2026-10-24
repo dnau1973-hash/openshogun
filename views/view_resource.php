@@ -329,10 +329,6 @@ $bgVersion = file_exists($bgFile) ? filemtime($bgFile) : 1;
         </div>
         <div class="card-body p-3">
             <div class="resource-scene-viewport">
-                <!-- Badge Transparence IA (Haut Droite de la Scène Panoramique) -->
-                <div style="position:absolute; top:12px; right:12px; z-index:25;">
-                    <?= class_exists('AiPromptHelper') ? AiPromptHelper::renderBadge(basename($zDef['bg_image']), $zDef['name'] . ' (5 Slots)', $zDef['bg_image'], 'ai-prompt-badge-pill', true) : '' ?>
-                </div>
 
                 <!-- Les 5 Slots Positionnés Spatialement sur le Décor -->
                 <?php foreach ($slots as $idx => $s): ?>

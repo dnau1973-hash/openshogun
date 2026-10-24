@@ -3551,6 +3551,19 @@
     color: #ef4444 !important;
 }
 
+/* Suppression globale des badges et modale d'affichage des prompts IA */
+.ai-prompt-badge,
+.ai-prompt-badge-pill,
+.ai-prompt-badge-sm,
+#aiPromptModal,
+.ai-modal-overlay {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+
 
 
 

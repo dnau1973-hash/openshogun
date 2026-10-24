@@ -188,8 +188,6 @@ $factionInfo = FACTIONS[$user['faction']] ?? FACTIONS['terran'];
     <link rel="stylesheet" href="/public/css/tabler/tabler.min.css?v=1.0.0-beta21">
     <!-- HUD Travian Féodal (header circulaire, barres de ressources, alertes) -->
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../../public/css/style.css') ? filemtime(__DIR__ . '/../../public/css/style.css') : time() ?>">
-    <!-- Transparence & Détails des Prompts Images IA -->
-    <link rel="stylesheet" href="/public/css/ai_prompt_modal.css?v=<?= file_exists(__DIR__ . '/../../public/css/ai_prompt_modal.css') ? filemtime(__DIR__ . '/../../public/css/ai_prompt_modal.css') : time() ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏯</text></svg>">
     <!-- Orchestrateur de Modales (évite l'empilement simultané à l'ouverture de session) -->
     <script src="/public/js/modal_queue.js?v=<?= file_exists(__DIR__ . '/../../public/js/modal_queue.js') ? filemtime(__DIR__ . '/../../public/js/modal_queue.js') : time() ?>"></script>

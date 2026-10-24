@@ -65,7 +65,6 @@ if (!$isAuth):
     <!-- Tabler Core CSS -->
     <link rel="stylesheet" href="/public/css/tabler/tabler.min.css">
     <link rel="stylesheet" href="/public/css/style.css?v=<?= file_exists(__DIR__ . '/../public/css/style.css') ? filemtime(__DIR__ . '/../public/css/style.css') : time() ?>">
-    <link rel="stylesheet" href="/public/css/ai_prompt_modal.css?v=<?= file_exists(__DIR__ . '/../public/css/ai_prompt_modal.css') ? filemtime(__DIR__ . '/../public/css/ai_prompt_modal.css') : 1 ?>">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
     <style>
         body {
@@ -151,12 +150,8 @@ if (!$isAuth):
         </footer>
     </div>
 
-    <!-- Modale de Transparence IA (Prompts & Traduction) -->
-    <?php require __DIR__ . '/partials/ai_prompt_modal.php'; ?>
-
     <!-- Tabler Core JS -->
     <script src="/public/js/tabler/tabler.min.js"></script>
-    <script src="/public/js/ai_prompt_modal.js"></script>
 </body>
 </html>
 <?php 

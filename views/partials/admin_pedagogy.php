@@ -711,29 +711,18 @@ seuil_final   = seuil_de_base + bonus_pitié;
                                 <span class="text-primary small fw-semibold">Transparence IA</span>
                             </div>
                             
-                            <!-- Carte Image de démonstration avec Badge « ? » universel -->
+                            <!-- Carte Image de démonstration -->
                             <div class="position-relative rounded overflow-hidden border border-secondary-subtle mb-3 bg-white" style="max-height: 220px;">
                                 <img src="/public/assets/units/piquier_ashigaru_yari.jpg" alt="Piquier Ashigaru" class="w-100 h-100" style="object-fit: cover; object-position: top center; display: block;">
-                                
-                                <!-- Badge Circulaire « ? » Universel branché sur ai_prompt_modal.js -->
-                                <button type="button" 
-                                        class="ai-prompt-badge" 
-                                        data-ai-title="Piquier Ashigaru (Yari)"
-                                        data-ai-img="/public/assets/units/piquier_ashigaru_yari.jpg"
-                                        data-ai-prompt="Full-body RTS video game unit illustration of a Sengoku Jidai Ashigaru Spearman, holding a long bamboo yari spear with a gleaming steel point, dynamic ready combat pose, light lacquered chest armor and jingasa conical helmet, standing in a misty bamboo forest near an authentic wooden fortress gate, colorful hand-drawn painterly vector art style of Travian and Grepolis, epic feudal Japanese tactical atmosphere, colorful vibrant colors, heroic composition. --no rice paper border, parchment, Japanese letters, kanji, text, frame"
-                                        data-ai-translation="Illustration de jeu de stratégie en pied d'un lancier Ashigaru de l'époque Sengoku, tenant une longue lance yari en bambou à pointe d'acier étincelante, posture dynamique de préparation au combat, armure pectorale laquée légère et chapeau conique jingasa, debout dans une forêt de bambous brumeuse près d'une porte de forteresse en bois d'époque, style artistique vectoriel peint à la main coloré rappelant Travian et Grepolis..."
-                                        title="Cliquez pour admirer la modale de transparence IA">
-                                    <span class="ai-badge-icon">?</span>
-                                </button>
 
                                 <div class="position-absolute bottom-0 start-0 end-0 p-2 bg-white bg-opacity-90 text-dark small border-top d-flex justify-content-between align-items-center">
                                     <span class="fw-bold">Piquier Ashigaru</span>
-                                    <span class="text-primary small fw-semibold">↗ Cliquez sur le « ? »</span>
+                                    <span class="text-secondary small">Époque Sengoku</span>
                                 </div>
                             </div>
 
                             <div class="text-secondary small text-center">
-                                <i class="fa-solid fa-hand-pointer text-primary me-1"></i><strong>Faites le test !</strong> Cliquez sur l'icône <code>?</code> en haut à droite de l'image pour ouvrir la modale, découvrir le prompt original en anglais et sa traduction française intégrale.
+                                <i class="fa-solid fa-paintbrush text-primary me-1"></i>Illustration représentant un lancier Ashigaru prêt au combat dans une forêt de bambous.
                             </div>
                         </div>
                     </div>

@@ -189,9 +189,6 @@ $queue = $shipyardEngine->getQueue((int)$planet['id']);
                                 <i class="fa-solid fa-horse text-danger me-1"></i>Disponibles : <?= number_format($s['stationed_count']) ?>
                             </div>
 
-                            <!-- Badge Transparence IA Prompts (« ? ») -->
-                            <?= AiPromptHelper::renderBadge($imgFile, $s['name'], $fullImg) ?>
-
                             <!-- Bouton Agrandir Loupe -->
                             <div style="position:absolute; bottom:8px; right:8px; background:rgba(28,25,23,0.75); backdrop-filter:blur(4px); color:#ffffff; border-radius:4px; padding:3px 8px; font-size:0.7rem; display:flex; align-items:center; gap:4px; border:1px solid rgba(255,255,255,0.2);">
                                 <i class="fa-solid fa-magnifying-glass me-1"></i>Agrandir
