@@ -211,7 +211,13 @@
                         const ok = playerStock >= costVal;
                         const tag = document.createElement('span');
                         tag.className = 'cost-chip ' + (ok ? 'affordable' : 'missing');
-                        tag.innerHTML = `<i class="${icon}"></i> ${name} : <strong>${costVal.toLocaleString()}</strong>`;
+                        const iconClass = ok ? icon : icon.replace(/text-[a-z]+/, 'text-danger');
+                        tag.innerHTML = `<i class="${iconClass}"></i> ${name} : <strong>${costVal.toLocaleString()}</strong>`;
+                        if (!ok) {
+                            tag.setAttribute('title', `Ressource manquante : ${(costVal - playerStock).toLocaleString()} ${name} requis en plus (Stock actuel : ${playerStock.toLocaleString()})`);
+                        } else {
+                            tag.setAttribute('title', `Ressource suffisante : ${playerStock.toLocaleString()} ${name} en réserve`);
+                        }
                         costContainer.appendChild(tag);
                     };
 

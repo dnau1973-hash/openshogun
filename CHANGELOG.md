@@ -17,6 +17,8 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
   * **Contrôles Ergonomiques Cages & Bandages Côte à Côte** : Dans Game Studio Général (*Vitesses & Équilibrage du Monde Féodal*) et Game Elevate Designer, le curseur et le champ numérique de probabilité de découverte des bandages (0% à 100%) sont positionnés immédiatement à côté de ceux des cages de capture de bêtes sauvages.
   * **Prise en compte dans le Moteur de Butin (`HeroEngine::processAdventureReturn`)** : Tirage aléatoire indépendant basé sur le taux configuré lors de la résolution de chaque retour d'expédition.
 ### Corrigé (Fixed)
+- **Indicateur des Matériaux Requis dans les Modales de la Cité (`views/city.php`, `public/css/style.css`, `public/js/rural_domain_map.js`, `views/resources.php`) :**
+  * Harmonisation visuelle des étiquettes de coûts d'élévation (`.cost-chip`) : les ressources manquantes (Bois, Pierre, Riz) sont désormais clairement signalées en rouge vif (`#ef4444` / `text-danger`), avec fond teinté et infobulle détaillée indiquant le montant manquant par rapport au stock actuel, exactement comme sur les modales du Terroir Rural.
 - **Illustration du Pêcheur Féodal dans la Modale du Dojo & Quartier Militaire (`views/city.php`, `core/BarracksEngine.php`, `core/PlanetEngine.php`, `database/migrations/005_lake_fishing_system.sql`) :**
   * Correction du chemin de l'image de l'unité pêcheur (`pecheur.jpg`) qui était stocké avec le préfixe `/public/assets/units/`, provoquant une URL dupliquée et le déclenchement de l'illustration de repli du colon. L'estampe authentique du Pêcheur Féodal (*Ryōshi*) s'affiche désormais impeccablement dans la modale d'enrôlement du Dojo et sur la file d'attente.
 

@@ -3514,5 +3514,43 @@
     }
 }
 
+/* ==========================================================
+   CHIPS DE COÛT & INDICATEURS DE MATÉRIAUX REQUIS (MODALES)
+   ========================================================== */
+.cost-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.cost-chip.affordable {
+    color: #10b981 !important;
+    border-color: rgba(16, 185, 129, 0.35) !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+}
+
+.cost-chip.affordable strong {
+    color: #10b981 !important;
+}
+
+.cost-chip.missing {
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.35) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+.cost-chip.missing i,
+.cost-chip.missing strong {
+    color: #ef4444 !important;
+}
+
+
 
 

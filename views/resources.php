@@ -181,10 +181,19 @@ $isTerran = (($user['faction'] ?? 'terran') === 'terran');
     background: rgba(16, 185, 129, 0.1);
 }
 
+.cost-chip.affordable strong {
+    color: #10b981 !important;
+}
+
 .cost-chip.missing {
-    color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.35);
-    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.35) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+.cost-chip.missing i,
+.cost-chip.missing strong {
+    color: #ef4444 !important;
 }
 </style>
 

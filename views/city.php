@@ -439,6 +439,41 @@ foreach ($citySlots as $s => $sd) {
     border-bottom: 3px solid #b91c1c !important;
 }
 
+/* Chips de coût des matériaux requis pour l'élévation (style identique aux ressources) */
+.cost-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.cost-chip.affordable {
+    color: #10b981 !important;
+    border-color: rgba(16, 185, 129, 0.35) !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+}
+
+.cost-chip.affordable strong {
+    color: #10b981 !important;
+}
+
+.cost-chip.missing {
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.35) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+.cost-chip.missing i,
+.cost-chip.missing strong {
+    color: #ef4444 !important;
+}
+
 .city-craft-card {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -1303,7 +1338,13 @@ function renderCitySlotModal() {
                     const ok = playerStock >= costVal;
                     const tag = document.createElement('span');
                     tag.className = 'cost-chip ' + (ok ? 'affordable' : 'missing');
-                    tag.innerHTML = `<i class="${icon}"></i> ${name} : <strong>${costVal.toLocaleString()}</strong>`;
+                    const iconClass = ok ? icon : icon.replace(/text-[a-z]+/, 'text-danger');
+                    tag.innerHTML = `<i class="${iconClass}"></i> ${name} : <strong>${costVal.toLocaleString()}</strong>`;
+                    if (!ok) {
+                        tag.setAttribute('title', `Ressource manquante : ${(costVal - playerStock).toLocaleString()} ${name} requis en plus (Stock actuel : ${playerStock.toLocaleString()})`);
+                    } else {
+                        tag.setAttribute('title', `Ressource suffisante : ${playerStock.toLocaleString()} ${name} en réserve`);
+                    }
                     costContainer.appendChild(tag);
                 };
 
