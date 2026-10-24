@@ -606,6 +606,7 @@ class GameStudioEngine {
         $beginnerProtectionDays = (int)GameConfig::get('beginner_protection_days', 7);
         $heroXpRatePercent      = (int)GameConfig::get('hero_xp_rate_percent', 100);
         $heroCageDropRate       = (int)GameConfig::get('hero_cage_drop_rate', 25);
+        $heroBandageDropRate    = (int)GameConfig::get('hero_bandage_drop_rate', 20);
         $famineEnabled          = (bool)GameConfig::get('famine_enabled', false);
         $famineRate             = (float)GameConfig::get('famine_rate', 3.0);
         $famineFlourConsumption = (float)GameConfig::get('famine_flour_consumption', 1.0);
@@ -667,6 +668,7 @@ class GameStudioEngine {
             'beginnerProtectionDays' => $beginnerProtectionDays,
             'heroXpRatePercent'      => $heroXpRatePercent,
             'heroCageDropRate'       => $heroCageDropRate,
+            'heroBandageDropRate'    => $heroBandageDropRate,
             'famineEnabled'          => $famineEnabled,
             'famineRate'             => $famineRate,
             'famineFlourConsumption' => $famineFlourConsumption,
@@ -861,6 +863,7 @@ class GameStudioEngine {
         $fleetSpeed             = max(1, min(50, (int)($params['fleet_speed'] ?? 5)));
         $heroXpRate             = max(10, min(500, (int)($params['hero_xp_rate_percent'] ?? 100)));
         $heroCageDropRate       = max(0, min(100, (int)($params['hero_cage_drop_rate'] ?? 25)));
+        $heroBandageDropRate    = max(0, min(100, (int)($params['hero_bandage_drop_rate'] ?? 20)));
         $famineEnabled          = !empty($params['famine_enabled']);
         $famineRate             = max(0.5, min(25.0, (float)($params['famine_rate'] ?? 3.0)));
         $famineFlour            = max(0.1, min(10.0, (float)($params['famine_flour_consumption'] ?? 1.0)));
@@ -870,6 +873,7 @@ class GameStudioEngine {
         GameConfig::set('fleet_speed', $fleetSpeed);
         GameConfig::set('hero_xp_rate_percent', $heroXpRate);
         GameConfig::set('hero_cage_drop_rate', $heroCageDropRate);
+        GameConfig::set('hero_bandage_drop_rate', $heroBandageDropRate);
         GameConfig::set('famine_enabled', $famineEnabled);
         GameConfig::set('famine_rate', $famineRate);
         GameConfig::set('famine_flour_consumption', $famineFlour);

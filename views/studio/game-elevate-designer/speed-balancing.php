@@ -145,6 +145,25 @@
 
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
+                                            <span><i class="fa-solid fa-bandage text-danger me-1"></i>Bandages de Soin (Hōtai) en Quête (%)</span>
+                                            <span class="badge bg-danger-lt fw-bold" id="dev_badge_hero_bandage_drop_rate"><?= (int)($gameSettings['hero_bandage_drop_rate'] ?? 20) ?> %</span>
+                                        </label>
+                                        <div class="d-flex align-items-center gap-2" style="min-height: 38px;">
+                                            <input type="range" id="dev_hero_bandage_drop_rate_range" min="0" max="100" step="1" 
+                                                   value="<?= (int)($gameSettings['hero_bandage_drop_rate'] ?? 20) ?>" class="form-range flex-grow-1" 
+                                                   oninput="document.getElementById('dev_hero_bandage_drop_rate_input').value = this.value; document.getElementById('dev_badge_hero_bandage_drop_rate').textContent = this.value + ' %';">
+                                            <div class="input-group" style="width: 95px;">
+                                                <input type="number" id="dev_hero_bandage_drop_rate_input" name="hero_bandage_drop_rate" min="0" max="100" step="1" 
+                                                       value="<?= (int)($gameSettings['hero_bandage_drop_rate'] ?? 20) ?>" class="form-control text-center font-weight-bold px-1" style="min-height: 36px;"
+                                                       oninput="document.getElementById('dev_hero_bandage_drop_rate_range').value = this.value; document.getElementById('dev_badge_hero_bandage_drop_rate').textContent = this.value + ' %';">
+                                                <span class="input-group-text px-1 text-muted">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-hint">Probabilité pour le Samouraï de dénicher des Bandages de Soin (Hōtai) pour se soigner immédiatement (+25% PV).</div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold text-dark d-flex justify-content-between align-items-center mb-1">
                                             <span><i class="fa-solid fa-user-ninja text-purple me-1"></i>Gain d'Expérience (XP) en Aventure (%)</span>
                                             <span class="badge bg-primary-lt fw-bold" id="dev_badge_hero_xp_rate"><?= (int)($gameSettings['hero_xp_rate_percent'] ?? 100) ?> %</span>
                                         </label>

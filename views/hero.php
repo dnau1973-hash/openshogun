@@ -53,6 +53,7 @@ if (empty($hero['effective']) || !is_array($hero['effective'])) {
 
 $adventures = $heroEngine->getAdventures((int)$user['id']);
 $inventory = $heroEngine->getInventory((int)$user['id']);
+$bandagesCount = $heroEngine->getBandagesCount((int)$user['id']);
 $activeTab = $_GET['tab'] ?? 'attributes';
 $dailyQuota = $hero['daily_adventures'] ?? $heroEngine->getDailyAdventureQuota((int)$user['id']);
 if (!is_array($dailyQuota)) {
@@ -122,6 +123,11 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 case 'cages_count':
                     $badges[] = '<span class="badge bg-success-lt text-success border border-success-lt fw-bold"><i class="fa-solid fa-box text-success me-1"></i>' . (int)$v . ' Cages de capture</span>';
                     break;
+                case 'bandages_count':
+                    $badges[] = '<span class="badge bg-danger-lt text-danger border border-danger-lt fw-bold"><i class="fa-solid fa-bandage text-danger me-1"></i>' . (int)$v . ' Bandages de soin (+25% PV)</span>';
+                    break;
+                case 'heal_amount':
+                    break;
                 default:
                     $badges[] = '<span class="badge bg-secondary-lt">+' . htmlspecialchars((string)$v) . ' ' . htmlspecialchars($k) . '</span>';
                     break;
@@ -160,7 +166,14 @@ if (!function_exists('renderRelicBonusesHtml')) {
                         </span>
                     </div>
                     <div class="col">
-                        <div class="font-weight-medium">Santé &amp; Vitalité</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="font-weight-medium">Santé &amp; Vitalité</div>
+                            <?php if ($bandagesCount > 0 && $health < 100 && $hero['status'] === 'home'): ?>
+                                <button type="button" class="btn btn-xs btn-outline-danger py-0 px-1.5" onclick="executeUseBandage()" title="Appliquer 1 bandage (+25% PV)">
+                                    <i class="fa-solid fa-bandage me-1"></i>Panser (<?= $bandagesCount ?>)
+                                </button>
+                            <?php endif; ?>
+                        </div>
                         <div class="text-secondary font-weight-bold" style="font-size: 1.15rem;">
                             <?= $health ?>%
                         </div>
@@ -582,34 +595,36 @@ if (!function_exists('renderRelicBonusesHtml')) {
                 if (!function_exists('getAdventureIllustrationUrl')) {
                     function getAdventureIllustrationUrl(string $name): string {
                         $normalized = mb_strtolower($name);
-                        if (str_contains($normalized, 'sanctuaire')) {
+                        if (str_contains($normalized, 'sanctuaire') || str_contains($normalized, 'kitsune') || str_contains($normalized, 'renard')) {
                             return '/public/assets/adventures/aventure_sanctuaire_shinto_abandonne.jpeg';
                         }
-                        if (str_contains($normalized, 'donjon') || str_contains($normalized, 'fief noir') || str_contains($normalized, 'fortin')) {
+                        if (str_contains($normalized, 'donjon') || str_contains($normalized, 'fief noir') || str_contains($normalized, 'fortin') || str_contains($normalized, 'forteresse') || str_contains($normalized, 'garnison')) {
                             return '/public/assets/adventures/aventure_ruine_vieux_donjon_fief_noir.jpeg';
                         }
-                        if (str_contains($normalized, 'gorge') || str_contains($normalized, 'ronin') || str_contains($normalized, 'campement')) {
+                        if (str_contains($normalized, 'gorge') || str_contains($normalized, 'ronin') || str_contains($normalized, 'campement') || str_contains($normalized, 'pirate') || str_contains($normalized, 'woko') || str_contains($normalized, 'wokō')) {
                             return '/public/assets/adventures/aventure_gorge_brumeuse_repaire_ronins.jpeg';
                         }
-                        if (str_contains($normalized, 'bambou') || str_contains($normalized, 'temple')) {
+                        if (str_contains($normalized, 'bambou') || str_contains($normalized, 'temple') || str_contains($normalized, 'herboriste') || str_contains($normalized, 'guerisseur') || str_contains($normalized, 'guérisseur') || str_contains($normalized, 'source') || str_contains($normalized, 'onsen') || str_contains($normalized, 'bosquet')) {
                             return '/public/assets/adventures/aventure_temple_antique-cache.jpeg';
                         }
-                        if (str_contains($normalized, 'cimetiere') || str_contains($normalized, 'cimetière') || str_contains($normalized, 'guerrier')) {
+                        if (str_contains($normalized, 'cimetiere') || str_contains($normalized, 'cimetière') || str_contains($normalized, 'guerrier') || str_contains($normalized, 'cendre')) {
                             return '/public/assets/adventures/aventure_cimetiere_guerriers_oublies.jpeg';
                         }
-                        if (str_contains($normalized, 'grotte') || str_contains($normalized, 'dragon') || str_contains($normalized, 'fluvial')) {
+                        if (str_contains($normalized, 'grotte') || str_contains($normalized, 'dragon') || str_contains($normalized, 'fluvial') || str_contains($normalized, 'caverne')) {
                             return '/public/assets/adventures/aventure_grotte_dragon_fluvial.jpeg';
                         }
-                        if (str_contains($normalized, 'pagode') || str_contains($normalized, 'maître') || str_contains($normalized, 'maitre')) {
+                        if (str_contains($normalized, 'pagode') || str_contains($normalized, 'maître') || str_contains($normalized, 'maitre') || str_contains($normalized, 'forgeron') || str_contains($normalized, 'masamune') || str_contains($normalized, 'dojo') || str_contains($normalized, 'dōjō') || str_contains($normalized, 'sohei') || str_contains($normalized, 'sōhei')) {
                             return '/public/assets/adventures/aventure_pagode_oubliee_maitres_armes.jpeg';
                         }
-                        if (str_contains($normalized, 'shinobi') || str_contains($normalized, 'ombre') || str_contains($normalized, 'défilé') || str_contains($normalized, 'defile')) {
+                        if (str_contains($normalized, 'shinobi') || str_contains($normalized, 'ombre') || str_contains($normalized, 'défilé') || str_contains($normalized, 'defile') || str_contains($normalized, 'eclaireur') || str_contains($normalized, 'éclaireur') || str_contains($normalized, 'ashigaru')) {
                             return '/public/assets/adventures/aventure_defile_shinobis.jpeg';
                         }
-                        if (str_contains($normalized, 'cerisier') || str_contains($normalized, 'vallée') || str_contains($normalized, 'vallee')) {
+                        if (str_contains($normalized, 'cerisier') || str_contains($normalized, 'vallée') || str_contains($normalized, 'vallee') || str_contains($normalized, 'cascade') || str_contains($normalized, 'cheval') || str_contains($normalized, 'chevaux')) {
                             return '/public/assets/adventures/aventure_vallee_cerisiers_ancestraux.jpeg';
                         }
-                        if (str_contains($normalized, 'montagne') || str_contains($normalized, 'tonnerre') || str_contains($normalized, 'raiden')) {
+                        if (str_contains($normalized, 'montagne') || str_contains($normalized, 'tonnerre') || str_contains($normalized, 'raiden') || str_contains($normalized, 'pic') || str_contains($normalized, 'demon') || str_contains($normalized, 'démon') || str_contains($normalized, 'oni')) {
+                            return '/public/assets/adventures/aventure_montagne_sacree.jpeg';
+                        }
                             return '/public/assets/adventures/aventure_montagne_sacree.jpeg';
                         }
                         return '/public/assets/adventures/adventure_depart.jpeg';
@@ -910,10 +925,22 @@ if (!function_exists('renderRelicBonusesHtml')) {
                                         </button>
                                         <div>
                                             <?php if ($it['item_type'] === 'consumable'): ?>
-                                                <?php $cCount = (int)($it['bonus_data']['cages_count'] ?? 0); ?>
-                                                <span class="badge bg-success-lt text-success fw-bold" style="font-size:0.75rem;">
-                                                    <i class="fa-solid fa-box text-success me-1"></i>En réserve : <?= $cCount ?>
-                                                </span>
+                                                <?php if (($it['item_code'] ?? '') === 'bandages_soin'): ?>
+                                                    <?php $bCount = (int)($it['bonus_data']['bandages_count'] ?? 0); ?>
+                                                    <div class="d-flex align-items-center gap-1.5">
+                                                        <span class="badge bg-danger-lt text-danger fw-bold" style="font-size:0.75rem;">
+                                                            <i class="fa-solid fa-bandage text-danger me-1"></i>En réserve : <?= $bCount ?>
+                                                        </span>
+                                                        <button type="button" onclick="executeUseBandage()" class="btn btn-sm btn-outline-danger px-2" <?= ($health >= 100 || $hero['status'] !== 'home' || $bCount <= 0) ? 'disabled title="Héros en pleine santé ou absent"' : 'title="Appliquer un bandage (+25% PV)"' ?>>
+                                                            <i class="fa-solid fa-heart-pulse me-1"></i>Soigner
+                                                        </button>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <?php $cCount = (int)($it['bonus_data']['cages_count'] ?? 0); ?>
+                                                    <span class="badge bg-success-lt text-success fw-bold" style="font-size:0.75rem;">
+                                                        <i class="fa-solid fa-box text-success me-1"></i>En réserve : <?= $cCount ?>
+                                                    </span>
+                                                <?php endif; ?>
                                             <?php elseif ($isEq): ?>
                                                 <button type="button" onclick="executeUnequip('<?= htmlspecialchars($itemSlot) ?>')" class="btn btn-sm btn-outline-danger">
                                                     Déséquiper
@@ -1222,6 +1249,25 @@ async function executeUnequip(slot) {
     }
 }
 
+async function executeUseBandage() {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'use_bandage');
+
+        const res = await fetch('/api/hero.php', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+            showModalAlert(data.message, "success", "Soins Féodaux");
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showModalAlert(data.error || "Impossible d'appliquer le bandage.", "danger", "Soins");
+        }
+    } catch (e) {
+        showModalAlert("Erreur réseau lors de l'application du bandage.", "danger", "Erreur");
+    }
+}
+
 function openItemDetailModal(item) {
     const modal = document.getElementById('itemDetailModal');
     if (!modal || !item) return;
@@ -1265,6 +1311,8 @@ function openItemDetailModal(item) {
             else if (k === 'production_wood') badgeHtml = `<span class="badge bg-teal-lt text-teal border border-teal-lt fs-5 px-2 py-1">+${v} Bois/h</span>`;
             else if (k === 'production_stone') badgeHtml = `<span class="badge bg-secondary-lt text-secondary border border-secondary-lt fs-5 px-2 py-1">+${v} Pierre/h</span>`;
             else if (k === 'cages_count') badgeHtml = `<span class="badge bg-success-lt text-success border border-success-lt fs-5 px-2 py-1 fw-bold"><i class="fa-solid fa-box text-success me-1"></i>${v} Cages disponibles</span>`;
+            else if (k === 'bandages_count') badgeHtml = `<span class="badge bg-danger-lt text-danger border border-danger-lt fs-5 px-2 py-1 fw-bold"><i class="fa-solid fa-bandage text-danger me-1"></i>${v} Bandages disponibles</span>`;
+            else if (k === 'heal_amount') badgeHtml = `<span class="badge bg-danger-lt text-danger border border-danger-lt fs-5 px-2 py-1 fw-bold"><i class="fa-solid fa-heart-pulse text-danger me-1"></i>+${v}% Soin par usage</span>`;
             else badgeHtml = `<span class="badge bg-secondary-lt fs-5 px-2 py-1">+${v} ${k}</span>`;
             bonusesContainer.innerHTML += badgeHtml;
         }
@@ -1274,13 +1322,28 @@ function openItemDetailModal(item) {
 
     const actionsContainer = document.getElementById('itemModalActions');
     if (slotCode === 'consumable' || item.item_type === 'consumable') {
-        const cCount = (bData && bData.cages_count) ? bData.cages_count : 0;
-        actionsContainer.innerHTML = `
-            <div class="small text-muted"><i class="fa-solid fa-box text-success me-1"></i>Consommable automatique lors des raids et attaques d'oasis (Stock : <strong>${cCount}</strong>)</div>
-            <button type="button" class="btn btn-secondary" onclick="closeItemDetailModal()">
-                Fermer
-            </button>
-        `;
+        if (item.item_code === 'bandages_soin') {
+            const bCount = (bData && bData.bandages_count) ? bData.bandages_count : 0;
+            actionsContainer.innerHTML = `
+                <div class="small text-muted"><i class="fa-solid fa-bandage text-danger me-1"></i>Soin immédiat de +25% PV par bandage (Stock : <strong>${bCount}</strong>)</div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-danger" onclick="closeItemDetailModal(); executeUseBandage();">
+                        <i class="fa-solid fa-heart-pulse me-1"></i>Appliquer un Bandage (+25% PV)
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeItemDetailModal()">
+                        Fermer
+                    </button>
+                </div>
+            `;
+        } else {
+            const cCount = (bData && bData.cages_count) ? bData.cages_count : 0;
+            actionsContainer.innerHTML = `
+                <div class="small text-muted"><i class="fa-solid fa-box text-success me-1"></i>Consommable automatique lors des raids et attaques d'oasis (Stock : <strong>${cCount}</strong>)</div>
+                <button type="button" class="btn btn-secondary" onclick="closeItemDetailModal()">
+                    Fermer
+                </button>
+            `;
+        }
     } else if (isEquipped) {
         actionsContainer.innerHTML = `
             <button type="button" class="btn btn-outline-danger" onclick="executeUnequip('${slotCode}')">

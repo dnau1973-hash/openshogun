@@ -112,6 +112,7 @@ try {
                 $famineRate = max(0.5, min(50.0, (float)($_POST['famine_rate'] ?? 3.0)));
                 $famineConsumption = max(0.1, min(20.0, (float)($_POST['famine_flour_consumption'] ?? 1.0)));
                 $heroCageDropRate = max(0, min(100, (int)($_POST['hero_cage_drop_rate'] ?? 25)));
+                $heroBandageDropRate = max(0, min(100, (int)($_POST['hero_bandage_drop_rate'] ?? 20)));
                 $heroXpRate = max(10, min(500, (int)($_POST['hero_xp_rate_percent'] ?? 100)));
 
                 GameConfig::set('game_speed', $gameSpeed);
@@ -124,6 +125,7 @@ try {
                 GameConfig::set('famine_rate', $famineRate);
                 GameConfig::set('famine_flour_consumption', $famineConsumption);
                 GameConfig::set('hero_cage_drop_rate', $heroCageDropRate);
+                GameConfig::set('hero_bandage_drop_rate', $heroBandageDropRate);
                 GameConfig::set('hero_xp_rate_percent', $heroXpRate);
             }
 

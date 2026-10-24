@@ -203,6 +203,7 @@ $speedParams = [
     'fleet_speed'              => 5,
     'hero_xp_rate_percent'     => 150,
     'hero_cage_drop_rate'      => 30,
+    'hero_bandage_drop_rate'   => 25,
     'famine_enabled'           => '1',
     'famine_rate'              => 4.5,
     'famine_flour_consumption' => 1.5
@@ -214,6 +215,7 @@ assertTest((int)GameConfig::get('resource_speed') === 8, "resource_speed mis à 
 assertTest((int)GameConfig::get('fleet_speed') === 5, "fleet_speed mis à jour à 5");
 assertTest((int)GameConfig::get('hero_xp_rate_percent') === 150, "hero_xp_rate_percent mis à jour à 150%");
 assertTest((int)GameConfig::get('hero_cage_drop_rate') === 30, "hero_cage_drop_rate mis à jour à 30%");
+assertTest((int)GameConfig::get('hero_bandage_drop_rate') === 25, "hero_bandage_drop_rate mis à jour à 25%");
 assertTest((bool)GameConfig::get('famine_enabled') === true, "famine_enabled mis à jour à true");
 assertTest((float)GameConfig::get('famine_rate') === 4.5, "famine_rate mis à jour à 4.5%");
 assertTest((float)GameConfig::get('famine_flour_consumption') === 1.5, "famine_flour_consumption mis à jour à 1.5");
@@ -225,6 +227,7 @@ assertTest($speedWorldData['resourceSpeed'] === 8, "resourceSpeed présent dans 
 assertTest($speedWorldData['fleetSpeed'] === 5, "fleetSpeed présent dans getWorldConfigData");
 assertTest($speedWorldData['heroXpRatePercent'] === 150, "heroXpRatePercent présent dans getWorldConfigData");
 assertTest($speedWorldData['heroCageDropRate'] === 30, "heroCageDropRate présent dans getWorldConfigData");
+assertTest($speedWorldData['heroBandageDropRate'] === 25, "heroBandageDropRate présent dans getWorldConfigData");
 assertTest($speedWorldData['famineEnabled'] === true, "famineEnabled présent dans getWorldConfigData");
 assertTest($speedWorldData['famineRate'] === 4.5, "famineRate présent dans getWorldConfigData");
 assertTest($speedWorldData['famineFlourConsumption'] === 1.5, "famineFlourConsumption présent dans getWorldConfigData");
@@ -245,6 +248,7 @@ assertTest(strpos($htmlSpeed, 'id="sim-march-time"') !== false, "Simulateur temp
 assertTest(strpos($htmlSpeed, 'id="sim-resource-prod"') !== false, "Simulateur production horaire présent");
 assertTest(strpos($htmlSpeed, 'applyDevSpeedPreset') !== false, "Fonction JS de préréglages de vitesse présente");
 assertTest(strpos($htmlSpeed, 'id="checkFamineEnabled"') !== false, "Switch de péril de famine présent");
+assertTest(strpos($htmlSpeed, 'id="sliderBandageDrop"') !== false, "Slider Taux de Bandages présent dans Item 3");
 
 // [TEST 9] Item 4 : Dotation Initiale du Nouveau Seigneur & Immunité Débutant
 echo "\n[TEST 9] Test de l'Item 4 : Dotation Initiale (Bois, Pierre, Riz, Poisson, Or) & Immunité...\n";

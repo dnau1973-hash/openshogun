@@ -3,6 +3,19 @@
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/), et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [1.37.0] - 2026-10-24
+### Ajouté & Amélioré (Added & Improved)
+- **Nouvelles Expéditions Provinciales Féodales pour le Samouraï (`core/HeroEngine.php`, `views/hero.php`) :**
+  * **Catalogue d'Aventures Doublé (20 Templates)** : Ajout de 10 nouvelles aventures historiques et légendaires japonaises (Tourbières Hantées d'Oze, Forteresse des Takeda, Tombeau des Minamoto, Sanctuaire du Mont Tateyama, Marais de Beppu, Temple Brûlé de Nobunaga, Île de Miyajima, Cratère de Sakurajima, Vallée aux Statues Jizō, Palais du Dragon Ryūgū-jō).
+  * **Iconographie & Estampes Immersives** : Chaque nouvelle expédition dispose de sa vignette et de son estampe panoramique grand format dans la modale de préparation et confirmation de départ.
+- **Nouvel Objet Consommable : Bandages de Soin Féodaux (*Hōtai* 🩹) (`core/HeroEngine.php`, `api/hero.php`, `views/hero.php`) :**
+  * **Soin Immédiat (+25% PV)** : Utilisable depuis le dojo/fief pour soigner immédiatement le Héros blessé (jusqu'à 100% de PV) sans attendre la régénération passive ou dépenser de ressources massives.
+  * **Bouton d'Action Express & Modale d'Arsenal** : Action directe « Panser (X) » sur la jauge de santé du Héros, bouton « Soigner » dans le coffre d'inventaire et vue détaillée avec description féodale.
+  * **API dédiée (`api/hero.php`)** : Action sécurisée `use_bandage` vérifiant le statut du Héros (vivant, au fief, PV < 100) et décrémentant le stock de manière atomique.
+- **Paramétrage Shogunal du Taux de Bandages (`hero_bandage_drop_rate`) (`core/GameConfig.php`, `core/GameStudioEngine.php`, `views/gamestudio/general_world_config.php`, `views/studio/game-elevate-designer/speed-balancing.php`, `views/admin.php`, `api/admin.php`, `api/dev_team.php`) :**
+  * **Contrôles Ergonomiques Cages & Bandages Côte à Côte** : Dans Game Studio Général (*Vitesses & Équilibrage du Monde Féodal*) et Game Elevate Designer, le curseur et le champ numérique de probabilité de découverte des bandages (0% à 100%) sont positionnés immédiatement à côté de ceux des cages de capture de bêtes sauvages.
+  * **Prise en compte dans le Moteur de Butin (`HeroEngine::processAdventureReturn`)** : Tirage aléatoire indépendant basé sur le taux configuré lors de la résolution de chaque retour d'expédition.
+
 ## [1.36.0] - 2026-10-21
 ### Ajouté & Amélioré (Added & Improved)
 - **Harmonisation du Hub des Ressources sous le Carrousel (`views/partials/header.php`) :**

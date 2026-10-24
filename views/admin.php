@@ -2543,6 +2543,9 @@ async function saveSettings(event) {
     if (document.getElementById('hero_cage_drop_rate_input')) {
         formData.append('hero_cage_drop_rate', document.getElementById('hero_cage_drop_rate_input').value);
     }
+    if (document.getElementById('hero_bandage_drop_rate_input')) {
+        formData.append('hero_bandage_drop_rate', document.getElementById('hero_bandage_drop_rate_input').value);
+    }
     if (document.getElementById('hero_xp_rate_percent_input')) {
         formData.append('hero_xp_rate_percent', document.getElementById('hero_xp_rate_percent_input').value);
     }

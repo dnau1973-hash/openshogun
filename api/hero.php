@@ -119,6 +119,15 @@ try {
             echo json_encode($result);
             break;
 
+        // Utiliser un bandage pour soigner le héros (+25% PV)
+        case 'use_bandage':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Méthode POST requise.");
+            }
+            $result = $heroEngine->useBandage($userId);
+            echo json_encode($result);
+            break;
+
         default:
             throw new Exception("Action inconnue.");
     }
@@ -126,4 +135,3 @@ try {
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
-

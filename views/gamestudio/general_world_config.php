@@ -523,16 +523,30 @@ unset($_SESSION['general_flash']);
                                                    id="inputHeroXp" name="hero_xp_rate_percent" min="10" max="500" value="<?= (int)$heroXpRatePercent ?>">
                                         </div>
                                     </div>
-                                    <div>
-                                        <label class="form-label small fw-bold text-dark d-flex justify-content-between mb-1">
-                                            <span>Taux d'Obtention de Cages :</span>
-                                            <span class="badge bg-secondary-lt font-monospace" id="badge-val-cage-drop"><?= (int)$heroCageDropRate ?>%</span>
-                                        </label>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <input type="range" class="form-range flex-grow-1" min="0" max="100" step="5" 
-                                                   id="sliderCageDrop" name="cage_drop_slider" value="<?= (int)$heroCageDropRate ?>">
-                                            <input type="number" class="form-control form-control-sm font-monospace text-center" style="width: 75px;" 
-                                                   id="inputCageDrop" name="hero_cage_drop_rate" min="0" max="100" value="<?= (int)$heroCageDropRate ?>">
+                                    <div class="row g-2">
+                                        <div class="col-sm-6">
+                                            <label class="form-label small fw-bold text-dark d-flex justify-content-between mb-1">
+                                                <span><i class="fa-solid fa-box text-warning me-1"></i>Taux de Cages :</span>
+                                                <span class="badge bg-secondary-lt font-monospace" id="badge-val-cage-drop"><?= (int)$heroCageDropRate ?>%</span>
+                                            </label>
+                                            <div class="d-flex align-items-center gap-1.5">
+                                                <input type="range" class="form-range flex-grow-1" min="0" max="100" step="5" 
+                                                       id="sliderCageDrop" name="cage_drop_slider" value="<?= (int)$heroCageDropRate ?>">
+                                                <input type="number" class="form-control form-control-sm font-monospace text-center px-1" style="width: 58px;" 
+                                                       id="inputCageDrop" name="hero_cage_drop_rate" min="0" max="100" value="<?= (int)$heroCageDropRate ?>">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label class="form-label small fw-bold text-dark d-flex justify-content-between mb-1">
+                                                <span><i class="fa-solid fa-bandage text-danger me-1"></i>Taux de Bandages :</span>
+                                                <span class="badge bg-danger-lt font-monospace text-danger" id="badge-val-bandage-drop"><?= (int)$heroBandageDropRate ?>%</span>
+                                            </label>
+                                            <div class="d-flex align-items-center gap-1.5">
+                                                <input type="range" class="form-range flex-grow-1" min="0" max="100" step="5" 
+                                                       id="sliderBandageDrop" name="bandage_drop_slider" value="<?= (int)$heroBandageDropRate ?>">
+                                                <input type="number" class="form-control form-control-sm font-monospace text-center px-1" style="width: 58px;" 
+                                                       id="inputBandageDrop" name="hero_bandage_drop_rate" min="0" max="100" value="<?= (int)$heroBandageDropRate ?>">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2345,6 +2359,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     syncSimpleControl('sliderCageDrop', 'inputCageDrop', 'badge-val-cage-drop', '%');
+    syncSimpleControl('sliderBandageDrop', 'inputBandageDrop', 'badge-val-bandage-drop', '%');
     syncSimpleControl('sliderHeroXp', 'inputHeroXp', 'badge-val-hero-xp', '%');
     syncSimpleControl('sliderFamineRate', 'inputFamineRate', 'badge-val-famine-rate', '%');
     syncSimpleControl('sliderFamineFlour', 'inputFamineFlour', 'badge-val-famine-flour', '');

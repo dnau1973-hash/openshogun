@@ -13,7 +13,7 @@ class HeroEngine {
     public const MAX_DAILY_ADVENTURES = 3;
 
     /**
-     * Catalogue des 10 expéditions provinciales uniques avec illustrations dédiées
+     * Catalogue des 20 expéditions provinciales uniques avec illustrations dédiées
      */
     public const ADVENTURE_TEMPLATES = [
         ['name' => 'Sanctuaire Shintō Abandonné dans la Forêt', 'diff' => 'easy'],
@@ -25,7 +25,17 @@ class HeroEngine {
         ['name' => 'Pagode Oubliée des Maîtres d\'Armes', 'diff' => 'medium'],
         ['name' => 'Défilé des Shinobis de l\'Ombre', 'diff' => 'hard'],
         ['name' => 'Vallée des Cerisiers Ancestraux', 'diff' => 'easy'],
-        ['name' => 'Montagne Sacrée du Dieu Tonnerre Raiden', 'diff' => 'hard']
+        ['name' => 'Montagne Sacrée du Dieu Tonnerre Raiden', 'diff' => 'hard'],
+        ['name' => 'Source Chaude Onsen des Herboristes Itinérants', 'diff' => 'easy'],
+        ['name' => 'Campement Médical Secret des Moines Guérisseurs', 'diff' => 'easy'],
+        ['name' => 'Fortin Brûlé et Gué des Pirates Wokō', 'diff' => 'hard'],
+        ['name' => 'Clairière Mystique du Grand Forgeron Masamune', 'diff' => 'medium'],
+        ['name' => 'Caverne Secrète des Esprits Renards Kitsune', 'diff' => 'easy'],
+        ['name' => 'Cascade Céleste et Dōjō des Moines Sōhei', 'diff' => 'medium'],
+        ['name' => 'Forteresse Ensevelie sous les Cendres Volcaniques', 'diff' => 'hard'],
+        ['name' => 'Bosquet Brumeux des Éclaireurs Ashigaru', 'diff' => 'easy'],
+        ['name' => 'Garnison Abandonnée des Chevaux Sauvages', 'diff' => 'medium'],
+        ['name' => 'Pic Glacé du Démon Rouge Aka-Oni', 'diff' => 'hard']
     ];
 
     private PDO $db;
@@ -900,11 +910,32 @@ class HeroEngine {
         $xpRes = $this->addExperience($userId, $xpGain);
 
         // 3. Déterminer le trésor / butin trouvé
-        $lootRoll = rand(1, 100);
+        $cageDropRate    = max(0, min(100, (int)GameConfig::get('hero_cage_drop_rate', 25)));
+        $bandageDropRate = max(0, min(100, (int)GameConfig::get('hero_bandage_drop_rate', 20)));
+
         $cargoData = ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
         $lootMsg = "";
         $rewardedItem = null;
         $ralliedTroops = null;
+        $extraConsumables = [];
+
+        // Test d'obtention de Bandages de Soin Féodaux (Hōtai) selon le taux configuré
+        if ($bandageDropRate > 0 && rand(1, 100) <= $bandageDropRate) {
+            $bandagesFound = rand(4, 10);
+            $this->addBandages($userId, $bandagesFound);
+            $totalBandages = $this->getBandagesCount($userId);
+            $extraConsumables[] = "<strong>{$bandagesFound} Bandages de Soin Féodaux (Hōtai 🩹)</strong> (Stock : {$totalBandages})";
+        }
+
+        // Test d'obtention de Cages Féodales (Kago) selon le taux configuré
+        if ($cageDropRate > 0 && rand(1, 100) <= $cageDropRate) {
+            $cagesFound = rand(4, 10);
+            $this->addCages($userId, $cagesFound);
+            $totalCages = $this->getCagesCount($userId);
+            $extraConsumables[] = "<strong>{$cagesFound} Cages Féodales de Chasse (Kago 🎋)</strong> (Stock : {$totalCages})";
+        }
+
+        $lootRoll = rand(1, 100);
 
         if ($lootRoll <= 40) {
             // Ressources
@@ -913,7 +944,7 @@ class HeroEngine {
             $cargoData['crystal'] = (int)round($mult * 0.8);
             $cargoData['deuterium'] = (int)round($mult * 0.6);
             $lootMsg = "Des coffres de guerre dissimulés contenant {$cargoData['metal']} 🪵 Bois, {$cargoData['crystal']} 🪨 Pierre et {$cargoData['deuterium']} 🌾 Koku de Riz ont été découverts !";
-        } elseif ($lootRoll <= 65) {
+        } elseif ($lootRoll <= 70) {
             // Équipement / Arsenal (Relique unique - jamais de doublon)
             $rewardedItem = $this->grantRandomEquipment($userId);
             if ($rewardedItem) {
@@ -926,12 +957,6 @@ class HeroEngine {
                 $cargoData['deuterium'] = (int)round($mult * 0.6);
                 $lootMsg = "Possédant déjà toutes les reliques sacrées de l'archipel, votre Samouraï découvre à la place un opulent trésor féodal : {$cargoData['metal']} 🪵 Bois, {$cargoData['crystal']} 🪨 Pierre et {$cargoData['deuterium']} 🌾 Koku de Riz !";
             }
-        } elseif ($lootRoll <= 80) {
-            // Cages de Capture Féodales (Kago 🎋) pour capturer les bêtes sauvages dans les oasis
-            $cagesFound = rand(4, 10);
-            $this->addCages($userId, $cagesFound);
-            $totalCages = $this->getCagesCount($userId);
-            $lootMsg = "Un lot de <strong>{$cagesFound} Cages Féodales de Chasse aux Fauves (Kago 🎋)</strong> en bambou armé a été récupéré (Stock total : {$totalCages}) ! Votre Samouraï pourra s'en servir pour capturer vivantes les bêtes sauvages des oasis sans combat.";
         } else {
             // Ralliement de guerriers conscrits
             $faction = $hero['faction'] ?? 'terran';
@@ -944,6 +969,10 @@ class HeroEngine {
             $troopCount = rand(4, 10);
             $ralliedTroops = ['code' => $uInfo['code'], 'count' => $troopCount, 'name' => $uInfo['name']];
             $lootMsg = "Des ronins et vaillants guerriers errants ({$troopCount} {$uInfo['name']}) impressionnés par la bravoure du Samouraï se rallient à votre clan !";
+        }
+
+        if (!empty($extraConsumables)) {
+            $lootMsg .= "<br><br>📦 <strong>Consommables récupérés en chemin :</strong> " . implode(' et ', $extraConsumables) . ".";
         }
 
         // 4. Marquer l'aventure comme terminée
@@ -1481,6 +1510,136 @@ class HeroEngine {
             }
         }
         return $used;
+    }
+
+    /**
+     * Récupère le nombre de Bandages de Soin Féodaux (Hōtai 🩹) en stock pour le joueur
+     */
+    public function getBandagesCount(int $userId): int {
+        $this->ensureSchema();
+        $stmt = $this->db->prepare("SELECT id, bonus_data FROM hero_inventory WHERE user_id = ? AND item_code = 'bandages_soin' LIMIT 1");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        if (!$row) return 0;
+        $data = is_string($row['bonus_data']) ? json_decode($row['bonus_data'], true) : $row['bonus_data'];
+        return (int)($data['bandages_count'] ?? 0);
+    }
+
+    /**
+     * Ajoute des Bandages de Soin à l'inventaire du joueur
+     */
+    public function addBandages(int $userId, int $count): void {
+        $this->ensureSchema();
+        if ($count <= 0) return;
+
+        $stmt = $this->db->prepare("SELECT id, bonus_data FROM hero_inventory WHERE user_id = ? AND item_code = 'bandages_soin' LIMIT 1");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+
+        if ($row) {
+            $data = is_string($row['bonus_data']) ? json_decode($row['bonus_data'], true) : $row['bonus_data'];
+            $newCount = max(0, (int)($data['bandages_count'] ?? 0) + $count);
+            $data['bandages_count'] = $newCount;
+            $this->db->prepare("UPDATE hero_inventory SET bonus_data = ? WHERE id = ?")
+                ->execute([json_encode($data), $row['id']]);
+        } else {
+            $data = ['bandages_count' => $count, 'heal_amount' => 25];
+            $stmtIns = $this->db->prepare("
+                INSERT INTO hero_inventory (user_id, item_code, item_type, name, description, bonus_data, is_equipped)
+                VALUES (?, 'bandages_soin', 'consumable', 'Bandages de Soin Féodaux (Hōtai 🩹)', 'Bandelettes de lin traitées aux herbes médicinales et onguents des montagnes. Permet de soigner immédiatement les blessures du Samouraï (+25% PV par bandage).', ?, 0)
+            ");
+            $stmtIns->execute([$userId, json_encode($data)]);
+        }
+    }
+
+    /**
+     * Consomme jusqu'à $count Bandages de Soin et retourne le nombre effectivement consommé
+     */
+    public function consumeBandages(int $userId, int $count): int {
+        $this->ensureSchema();
+        if ($count <= 0) return 0;
+
+        $current = $this->getBandagesCount($userId);
+        $used = min($current, $count);
+        if ($used > 0) {
+            $stmt = $this->db->prepare("SELECT id, bonus_data FROM hero_inventory WHERE user_id = ? AND item_code = 'bandages_soin' LIMIT 1");
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch();
+            if ($row) {
+                $data = is_string($row['bonus_data']) ? json_decode($row['bonus_data'], true) : $row['bonus_data'];
+                $newCount = max(0, (int)($data['bandages_count'] ?? 0) - $used);
+                $data['bandages_count'] = $newCount;
+                if ($newCount <= 0) {
+                    $this->db->prepare("DELETE FROM hero_inventory WHERE id = ?")->execute([$row['id']]);
+                } else {
+                    $this->db->prepare("UPDATE hero_inventory SET bonus_data = ? WHERE id = ?")
+                        ->execute([json_encode($data), $row['id']]);
+                }
+            }
+        }
+        return $used;
+    }
+
+    /**
+     * Applique 1 Bandage de Soin sur le Samouraï (+25% PV jusqu'à 100% max)
+     */
+    public function useBandage(int $userId): array {
+        $this->ensureSchema();
+        $hero = $this->getHeroByUserId($userId);
+        if (!$hero) {
+            return ['success' => false, 'error' => 'Héros introuvable.'];
+        }
+        if ($hero['status'] === 'dead' || (float)$hero['health'] <= 0) {
+            return ['success' => false, 'error' => 'Le Samouraï a succombé au combat. Accomplissez le rituel de résurrection pour le ramener à la vie.'];
+        }
+        if ($hero['status'] !== 'home') {
+            return ['success' => false, 'error' => 'Le Samouraï doit être présent au fief pour recevoir des soins.'];
+        }
+        if ((float)$hero['health'] >= 100.0) {
+            return ['success' => false, 'error' => 'Votre Samouraï est déjà au sommet de sa forme (100% PV).'];
+        }
+
+        $count = $this->getBandagesCount($userId);
+        if ($count <= 0) {
+            return ['success' => false, 'error' => 'Vous ne possédez aucun bandage de soin en réserve.'];
+        }
+
+        $stmt = $this->db->prepare("SELECT id, bonus_data FROM hero_inventory WHERE user_id = ? AND item_code = 'bandages_soin' LIMIT 1");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        $healAmount = 25.0;
+        if ($row) {
+            $data = is_string($row['bonus_data']) ? json_decode($row['bonus_data'], true) : $row['bonus_data'];
+            $healAmount = (float)($data['heal_amount'] ?? 25.0);
+            $newCount = max(0, (int)($data['bandages_count'] ?? 0) - 1);
+            $data['bandages_count'] = $newCount;
+            if ($newCount <= 0) {
+                $this->db->prepare("DELETE FROM hero_inventory WHERE id = ?")->execute([$row['id']]);
+            } else {
+                $this->db->prepare("UPDATE hero_inventory SET bonus_data = ? WHERE id = ?")
+                    ->execute([json_encode($data), $row['id']]);
+            }
+        } else {
+            $newCount = 0;
+        }
+
+        $currentHp = (float)$hero['health'];
+        $newHp = min(100.0, $currentHp + $healAmount);
+        $hpGained = round($newHp - $currentHp, 1);
+        $now = time();
+
+        $this->db->prepare("UPDATE heroes SET health = ?, last_health_update = ? WHERE user_id = ?")
+            ->execute([$newHp, $now, $userId]);
+
+        return [
+            'success' => true,
+            'message' => "Un bandage féodal a été appliqué ! Vitalité restaurée : " . round($newHp) . "% (+{$hpGained}% PV).",
+            'old_health' => $currentHp,
+            'new_health' => $newHp,
+            'remaining_bandages' => $newCount,
+            'hero' => $this->getHeroByUserId($userId),
+            'inventory' => $this->getInventory($userId)
+        ];
     }
 }
 
