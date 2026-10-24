@@ -625,8 +625,6 @@ if (!function_exists('renderRelicBonusesHtml')) {
                         if (str_contains($normalized, 'montagne') || str_contains($normalized, 'tonnerre') || str_contains($normalized, 'raiden') || str_contains($normalized, 'pic') || str_contains($normalized, 'demon') || str_contains($normalized, 'démon') || str_contains($normalized, 'oni')) {
                             return '/public/assets/adventures/aventure_montagne_sacree.jpeg';
                         }
-                            return '/public/assets/adventures/aventure_montagne_sacree.jpeg';
-                        }
                         return '/public/assets/adventures/adventure_depart.jpeg';
                     }
                 }
