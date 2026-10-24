@@ -83,6 +83,9 @@ class BarracksEngine {
             if (in_array($u['code'], $excludedCodes)) {
                 continue; // Les animaux ne sont plus entraînables (capturés via cages)
             }
+            if (!empty($u['image'])) {
+                $u['image'] = basename($u['image']);
+            }
             if ($u['code'] === 'colonizer') {
                 $colonStatus = $this->planetEngine->getTenshuColonizerStatus($planetId);
                 $u['available_slots'] = (int)($colonStatus['available_slots'] ?? 0);

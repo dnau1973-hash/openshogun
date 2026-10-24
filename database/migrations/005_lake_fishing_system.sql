@@ -41,7 +41,7 @@ VALUES (
     'all',
     1,
     '🎣',
-    '/public/assets/units/pecheur.jpg',
+    'pecheur.jpg',
     60,
     40,
     50,

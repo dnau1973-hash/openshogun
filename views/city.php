@@ -2140,7 +2140,8 @@ function renderCityTroopsPane(data) {
                 <div class="d-flex flex-column gap-1.5">
                     ${queue.map(q => {
                         const dateFin = new Date(q.finishes_at * 1000);
-                        const imgThumb = q.unit_image ? `/public/assets/units/${q.unit_image}` : `/public/assets/units/${q.unit_code}.jpg`;
+                        const cleanQImg = (q.unit_image || (q.unit_code + '.jpg')).split('/').pop();
+                        const imgThumb = `/public/assets/units/${cleanQImg}`;
                         return `
                             <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded border small">
                                 <div class="d-flex align-items-center gap-2">
@@ -2187,7 +2188,9 @@ function renderCityTroopsPane(data) {
             maxAffordable = Math.min(maxAffordable, availSlots);
         }
 
-        const imgSrc = isColonizer ? '/public/assets/units/expedition_etablissement_castral.jpg' : `/public/assets/units/${u.image || (u.code + '.jpg')}`;
+        const cleanUnitImg = (u.image || (u.code + '.jpg')).split('/').pop();
+        const imgSrc = isColonizer ? '/public/assets/units/expedition_etablissement_castral.jpg' : `/public/assets/units/${cleanUnitImg}`;
+        const fallbackImg = isColonizer ? '/public/assets/units/expedition_etablissement_castral.jpg' : `/public/assets/units/${u.code}.jpg`;
         const hqLvl = parseInt(u.hq_level ?? 1, 10);
         const totalUsed = parseInt(u.total_used ?? 0, 10);
         const availSlots = parseInt(u.available_slots ?? 0, 10);
@@ -2201,7 +2204,7 @@ function renderCityTroopsPane(data) {
                             <img src="${imgSrc}" 
                                  alt="${u.name}" 
                                  style="width: 100%; height: 100%; object-fit: cover; object-position: center top;"
-                                 onerror="this.src='/public/assets/units/expedition_etablissement_castral.jpg'; this.onerror=function(){this.src='/public/assets/tiles/tile_barracks.png';};">
+                                 onerror="this.src='${fallbackImg}'; this.onerror=function(){this.src='/public/assets/tiles/tile_barracks.png';};">
                             <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.85) 100%);"></div>
                             
                             <!-- Badges flottants -->

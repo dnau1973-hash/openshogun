@@ -1464,6 +1464,8 @@ class PlanetEngine {
                         VALUES
                         ('pecheur', 'Pêcheur Féodal (Ryōshi)', 'all', 1, '🐟', 'pecheur.jpg', 60, 40, 50, 0, 5, 10, 10, 14, 100, 45, 'Villageois spécialisé dans les sorties de pêche sur les lacs et eaux calmes pour ramener du poisson frais.')
                     ");
+                } else {
+                    $this->db->exec("UPDATE `units` SET `image` = 'pecheur.jpg' WHERE `code` = 'pecheur' AND `image` LIKE '%/%'");
                 }
             } catch (Exception $ePec) {}
 
